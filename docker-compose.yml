@@ -1,0 +1,31 @@
+services:
+  RokaMokaServer:
+    image: roka-moka-server
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    networks:
+      - hoka-moka-network
+
+  db:
+    image: postgres
+    volumes:
+      - db-data:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: RokaMokaDb
+    ports:
+      - "5432:5432"
+    networks:
+      - hoka-moka-network
+
+volumes:
+  db-data:
+networks:
+  hoka-moka-network:
+    driver: bridge
