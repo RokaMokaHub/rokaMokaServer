@@ -1,4 +1,8 @@
 FROM openjdk:17-jdk-alpine
 MAINTAINER @HokaMokaHub
-COPY target/rokamokaServer-0.0.1-SNAPSHOT.jar rokamokaServer-0.0.1.jar
-ENTRYPOINT ["java","-jar","/rokamokaServer-0.0.1.jar"]
+# Define a variável de ambiente APP_VERSION
+ARG APP_VERSION
+ENV APP_VERSION=${APP_VERSION}
+
+COPY target/rokamokaServer-${APP_VERSION}.jar rokaMokaServer.jar
+ENTRYPOINT ["java","-jar","/rokaMokaServer.jar"]
