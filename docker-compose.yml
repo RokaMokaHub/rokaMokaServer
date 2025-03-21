@@ -1,11 +1,16 @@
 services:
   RokaMokaServer:
     image: roka-moka-server
+    container_name: roka-moka-server
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8080:8080"
+      - "${SERVER_PORT_EXPOSE}:${SERVER_PORT}"
+    environment:
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - SERVER_PORT=${SERVER_PORT}
     depends_on:
       - db
     networks:
@@ -13,14 +18,16 @@ services:
 
   db:
     image: postgres
+    container_name: rokamokadb
+    restart: always
     volumes:
       - db-data:/var/lib/postgresql/data/
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: RokaMokaDb
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
-      - "5432:5432"
+      - "${DB_PORT_EXPOSE}:${DB_PORT}"
     networks:
       - hoka-moka-network
 
