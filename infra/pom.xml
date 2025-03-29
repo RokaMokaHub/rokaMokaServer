@@ -9,6 +9,7 @@
   </parent>
 
   <groupId>edu.ufpel</groupId>
+  <packaging>pom</packaging>
   <artifactId>infra</artifactId>
   <version>0.0.1-SNAPSHOT</version>
 
@@ -19,11 +20,4 @@
     <maven.compiler.release>${java.version}</maven.compiler.release>
   </properties>
 
-
-  <build>
-    <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
-      <plugins>
-      </plugins>
-    </pluginManagement>
-  </build>
 </project>
