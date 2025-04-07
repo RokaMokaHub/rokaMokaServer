@@ -3,6 +3,7 @@ app/target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+/logs
 
 ### STS ###
 .apt_generated
@@ -14,6 +15,7 @@ app/target/
 .sts4-cache
 
 ### IntelliJ IDEA ###
+# TODO is .idea to be ignored?
 ../.idea
 *.iws
 *.iml
@@ -31,7 +33,6 @@ build/
 
 ### VS Code ###
 .vscode/
-
 
 ### Docker ###
 ./infra/db-data
