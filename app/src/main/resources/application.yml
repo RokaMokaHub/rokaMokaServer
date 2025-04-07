@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: "Roka Moka Server"
+
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+server:
+  port: ${SERVER_PORT:8080}
+  address: ${SERVER_ADDRESS:127.0.0.1}
+  servlet:
+    context-path: /
