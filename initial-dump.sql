@@ -36,7 +36,7 @@ CREATE TABLE Obra
     ID           SERIAL PRIMARY KEY,
     NOME         VARCHAR(255) NOT NULL,
     Exposicao_ID INT,
-    FOREIGN KEY (Exposicao_ID) REFERENCES Exposição (ID)
+    FOREIGN KEY (Exposicao_ID) REFERENCES Exposicao (ID)
 );
 
 CREATE TABLE MokaDex
