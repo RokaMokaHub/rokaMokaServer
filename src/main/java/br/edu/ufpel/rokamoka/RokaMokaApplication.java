@@ -1,13 +1,13 @@
-package br.edu.ufpel.rokamokaServer;
+package br.edu.ufpel.rokamoka;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class RokamokaServerApplication {
+public class RokaMokaApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(RokamokaServerApplication.class, args);
+		SpringApplication.run(RokaMokaApplication.class, args);
 	}
 
 }
