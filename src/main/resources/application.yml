@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: roka-moka
+  profiles:
+    active: dev
+  datasource:
+    url: jdbc:postgresql://localhost:5432/RokaMokaDb
+    username: rokamoka
+    password: teste123
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
