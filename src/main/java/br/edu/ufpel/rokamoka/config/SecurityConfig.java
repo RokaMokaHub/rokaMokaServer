@@ -36,15 +36,17 @@ public class SecurityConfig {
     private RSAPublicKey key;
     @Value("${jwt.private.key}")
     private RSAPrivateKey priv;
-    private static final String[] ENDPOINTS_WITH_AUTHENTICATION_NOT_REQUIRED = { "user/**" };
+    private static final String[] ENDPOINTS_WITH_AUTHENTICATION_NOT_REQUIRED = { "user/login", "user/register" };
+    private static final String[] ENDPOINTS_WITH_AUTHENTICATION_REQUIRED = { "teste/**" };
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf(CsrfConfigurer -> CsrfConfigurer.disable())// Desativa a proteção contra CSRF
                 .formLogin(form -> form.disable()).httpBasic(Customizer.withDefaults()).authorizeHttpRequests(
                         authorizeHttpRequests -> authorizeHttpRequests.requestMatchers(
-                                        ENDPOINTS_WITH_AUTHENTICATION_NOT_REQUIRED)
-                                .permitAll()) // Habilita a autorização para as requisições HTTP
+                                        ENDPOINTS_WITH_AUTHENTICATION_NOT_REQUIRED).permitAll()
+                                .requestMatchers(ENDPOINTS_WITH_AUTHENTICATION_REQUIRED)
+                                .authenticated()) // Habilita a autorização para as requisições HTTP
                 .oauth2ResourceServer(conf -> conf.jwt(Customizer.withDefaults())).build();
     }
 

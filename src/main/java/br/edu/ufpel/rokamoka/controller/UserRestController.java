@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.edu.ufpel.rokamoka.dto.input.NewUserDTO;
+import br.edu.ufpel.rokamoka.dto.input.UserBasicDTO;
 import br.edu.ufpel.rokamoka.dto.output.UserResponseDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicated;
 import br.edu.ufpel.rokamoka.security.AuthenticationService;
@@ -27,7 +27,7 @@ public class UserRestController {
     private final AuthenticationService authenticationService;
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponseDTO> register(@RequestBody @Validated NewUserDTO userDTO)
+    public ResponseEntity<UserResponseDTO> register(@RequestBody @Validated UserBasicDTO userDTO)
             throws RokaMokaContentDuplicated {
         UserResponseDTO responseDTO = userService.createNormalUser(userDTO);
         return ResponseEntity.ok(responseDTO);

@@ -10,7 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import br.edu.ufpel.rokamoka.core.User;
-import br.edu.ufpel.rokamoka.dto.input.NewUserDTO;
+import br.edu.ufpel.rokamoka.dto.input.UserBasicDTO;
 import br.edu.ufpel.rokamoka.dto.output.UserResponseDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicated;
 import br.edu.ufpel.rokamoka.repository.UserRepository;
@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public UserResponseDTO createNormalUser(NewUserDTO userDTO) throws RokaMokaContentDuplicated {
+    public UserResponseDTO createNormalUser(UserBasicDTO userDTO) throws RokaMokaContentDuplicated {
         var user = User.builder().nome(userDTO.name()).email(userDTO.email())
                 .senha(passwordEncoder.encode(userDTO.password())).roles(new ArrayList<>()).build();
         isValid(user);
