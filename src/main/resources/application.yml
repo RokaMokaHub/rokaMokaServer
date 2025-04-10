@@ -11,3 +11,9 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+jwt:
+  private:
+    key: classpath:app.key
+  public:
+    key: classpath:app.pub
+
