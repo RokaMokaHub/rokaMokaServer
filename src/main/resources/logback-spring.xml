@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration>
+
+    <property name="LOG_FILE" value="logs/roka-moka.log"/>
+    <property name="FILE_NAME_PATTERN" value="logs/roka-moka"/>
+
+    <!--Console Appender with Colors-->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>
+                %d{yyyy-MM-dd HH:mm:ss} | %highlight(%-5level) | [%magenta(%X{user:-NONE})] | [%magenta(%X{execution:-NONE})] | %cyan(%-40.40logger{39}) : %m%n
+            </pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!--File Appender with Colors-->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_FILE}</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${FILE_NAME_PATTERN}.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxHistory>5</maxHistory>
+            <maxFileSize>10MB</maxFileSize>
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>
+                %d{yyyy-MM-dd HH:mm:ss} | %-5level | [%X{user}] | [%X{execution})] | %-40.40logger{39} : %m%n
+            </pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <root level="WARN">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </root>
+
+    <springProfile name="dev">
+        <looger name="ROOT" level="DEBUG"/>
+        <logger name="br.edu.ufpel" level="DEBUG"/>
+    </springProfile>
+</configuration>
