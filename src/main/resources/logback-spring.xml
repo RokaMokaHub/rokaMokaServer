@@ -37,7 +37,7 @@
     </root>
 
     <springProfile name="dev">
-        <looger name="ROOT" level="DEBUG"/>
+        <logger name="ROOT" level="INFO"/>
         <logger name="br.edu.ufpel" level="DEBUG"/>
     </springProfile>
 </configuration>
