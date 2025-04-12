@@ -1,10 +1,6 @@
 package br.edu.ufpel.rokamoka.config;
 
-
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,6 +8,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -27,27 +24,29 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 
-
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-    @Value("${jwt.public.key}")
-    private RSAPublicKey key;
-    @Value("${jwt.private.key}")
-    private RSAPrivateKey priv;
-    private static final String[] ENDPOINTS_WITH_AUTHENTICATION_NOT_REQUIRED = { "user/login", "user/register" };
-    private static final String[] ENDPOINTS_WITH_AUTHENTICATION_REQUIRED = { "teste/**" };
+    private final SecurityConfigProperties properties;
+    private static final String[] ENDPOINTS_WITH_AUTHENTICATION_NOT_REQUIRED = {"user/login", "user/register"};
+    private static final String[] ENDPOINTS_WITH_AUTHENTICATION_REQUIRED = {"teste/**"};
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http.csrf(CsrfConfigurer -> CsrfConfigurer.disable())// Desativa a proteção contra CSRF
-                .formLogin(form -> form.disable()).httpBasic(Customizer.withDefaults()).authorizeHttpRequests(
-                        authorizeHttpRequests -> authorizeHttpRequests.requestMatchers(
-                                        ENDPOINTS_WITH_AUTHENTICATION_NOT_REQUIRED).permitAll()
+        return http.csrf(AbstractHttpConfigurer::disable)// Desativa a proteção contra CSRF
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(Customizer.withDefaults())
+                .authorizeHttpRequests(authorizeHttpRequests ->
+                        authorizeHttpRequests
+                                .requestMatchers(ENDPOINTS_WITH_AUTHENTICATION_NOT_REQUIRED)
+                                .permitAll()
                                 .requestMatchers(ENDPOINTS_WITH_AUTHENTICATION_REQUIRED)
                                 .authenticated()) // Habilita a autorização para as requisições HTTP
-                .oauth2ResourceServer(conf -> conf.jwt(Customizer.withDefaults())).build();
+                .oauth2ResourceServer(conf ->
+                        conf.jwt(Customizer.withDefaults()))
+                .build();
     }
 
     @Bean
@@ -57,14 +56,19 @@ public class SecurityConfig {
 
     @Bean
     JwtDecoder jwtDecoder() {
-        return NimbusJwtDecoder.withPublicKey(this.key).build();
+        return NimbusJwtDecoder
+                .withPublicKey(properties.getPublicKey())
+                .build();
     }
 
     @Bean
     JwtEncoder jwtEncoder() {
-        JWK jwk = new RSAKey.Builder(this.key).privateKey(this.priv).build();
-        JWKSource<SecurityContext> jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
-        return new NimbusJwtEncoder(jwks);
+        JWK jwk = new RSAKey
+                .Builder(properties.getPublicKey())
+                .privateKey(properties.getPrivateKey())
+                .build();
+        JWKSource<SecurityContext> jwkSource = new ImmutableJWKSet<>(new JWKSet(jwk));
+        return new NimbusJwtEncoder(jwkSource);
     }
 
     @Bean
