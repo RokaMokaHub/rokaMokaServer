@@ -11,7 +11,6 @@
 
 package br.edu.ufpel.rokamoka.security;
 
-
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -21,7 +20,6 @@ import br.edu.ufpel.rokamoka.repository.UserRepository;
 
 import lombok.AllArgsConstructor;
 
-
 @AllArgsConstructor
 @Service
 public class UserDetailServiceImpl implements UserDetailsService {
@@ -30,9 +28,9 @@ public class UserDetailServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByNome(username).map(UserAuthenticated::new)
+        return userRepository
+                .findByNome(username)
+                .map(UserAuthenticated::new)
                 .orElseThrow(() -> new UsernameNotFoundException(username));
     }
-
-    ;
 }
