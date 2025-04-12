@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <configuration>
 
-    <property name="LOG_FILE" value="logs/roka-moka.log"/>
-    <property name="FILE_NAME_PATTERN" value="logs/roka-moka"/>
+    <property name="LOG_FILE" value=".logs/roka-moka.log"/>
+    <property name="FILE_NAME_PATTERN" value=".logs/roka-moka"/>
 
     <!--Console Appender with Colors-->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
@@ -37,7 +37,7 @@
     </root>
 
     <springProfile name="dev">
-        <looger name="ROOT" level="DEBUG"/>
+        <logger name="ROOT" level="INFO"/>
         <logger name="br.edu.ufpel" level="DEBUG"/>
     </springProfile>
 </configuration>
