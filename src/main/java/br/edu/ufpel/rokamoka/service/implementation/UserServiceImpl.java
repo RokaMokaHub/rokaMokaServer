@@ -3,6 +3,7 @@ package br.edu.ufpel.rokamoka.service.implementation;
 
 import java.util.ArrayList;
 
+import jakarta.validation.Valid;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -18,9 +19,10 @@ import br.edu.ufpel.rokamoka.security.AuthenticationService;
 import br.edu.ufpel.rokamoka.service.UserService;
 
 import lombok.AllArgsConstructor;
-
+import org.springframework.validation.annotation.Validated;
 
 @Service
+@Validated
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
 
@@ -30,10 +32,17 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public UserResponseDTO createNormalUser(UserBasicDTO userDTO) throws RokaMokaContentDuplicated {
-        var user = User.builder().nome(userDTO.name()).email(userDTO.email())
-                .senha(passwordEncoder.encode(userDTO.password())).roles(new ArrayList<>()).build();
-        isValid(user);
+    public UserResponseDTO createNormalUser(@Valid UserBasicDTO userDTO) throws RokaMokaContentDuplicated {
+        var user = User.builder()
+                .nome(userDTO.name())
+                .email(userDTO.email())
+                .senha(passwordEncoder.encode(userDTO.password()))
+                .roles(new ArrayList<>()).build();
+
+        if (isInvalid(user)) {
+            throw new RokaMokaContentDuplicated("O email já existe no banco de dados");
+        }
+
         User newUser = this.userRepository.save(user);
 
         UsernamePasswordAuthenticationToken authToken =
@@ -45,9 +54,7 @@ public class UserServiceImpl implements UserService {
         return new UserResponseDTO(jwtToken);
     }
 
-    private void isValid(User user) throws RokaMokaContentDuplicated {
-        if (this.userRepository.existsByEmail(user.getEmail())) {
-            throw new RokaMokaContentDuplicated("O email já existe no banco de dados");
-        }
+    private boolean isInvalid(User user) {
+        return this.userRepository.existsByEmail(user.getEmail());
     }
 }

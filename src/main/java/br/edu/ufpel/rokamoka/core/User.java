@@ -1,10 +1,6 @@
-
 package br.edu.ufpel.rokamoka.core;
 
-
-import java.util.ArrayList;
-import java.util.List;
-
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -21,25 +17,36 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.ArrayList;
+import java.util.List;
 
-@Entity
 @Getter
 @Setter
-@ToString
-@NoArgsConstructor
 @Builder
+@ToString(of = {"email"})
+@NoArgsConstructor
 @AllArgsConstructor
+@Entity
 @Table(name = "usuario")
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String nome;
+
     private String email;
+
     private Boolean ativo;
-    private String senha;
+
+    @Column(nullable = false) private String senha;
+
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+    @JoinTable(
+            name = "users_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
     private List<Role> roles = new ArrayList<>();
 }
