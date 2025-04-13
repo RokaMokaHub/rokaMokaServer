@@ -1,5 +1,13 @@
 package br.edu.ufpel.rokamoka.config;
 
+import br.edu.ufpel.rokamoka.filter.ServiceContextFilter;
+import br.edu.ufpel.rokamoka.security.EndpointAccessRules;
+import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.proc.SecurityContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,13 +24,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-
-import com.nimbusds.jose.jwk.JWK;
-import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
-import com.nimbusds.jose.jwk.source.JWKSource;
-import com.nimbusds.jose.proc.SecurityContext;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -30,19 +32,19 @@ import com.nimbusds.jose.proc.SecurityContext;
 public class SecurityConfig {
 
     private final SecurityConfigProperties properties;
-    private static final String[] ENDPOINTS_WITH_AUTHENTICATION_NOT_REQUIRED = {"user/login", "user/register"};
-    private static final String[] ENDPOINTS_WITH_AUTHENTICATION_REQUIRED = {"teste/**"};
+    private final EndpointAccessRules endpointAccessRules;
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http.csrf(AbstractHttpConfigurer::disable)// Desativa a proteção contra CSRF
+        return http
+                .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(Customizer.withDefaults())
                 .authorizeHttpRequests(authorizeHttpRequests ->
                         authorizeHttpRequests
-                                .requestMatchers(ENDPOINTS_WITH_AUTHENTICATION_NOT_REQUIRED)
+                                .requestMatchers(endpointAccessRules.getEndpointsWithoutAuthentication())
                                 .permitAll()
-                                .requestMatchers(ENDPOINTS_WITH_AUTHENTICATION_REQUIRED)
+                                .requestMatchers(endpointAccessRules.getEndpointsWithAuthentication()) // TODO: update to anyRequest()
                                 .authenticated()) // Habilita a autorização para as requisições HTTP
                 .oauth2ResourceServer(conf ->
                         conf.jwt(Customizer.withDefaults()))
