@@ -43,6 +43,8 @@ public class ServiceContextFilter implements Filter {
         ServiceContext ctx = ServiceContext.newContext();
 
         HttpServletRequest httpRequest = (HttpServletRequest) request;
+
+        // removes leading slash
         String requestPath = new UrlPathHelper().getPathWithinApplication(httpRequest).substring(1);
 
         for (String endpoint : endpointAccessRules.getEndpointsWithoutAuthentication()) {
