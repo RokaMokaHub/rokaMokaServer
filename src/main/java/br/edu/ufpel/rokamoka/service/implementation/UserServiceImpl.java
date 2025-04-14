@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import br.edu.ufpel.rokamoka.core.User;
-import br.edu.ufpel.rokamoka.dto.input.UserBasicDTO;
-import br.edu.ufpel.rokamoka.dto.output.UserResponseDTO;
+import br.edu.ufpel.rokamoka.dto.user.input.UserBasicDTO;
+import br.edu.ufpel.rokamoka.dto.user.output.UserResponseDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.repository.UserRepository;
 import br.edu.ufpel.rokamoka.security.AuthenticationService;

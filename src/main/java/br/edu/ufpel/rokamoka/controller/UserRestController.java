@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.edu.ufpel.rokamoka.dto.input.UserBasicDTO;
-import br.edu.ufpel.rokamoka.dto.output.UserResponseDTO;
+import br.edu.ufpel.rokamoka.dto.user.input.UserBasicDTO;
+import br.edu.ufpel.rokamoka.dto.user.output.UserResponseDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.security.AuthenticationService;
 import br.edu.ufpel.rokamoka.service.UserService;
