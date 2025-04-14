@@ -1,23 +1,22 @@
-/*
- * Copyright (c) 1999-2025 Touch Tecnologia e Informatica Ltda.
- * Gomes de Carvalho, 1666, 3o. Andar, Vila Olimpia, Sao Paulo, SP, Brasil.
- * Todos os direitos reservados.
- *
- * Este software e confidencial e de propriedade da Touch Tecnologia e
- * Informatica Ltda. (Informacao Confidencial). As informacoes contidas neste
- * arquivo nao podem ser publicadas, e seu uso esta limitado de acordo com os
- * termos do contrato de licenca.
- */
-
 package br.edu.ufpel.rokamoka.dto.user.input;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 
+/**
+ * A Data Transfer Object for basic user information.
+ * <p>
+ * This record is used to capture the basic information required for creating or authenticating a user.
+ * </p>
+ *
+ * @param email    The email of the user. Must be a valid email format and not null.
+ * @param password The user's password. Must be between 8 and 20 characters, inclusive, and not blank.
+ * @param name     The name of the user. Must not be blank.
+ * @param deviceId The ID of the user's device.
+ * @Author: iyisakuma
+ */
 public record UserBasicDTO(
         @NotNull @Email String email,
-        @NotBlank String password,
+        @NotBlank @Min(value = 8) @Max(value = 20) String password,
         @NotBlank String name,
         String deviceId
 ) {}
