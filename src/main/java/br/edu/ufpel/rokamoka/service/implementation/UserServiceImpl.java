@@ -3,23 +3,22 @@ package br.edu.ufpel.rokamoka.service.implementation;
 
 import java.util.ArrayList;
 
-import jakarta.validation.Valid;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import br.edu.ufpel.rokamoka.core.User;
 import br.edu.ufpel.rokamoka.dto.input.UserBasicDTO;
 import br.edu.ufpel.rokamoka.dto.output.UserResponseDTO;
-import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicated;
+import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.repository.UserRepository;
 import br.edu.ufpel.rokamoka.security.AuthenticationService;
 import br.edu.ufpel.rokamoka.service.UserService;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.validation.annotation.Validated;
+
 
 @Service
 @Validated
@@ -28,33 +27,31 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final AuthenticationService authenticationService;
-    private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public UserResponseDTO createNormalUser(@Valid UserBasicDTO userDTO) throws RokaMokaContentDuplicated {
-        var user = User.builder()
-                .nome(userDTO.name())
-                .email(userDTO.email())
-                .senha(passwordEncoder.encode(userDTO.password()))
+    public UserResponseDTO createNormalUser(@Valid UserBasicDTO userDTO) throws RokaMokaContentDuplicatedException {
+        var undecodedPasswd = userDTO.password();
+        var user = User.builder().nome(userDTO.name()).email(userDTO.email())
+                .senha(this.passwordEncoder.encode(undecodedPasswd))
                 .roles(new ArrayList<>()).build();
 
-        if (isInvalid(user)) {
-            throw new RokaMokaContentDuplicated("O email já existe no banco de dados");
-        }
-
+        this.validateOrThrowExecption(user);
         User newUser = this.userRepository.save(user);
 
+        String userJWT =
+                this.authenticationService.basicAuthenticationAndGenerateJWT(newUser.getNome(), undecodedPasswd);
         UsernamePasswordAuthenticationToken authToken =
                 new UsernamePasswordAuthenticationToken(newUser.getNome(), userDTO.password());
-
-        Authentication authentication = this.authenticationManager.authenticate(authToken);
-
-        var jwtToken = this.authenticationService.authenticate(authentication);
-        return new UserResponseDTO(jwtToken);
+        return new UserResponseDTO(userJWT);
     }
 
-    private boolean isInvalid(User user) {
-        return this.userRepository.existsByEmail(user.getEmail());
+    private void validateOrThrowExecption(User user) throws RokaMokaContentDuplicatedException {
+        if (this.userRepository.existsByEmail(user.getEmail())) {
+            throw new RokaMokaContentDuplicatedException("O email já está sendo utilizado,");
+        }
+        if (this.userRepository.existsByName(user.getNome())) {
+            throw new RokaMokaContentDuplicatedException("O nome do usuário já está sendo utilizado");
+        }
     }
 }
