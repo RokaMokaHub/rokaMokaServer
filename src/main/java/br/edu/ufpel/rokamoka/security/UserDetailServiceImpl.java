@@ -1,6 +1,5 @@
 package br.edu.ufpel.rokamoka.security;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -8,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import br.edu.ufpel.rokamoka.repository.UserRepository;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 /**
  * A service for loading user details by username.
@@ -18,7 +17,6 @@ import lombok.AllArgsConstructor;
  *
  * @author iyisakuma
  */
-@AllArgsConstructor
 @Service
 @RequiredArgsConstructor
 public class UserDetailServiceImpl implements UserDetailsService {

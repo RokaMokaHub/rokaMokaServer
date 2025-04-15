@@ -1,21 +1,27 @@
 package br.edu.ufpel.rokamoka.service.implementation;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.text.RandomStringGenerator;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
+
+import br.edu.ufpel.rokamoka.core.Role;
 import br.edu.ufpel.rokamoka.core.User;
+import br.edu.ufpel.rokamoka.dto.user.input.UserAnonymousDTO;
 import br.edu.ufpel.rokamoka.dto.user.input.UserBasicDTO;
+import br.edu.ufpel.rokamoka.dto.user.output.UserAnonymousResponseDTO;
 import br.edu.ufpel.rokamoka.dto.user.output.UserResponseDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.repository.UserRepository;
 import br.edu.ufpel.rokamoka.security.AuthenticationService;
 import br.edu.ufpel.rokamoka.service.UserService;
+
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
-
-import java.util.ArrayList;
 
 /**
  * Implementation of the {@link UserService} interface.
@@ -51,6 +57,8 @@ public class UserServiceImpl implements UserService {
     private final AuthenticationService authenticationService;
     private final PasswordEncoder passwordEncoder;
 
+    private final static List<Role> NOMAL_USER_ROLES = new ArrayList();
+
     /**
      * Creates a normal user with the provided user information and generates a JWT.
      *
@@ -68,17 +76,41 @@ public class UserServiceImpl implements UserService {
     public UserResponseDTO createNormalUser(@Valid UserBasicDTO userDTO) throws RokaMokaContentDuplicatedException {
         var undecodedPasswd = userDTO.password();
         var user = User.builder().nome(userDTO.name()).email(userDTO.email())
-                .senha(this.passwordEncoder.encode(undecodedPasswd))
-                .roles(new ArrayList<>()).build();
+                .senha(this.passwordEncoder.encode(undecodedPasswd)).roles(NOMAL_USER_ROLES).build();
 
         this.validateOrThrowExecption(user);
         User newUser = this.userRepository.save(user);
 
         String userJWT =
                 this.authenticationService.basicAuthenticationAndGenerateJWT(newUser.getNome(), undecodedPasswd);
-        UsernamePasswordAuthenticationToken authToken =
-                new UsernamePasswordAuthenticationToken(newUser.getNome(), userDTO.password());
         return new UserResponseDTO(userJWT);
+    }
+
+    /**
+     * Creates an anonymous user with the provided username and generates a JWT.
+     * <p>This method takes a {@link UserAnonymousDTO} object containing the user's name,
+     * generates a random password, and creates a new user in the system. The user is then authenticated, and a JWT is
+     * generated and returned along with the user's name.
+     *
+     * @param userDTO
+     *         A {@link UserAnonymousDTO} containing the user's name.
+     * @return A {@link UserAnonymousResponseDTO} containing the generated JWT and the user's name.
+     * @throws RokaMokaContentDuplicatedException
+     *         if the user's name already exists.
+     */
+    @Override
+    public UserAnonymousResponseDTO createAnonymousUser(UserAnonymousDTO userDTO)
+            throws RokaMokaContentDuplicatedException {
+        var undecodedPasswd = this.generateRandomPassword();
+        var user = User.builder().nome(userDTO.userName()).senha(this.passwordEncoder.encode(undecodedPasswd))
+                .roles(NOMAL_USER_ROLES).build();
+
+        this.validateOrThrowExecption(user);
+
+        User newUser = this.userRepository.save(user);
+        String userJWT =
+                this.authenticationService.basicAuthenticationAndGenerateJWT(newUser.getNome(), undecodedPasswd);
+        return new UserAnonymousResponseDTO(userJWT, undecodedPasswd);
     }
 
     /**
@@ -93,11 +125,22 @@ public class UserServiceImpl implements UserService {
      * @throws RokaMokaContentDuplicatedException if the user's email or name already exists.
      */
     private void validateOrThrowExecption(User user) throws RokaMokaContentDuplicatedException {
-        if (this.userRepository.existsByEmail(user.getEmail())) {
+        if (user.getEmail() != null && this.userRepository.existsByEmail(user.getEmail())) {
             throw new RokaMokaContentDuplicatedException("O email já está sendo utilizado,");
         }
-        if (this.userRepository.existsByName(user.getNome())) {
+        if (this.userRepository.existsByNome(user.getNome())) {
             throw new RokaMokaContentDuplicatedException("O nome do usuário já está sendo utilizado");
         }
     }
+
+    /**
+     * Generates a random password consisting of 10 lowercase letters.
+     *
+     * @return A random password consisting of 10 lowercase letters.
+     */
+    private String generateRandomPassword() {
+        RandomStringGenerator pwdGenerator = new RandomStringGenerator.Builder().withinRange('a', 'z').build();
+        return pwdGenerator.generate(10);
+    }
+
 }

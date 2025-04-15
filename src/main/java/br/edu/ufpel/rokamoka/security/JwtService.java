@@ -1,6 +1,9 @@
 package br.edu.ufpel.rokamoka.security;
 
-import lombok.RequiredArgsConstructor;
+
+import java.time.Instant;
+import java.util.stream.Collectors;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
@@ -8,8 +11,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 /**
  * A service for generating JSON Web Tokens (JWTs).
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class JwtService {
 
+    private static final String ROKAMOKA = "ROKAMOKA";
     private final JwtEncoder jwtEncoder;
 
     /**
@@ -46,9 +49,7 @@ public class JwtService {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(" "));
 
-        JwtClaimsSet claims = JwtClaimsSet
-                .builder()
-                .issuer("spring-security-jwt")
+        JwtClaimsSet claims = JwtClaimsSet.builder().issuer(this.ROKAMOKA)
                 .issuedAt(now)
                 .expiresAt(now.plusSeconds(expiry))
                 .subject(authentication.getName())
