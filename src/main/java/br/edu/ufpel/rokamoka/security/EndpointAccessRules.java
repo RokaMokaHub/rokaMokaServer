@@ -8,11 +8,11 @@ import org.springframework.stereotype.Component;
 public class EndpointAccessRules {
 
     private final String[] endpointsWithoutAuthentication = {
-            "user/login",
-            "user/register"
+            "/user/login",
+            "/user/register"
     };
 
     private final String[] endpointsWithAuthentication = {
-            "teste/**"
+            "/teste/**"
     };
 }
