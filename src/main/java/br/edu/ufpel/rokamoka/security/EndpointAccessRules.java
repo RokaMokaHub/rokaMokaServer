@@ -1,15 +1,16 @@
 package br.edu.ufpel.rokamoka.security;
 
-import lombok.Getter;
+
 import org.springframework.stereotype.Component;
+
+import lombok.Getter;
 
 @Getter
 @Component
 public class EndpointAccessRules {
 
-    private final String[] endpointsWithoutAuthentication = {
-            "/user/login",
-            "/user/register"
+    private final String[] endpointsWithoutAuthentication =
+            { "/user/login", "/user/anonymous/create", "/user/normal/create"
     };
 
     private final String[] endpointsWithAuthentication = {

@@ -1,5 +1,9 @@
 package br.edu.ufpel.rokamoka.core;
 
+
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -17,9 +21,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.util.ArrayList;
-import java.util.List;
-
+/**
+ * A user of the system.
+ *
+ * <p>This entity is used to represent a user of the system. The user can have
+ * multiple roles and can be associated with multiple devices.
+ *
+ * @author iyisakuma
+ */
 @Getter
 @Setter
 @Builder
@@ -37,8 +46,6 @@ public class User {
     private String nome;
 
     private String email;
-
-    private Boolean ativo;
 
     @Column(nullable = false) private String senha;
 

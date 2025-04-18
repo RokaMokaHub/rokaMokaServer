@@ -1,19 +1,14 @@
 package br.edu.ufpel.rokamoka.core;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import jakarta.persistence.*;
+import lombok.*;
 
+
+/**
+ * A role of a user.
+ *
+ * @author iyiSakuma
+ */
 @Getter
 @Setter
 @Builder
@@ -25,7 +20,7 @@ import lombok.ToString;
 public class Role {
 
     public enum RoleName {
-        PADRAO, ADMINISTRATOR
+        ADMINISTRATOR, SEARCHER, CURATOR, USER
     }
 
     @Id
