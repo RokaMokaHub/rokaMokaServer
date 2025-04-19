@@ -27,9 +27,14 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * This filter is responsible for setting up the service context for each request and ensuring that authentication is
- * properly handled. It skips filtering for specific endpoints that do not require authentication.
+ * properly handled.
+ *
+ * <p>It skips filtering for specific endpoints that do not require authentication.
  *
  * @author mauriciomucci
+ * @see Slf4j
+ * @see Component
+ * @see RequiredArgsConstructor
  * @see UserDetailsService
  * @see EndpointAccessRules
  */
