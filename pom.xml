@@ -10,7 +10,7 @@
     </parent>
     <groupId>br.edu.ufpel</groupId>
     <artifactId>rokamoka</artifactId>
-    <version>0.1.1-SNAPSHOT</version>
+    <version>0.2.2-SNAPSHOT</version>
     <name>rokamoka</name>
     <description>education project</description>
     <properties>
