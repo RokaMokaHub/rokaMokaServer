@@ -1,8 +1,21 @@
 package br.edu.ufpel.rokamoka.filter;
 
+
+import java.io.IOException;
+import java.util.Arrays;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.web.util.UrlPathHelper;
+
 import br.edu.ufpel.rokamoka.context.ServiceContext;
 import br.edu.ufpel.rokamoka.security.EndpointAccessRules;
 import br.edu.ufpel.rokamoka.security.UserAuthenticated;
+
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -11,15 +24,6 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.stereotype.Component;
-import org.springframework.web.util.UrlPathHelper;
-
-import java.io.IOException;
-import java.util.Arrays;
 
 /**
  * This filter is responsible for setting up the service context for each request and ensuring that authentication is
@@ -36,6 +40,7 @@ public class ServiceContextFilter implements Filter {
 
     private final UserDetailsService userDetailService;
     private final EndpointAccessRules endpointAccessRules;
+    private final AntPathMatcher matcher = new AntPathMatcher();
 
     /**
      * Processes incoming requests and applies the filter logic. It sets up the service context, checks if the filter
@@ -66,7 +71,7 @@ public class ServiceContextFilter implements Filter {
             return;
         }
 
-        UserDetails userDetails = userDetailService.loadUserByUsername(auth.getName());
+        UserDetails userDetails = this.userDetailService.loadUserByUsername(auth.getName());
         ctx.setUser((UserAuthenticated) userDetails);
 
         chain.doFilter(request, response);
@@ -81,10 +86,9 @@ public class ServiceContextFilter implements Filter {
      * @return true if the filter should be skipped, false otherwise
      */
     private boolean shouldSkipFilter(ServletRequest request) {
-        HttpServletRequest httpRequest = (HttpServletRequest) request;
-        String requestPath = new UrlPathHelper().getPathWithinApplication(httpRequest);
-        return Arrays
-                .stream(endpointAccessRules.getEndpointsWithoutAuthentication())
-                .anyMatch(requestPath::startsWith);
+        String requestPath = new UrlPathHelper().getPathWithinApplication((HttpServletRequest) request);
+        return Arrays.stream(this.endpointAccessRules.getEndpointsWithoutAuthentication())
+                .anyMatch(endpointsPermited -> this.matcher.match(endpointsPermited, requestPath));
     }
+
 }
