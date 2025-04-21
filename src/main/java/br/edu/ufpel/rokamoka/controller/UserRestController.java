@@ -74,7 +74,7 @@ public class UserRestController extends RokaMokaController {
      */
     @Operation(summary = "Login de um determinado usuário", description = "Login de um determinado usuário")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Login de usuário") })
-    @GetMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/login", consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseWrapper<UserResponseDTO>> login(Authentication authentication) {
         return success(new UserResponseDTO(authenticationService.authenticate(authentication)));
     }
