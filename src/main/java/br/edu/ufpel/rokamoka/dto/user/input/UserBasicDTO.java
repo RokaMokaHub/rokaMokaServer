@@ -4,6 +4,7 @@ package br.edu.ufpel.rokamoka.dto.user.input;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 /**
@@ -20,6 +21,6 @@ import jakarta.validation.constraints.Size;
  */
 public record UserBasicDTO(
         @NotNull @Email String email, @NotBlank @Size(min = 8, max = 20) String password,
-        @NotBlank String name,
+        @Pattern(regexp = "^[a-zA-Z0-9_-]+$", message = "Apenas letras, números, hífen e underline são permitidos") String name,
         String deviceId
 ) {}
