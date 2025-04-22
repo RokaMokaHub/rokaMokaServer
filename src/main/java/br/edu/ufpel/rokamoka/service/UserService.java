@@ -16,5 +16,6 @@ public interface UserService {
 
     UserResponseDTO createNormalUser(@Valid UserBasicDTO user) throws RokaMokaContentDuplicatedException;
 
-    UserAnonymousResponseDTO createAnonymousUser(UserAnonymousDTO userDTO) throws RokaMokaContentDuplicatedException;
+    UserAnonymousResponseDTO createAnonymousUser(@Valid UserAnonymousDTO userDTO)
+            throws RokaMokaContentDuplicatedException;
 }
