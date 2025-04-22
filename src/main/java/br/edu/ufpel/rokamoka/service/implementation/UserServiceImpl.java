@@ -99,7 +99,7 @@ public class UserServiceImpl implements UserService {
      *         if the user's name already exists.
      */
     @Override
-    public UserAnonymousResponseDTO createAnonymousUser(UserAnonymousDTO userDTO)
+    public UserAnonymousResponseDTO createAnonymousUser(@Valid UserAnonymousDTO userDTO)
             throws RokaMokaContentDuplicatedException {
         var undecodedPasswd = this.generateRandomPassword();
         var user = User.builder().nome(userDTO.userName()).senha(this.passwordEncoder.encode(undecodedPasswd))
