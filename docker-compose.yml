@@ -2,7 +2,7 @@ services:
   db:
     image: postgres
     container_name: roka-moka-db
-    restart: always
+    restart: on-failure
     volumes:
       - ./db-data:/var/lib/postgresql/data/
       - ./initial-dump.sql:/docker-entrypoint-initdb.d/init.sql
