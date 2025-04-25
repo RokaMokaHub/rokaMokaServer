@@ -1,5 +1,6 @@
 package br.edu.ufpel.rokamoka.security;
 
+
 import br.edu.ufpel.rokamoka.core.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -33,8 +34,8 @@ public class UserAuthenticated implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.user.getRoles()
-                .stream()
-                .map(role -> new SimpleGrantedAuthority(role.toString()))
+                .stream().flatMap(role -> role.getActions().stream())
+                .map(action -> new SimpleGrantedAuthority(action.getName()))
                 .toList();
     }
 

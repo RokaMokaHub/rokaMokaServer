@@ -1,9 +1,8 @@
 package br.edu.ufpel.rokamoka.security;
 
 
-import org.springframework.stereotype.Component;
-
 import lombok.Getter;
+import org.springframework.stereotype.Component;
 
 @Getter
 @Component
@@ -14,6 +13,6 @@ public class EndpointAccessRules {
                     "/v3/api-docs/**", "/swagger-resources/**" };
 
     private final String[] endpointsWithAuthentication = {
-            "/teste/**"
+            "user/teste-acao"
     };
 }
