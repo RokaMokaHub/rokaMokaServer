@@ -1,15 +1,6 @@
 package br.edu.ufpel.rokamoka.controller;
 
 
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
 import br.edu.ufpel.rokamoka.dto.user.input.UserAnonymousDTO;
 import br.edu.ufpel.rokamoka.dto.user.input.UserBasicDTO;
@@ -19,12 +10,15 @@ import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.security.AuthenticationService;
 import br.edu.ufpel.rokamoka.service.UserService;
 import br.edu.ufpel.rokamoka.wrapper.RokaMokaController;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
 
 /**
@@ -77,5 +71,10 @@ public class UserRestController extends RokaMokaController {
     @GetMapping(value = "/login", consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseWrapper<UserResponseDTO>> login(Authentication authentication) {
         return success(new UserResponseDTO(authenticationService.authenticate(authentication)));
+    }
+
+    @GetMapping(value = "/teste-acao", consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ApiResponseWrapper<String>> teste() {
+        return success("Ok, funcionou");
     }
 }

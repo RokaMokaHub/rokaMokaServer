@@ -1,27 +1,25 @@
 package br.edu.ufpel.rokamoka.service.implementation;
 
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.text.RandomStringGenerator;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
-
-import br.edu.ufpel.rokamoka.core.Role;
+import br.edu.ufpel.rokamoka.core.RoleEnum;
 import br.edu.ufpel.rokamoka.core.User;
 import br.edu.ufpel.rokamoka.dto.user.input.UserAnonymousDTO;
 import br.edu.ufpel.rokamoka.dto.user.input.UserBasicDTO;
 import br.edu.ufpel.rokamoka.dto.user.output.UserAnonymousResponseDTO;
 import br.edu.ufpel.rokamoka.dto.user.output.UserResponseDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
+import br.edu.ufpel.rokamoka.repository.RoleRepository;
 import br.edu.ufpel.rokamoka.repository.UserRepository;
 import br.edu.ufpel.rokamoka.security.AuthenticationService;
 import br.edu.ufpel.rokamoka.service.UserService;
-
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.apache.commons.text.RandomStringGenerator;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
+
+import java.util.Set;
 
 /**
  * Implementation of the {@link UserService} interface.
@@ -54,10 +52,10 @@ import lombok.AllArgsConstructor;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final AuthenticationService authenticationService;
     private final PasswordEncoder passwordEncoder;
 
-    private final static List<Role> NOMAL_USER_ROLES = new ArrayList();
 
     /**
      * Creates a normal user with the provided user information and generates a JWT.
@@ -75,8 +73,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDTO createNormalUser(@Valid UserBasicDTO userDTO) throws RokaMokaContentDuplicatedException {
         var undecodedPasswd = userDTO.password();
-        var user = User.builder().nome(userDTO.name()).email(userDTO.email())
-                .senha(this.passwordEncoder.encode(undecodedPasswd)).roles(NOMAL_USER_ROLES).build();
+        var user = User.builder()
+                .nome(userDTO.name())
+                .email(userDTO.email())
+                .senha(this.passwordEncoder.encode(undecodedPasswd))
+                .roles(Set.of(this.roleRepository.findByName(RoleEnum.USER)))
+                .build();
 
         this.validateOrThrowExecption(user);
         User newUser = this.userRepository.save(user);
@@ -103,7 +105,7 @@ public class UserServiceImpl implements UserService {
             throws RokaMokaContentDuplicatedException {
         var undecodedPasswd = this.generateRandomPassword();
         var user = User.builder().nome(userDTO.userName()).senha(this.passwordEncoder.encode(undecodedPasswd))
-                .roles(NOMAL_USER_ROLES).build();
+                .roles(Set.of(this.roleRepository.findByName(RoleEnum.USER))).build();
 
         this.validateOrThrowExecption(user);
 
