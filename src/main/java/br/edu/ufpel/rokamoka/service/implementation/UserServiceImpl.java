@@ -1,8 +1,8 @@
 package br.edu.ufpel.rokamoka.service.implementation;
 
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.text.RandomStringGenerator;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -57,7 +57,7 @@ public class UserServiceImpl implements UserService {
     private final AuthenticationService authenticationService;
     private final PasswordEncoder passwordEncoder;
 
-    private final static List<Role> NOMAL_USER_ROLES = new ArrayList();
+    private final static Set<Role> NOMAL_USER_ROLES = new HashSet<>();
 
     /**
      * Creates a normal user with the provided user information and generates a JWT.
