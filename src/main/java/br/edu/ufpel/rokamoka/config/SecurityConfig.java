@@ -43,7 +43,7 @@ public class SecurityConfig {
                 .httpBasic(Customizer.withDefaults())
                 .authorizeHttpRequests(authorizeHttpRequests ->
                         authorizeHttpRequests
-                                .requestMatchers(endpointAccessRules.getEndpointsWithAuthentication()).hasAuthority("acao_teste")
+                                .requestMatchers(endpointAccessRules.getEndpointsWithAuthentication()).hasAuthority("acao_teste")//exemplo ne gurizes
                                 .requestMatchers(endpointAccessRules.getEndpointsWithoutAuthentication())
                                 .permitAll()
                 ) // Habilita a autorização para as requisições HTTP

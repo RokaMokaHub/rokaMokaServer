@@ -48,8 +48,8 @@ CREATE TABLE public.usuario_perfil (
     CONSTRAINT usario_perfil_pkey PRIMARY KEY (perfil_id,usario_id)
 );
 
-INSERT INTO public.perfil(id, "name") VALUES(1, 'USER');
-INSERT INTO public.acao(id, "name") VALUES(1, 'acao_teste');
+INSERT INTO public.perfil("name") VALUES( 'USER');
+INSERT INTO public.acao("name") VALUES('acao_teste');
 INSERT INTO public.perfil_acao(acao_id, perfil_id) VALUES(1, 1);
 
 
@@ -61,7 +61,7 @@ INSERT INTO public.perfil_acao(acao_id, perfil_id) VALUES(1, 1);
 -- 	"name":"teste",
 -- 	"deviceId":"AKJDASD"
 -- }
-INSERT INTO public.usuario (id, email, nome, senha) VALUES(1, 'test@test.com', 'teste', '$2a$10$C.g8gn8iC9zu0..ALTIcButWBetd/fyH3a40Dc/sWhFCc3YsiNy6e');
+INSERT INTO public.usuario ( email, nome, senha) VALUES( 'test@test.com', 'teste', '$2a$10$C.g8gn8iC9zu0..ALTIcButWBetd/fyH3a40Dc/sWhFCc3YsiNy6e');
 INSERT INTO public.usuario_perfil (perfil_id, usario_id) VALUES(1, 1);
 
 CREATE TABLE Exposicao

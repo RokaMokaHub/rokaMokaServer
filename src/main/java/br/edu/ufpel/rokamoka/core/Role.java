@@ -22,17 +22,13 @@ import java.util.Set;
 @Table(name = "perfil")
 public class Role {
 
-    public enum RoleName {
-        ADMINISTRATOR, SEARCHER, CURATOR, USER
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Enumerated(EnumType.STRING)
     @Column(unique = true)
-    private RoleName name;
+    private RoleEnum name;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "perfil_acao",
