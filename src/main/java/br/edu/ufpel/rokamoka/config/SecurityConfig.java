@@ -46,6 +46,8 @@ public class SecurityConfig {
                                 .requestMatchers(endpointAccessRules.getEndpointsWithAuthentication()).hasAuthority("acao_teste")//exemplo ne gurizes
                                 .requestMatchers(endpointAccessRules.getEndpointsWithoutAuthentication())
                                 .permitAll()
+                                .anyRequest()
+                                .authenticated()
                 ) // Habilita a autorização para as requisições HTTP
                 .oauth2ResourceServer(conf ->
                         conf.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)))
