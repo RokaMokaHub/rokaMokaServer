@@ -18,6 +18,7 @@ public class GlobalExceptionHandler extends RokaMokaController {
 
     @ExceptionHandler(value = {
             RokaMokaContentDuplicatedException.class,
+            RokaMokaContentNotFoundException.class,
             ConstraintViolationException.class
     })
     public ResponseEntity<ApiResponseWrapper<Void>> handleBadRequest(Exception ex) {
