@@ -24,4 +24,11 @@ public class GlobalExceptionHandler extends RokaMokaController {
     public ResponseEntity<ApiResponseWrapper<Void>> handleBadRequest(Exception ex) {
         return error(ex, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(value = {
+            RokaMokaForbiddenException.class
+    })
+    public ResponseEntity<ApiResponseWrapper<Void>> handleForbidden(Exception ex) {
+        return error(ex, HttpStatus.FORBIDDEN);
+    }
 }
