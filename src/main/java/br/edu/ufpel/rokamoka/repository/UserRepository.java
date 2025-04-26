@@ -1,12 +1,10 @@
 package br.edu.ufpel.rokamoka.repository;
 
-
-import java.util.Optional;
-
+import br.edu.ufpel.rokamoka.core.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import br.edu.ufpel.rokamoka.core.User;
+import java.util.Optional;
 
 /**
  * A JPA repository for User objects.
@@ -18,7 +16,6 @@ import br.edu.ufpel.rokamoka.core.User;
  */
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-
 
     /**
      * Retrieves an Optional containing a User with the specified name.
@@ -43,4 +40,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @return true if a user with the given name exists, false otherwise.
      */
     boolean existsByNome(String nome);
+
+    /**
+     * Verifies if a User with the given name and email already exists in the database.
+     *
+     * @param nome The name of the user to check.
+     * @param email The email of the user to check.
+     * @return {@code true} if a user with the given name and email exists, {@code false} otherwise.
+     */
+    boolean existsByNomeAndEmail(String nome, String email);
 }

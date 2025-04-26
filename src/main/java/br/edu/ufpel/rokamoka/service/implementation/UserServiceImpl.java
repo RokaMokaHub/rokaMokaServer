@@ -133,8 +133,7 @@ public class UserServiceImpl implements UserService {
     public void resetUserPassword(@Valid UserBasicDTO userDTO)
             throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
 
-        if (!this.userRepository.existsByNome(userDTO.name()) ||
-            !this.userRepository.existsByEmail(userDTO.email())) {
+        if (!this.userRepository.existsByNomeAndEmail(userDTO.name(), userDTO.email())) {
             throw new RokaMokaContentNotFoundException("Usuário não encontrado");
         }
 
