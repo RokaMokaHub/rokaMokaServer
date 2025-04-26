@@ -1,6 +1,5 @@
 package br.edu.ufpel.rokamoka.service.implementation;
 
-
 import br.edu.ufpel.rokamoka.core.RoleEnum;
 import br.edu.ufpel.rokamoka.core.User;
 import br.edu.ufpel.rokamoka.dto.user.input.UserAnonymousDTO;
@@ -8,6 +7,7 @@ import br.edu.ufpel.rokamoka.dto.user.input.UserBasicDTO;
 import br.edu.ufpel.rokamoka.dto.user.output.UserAnonymousResponseDTO;
 import br.edu.ufpel.rokamoka.dto.user.output.UserResponseDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
+import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.repository.RoleRepository;
 import br.edu.ufpel.rokamoka.repository.UserRepository;
 import br.edu.ufpel.rokamoka.security.AuthenticationService;
@@ -104,8 +104,11 @@ public class UserServiceImpl implements UserService {
     public UserAnonymousResponseDTO createAnonymousUser(@Valid UserAnonymousDTO userDTO)
             throws RokaMokaContentDuplicatedException {
         var undecodedPasswd = this.generateRandomPassword();
-        var user = User.builder().nome(userDTO.userName()).senha(this.passwordEncoder.encode(undecodedPasswd))
-                .roles(Set.of(this.roleRepository.findByName(RoleEnum.USER))).build();
+        var user = User.builder()
+                .nome(userDTO.userName())
+                .senha(this.passwordEncoder.encode(undecodedPasswd))
+                .roles(Set.of(this.roleRepository.findByName(RoleEnum.USER)))
+                .build();
 
         this.validateOrThrowExecption(user);
 
@@ -113,6 +116,15 @@ public class UserServiceImpl implements UserService {
         String userJWT =
                 this.authenticationService.basicAuthenticationAndGenerateJWT(newUser.getNome(), undecodedPasswd);
         return new UserAnonymousResponseDTO(userJWT, undecodedPasswd);
+    }
+
+    @Override
+    public void resetUserPassword(UserBasicDTO userDTO) throws RokaMokaContentNotFoundException {
+        User user = this.userRepository
+                .findByNome(userDTO.name())
+                .orElseThrow(() -> new RokaMokaContentNotFoundException("Usuário não encontrado"));
+        user.setSenha(this.passwordEncoder.encode(userDTO.password()));
+        this.userRepository.save(user);
     }
 
     /**
@@ -144,5 +156,4 @@ public class UserServiceImpl implements UserService {
         RandomStringGenerator pwdGenerator = new RandomStringGenerator.Builder().withinRange('a', 'z').build();
         return pwdGenerator.generate(10);
     }
-
 }

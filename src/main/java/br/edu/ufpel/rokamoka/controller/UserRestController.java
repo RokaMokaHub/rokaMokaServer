@@ -1,12 +1,12 @@
 package br.edu.ufpel.rokamoka.controller;
 
-
 import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
 import br.edu.ufpel.rokamoka.dto.user.input.UserAnonymousDTO;
 import br.edu.ufpel.rokamoka.dto.user.input.UserBasicDTO;
 import br.edu.ufpel.rokamoka.dto.user.output.UserAnonymousResponseDTO;
 import br.edu.ufpel.rokamoka.dto.user.output.UserResponseDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
+import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.security.AuthenticationService;
 import br.edu.ufpel.rokamoka.service.UserService;
 import br.edu.ufpel.rokamoka.wrapper.RokaMokaController;
@@ -18,7 +18,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 
 /**
@@ -76,5 +80,18 @@ public class UserRestController extends RokaMokaController {
     @GetMapping(value = "/teste-acao", consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseWrapper<String>> teste() {
         return success("Ok, funcionou");
+    }
+
+    @Operation(summary = "Redefinição de senha do usuário",
+            description = "Permite que um usuário redefina sua senha fornecendo suas credenciais")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Senha alterada")})
+    @PostMapping(
+            value = "/password-reset",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ApiResponseWrapper<Void>> resetPassword(@RequestBody UserBasicDTO userDTO)
+            throws RokaMokaContentNotFoundException {
+        this.userService.resetUserPassword(userDTO);
+        return success();
     }
 }
