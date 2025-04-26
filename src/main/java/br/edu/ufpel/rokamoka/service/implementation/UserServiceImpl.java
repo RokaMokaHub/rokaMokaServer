@@ -1,5 +1,6 @@
 package br.edu.ufpel.rokamoka.service.implementation;
 
+import br.edu.ufpel.rokamoka.context.ServiceContext;
 import br.edu.ufpel.rokamoka.core.RoleEnum;
 import br.edu.ufpel.rokamoka.core.User;
 import br.edu.ufpel.rokamoka.dto.user.input.UserAnonymousDTO;
@@ -8,6 +9,7 @@ import br.edu.ufpel.rokamoka.dto.user.output.UserAnonymousResponseDTO;
 import br.edu.ufpel.rokamoka.dto.user.output.UserResponseDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
+import br.edu.ufpel.rokamoka.exceptions.RokaMokaForbiddenException;
 import br.edu.ufpel.rokamoka.repository.RoleRepository;
 import br.edu.ufpel.rokamoka.repository.UserRepository;
 import br.edu.ufpel.rokamoka.security.AuthenticationService;
@@ -119,10 +121,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void resetUserPassword(UserBasicDTO userDTO) throws RokaMokaContentNotFoundException {
+    public void resetUserPassword(@Valid UserBasicDTO userDTO)
+            throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
+
+        if (!this.userRepository.existsByNome(userDTO.name()) ||
+            !this.userRepository.existsByEmail(userDTO.email())) {
+            throw new RokaMokaContentNotFoundException("Usuário não encontrado");
+        }
+
         User user = this.userRepository
                 .findByNome(userDTO.name())
                 .orElseThrow(() -> new RokaMokaContentNotFoundException("Usuário não encontrado"));
+
+        User loggedInUser = this.userRepository
+                .findByNome(ServiceContext.getContext().getUser().getUsername())
+                .orElseThrow(() -> new RokaMokaContentNotFoundException("Usuário não encontrado"));
+        if (!loggedInUser.equals(user)) {
+            throw new RokaMokaForbiddenException("Apenas o próprio usuário pode alterar a sua senha");
+        }
+
         user.setSenha(this.passwordEncoder.encode(userDTO.password()));
         this.userRepository.save(user);
     }

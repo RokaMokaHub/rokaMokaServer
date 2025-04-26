@@ -7,6 +7,7 @@ import br.edu.ufpel.rokamoka.dto.user.output.UserAnonymousResponseDTO;
 import br.edu.ufpel.rokamoka.dto.user.output.UserResponseDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
+import br.edu.ufpel.rokamoka.exceptions.RokaMokaForbiddenException;
 import br.edu.ufpel.rokamoka.security.AuthenticationService;
 import br.edu.ufpel.rokamoka.service.UserService;
 import br.edu.ufpel.rokamoka.wrapper.RokaMokaController;
@@ -90,7 +91,7 @@ public class UserRestController extends RokaMokaController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseWrapper<Void>> resetPassword(@RequestBody UserBasicDTO userDTO)
-            throws RokaMokaContentNotFoundException {
+            throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
         this.userService.resetUserPassword(userDTO);
         return success();
     }
