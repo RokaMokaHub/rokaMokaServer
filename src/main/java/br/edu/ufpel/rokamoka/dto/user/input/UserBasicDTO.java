@@ -1,9 +1,8 @@
 package br.edu.ufpel.rokamoka.dto.user.input;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import br.edu.ufpel.rokamoka.utils.user.EmailConstraint;
+import br.edu.ufpel.rokamoka.utils.user.PasswordConstraint;
+import br.edu.ufpel.rokamoka.utils.user.UserNameConstraint;
 
 /**
  * A Data Transfer Object for basic user information.
@@ -18,8 +17,8 @@ import jakarta.validation.constraints.Size;
  * @Author: iyisakuma
  */
 public record UserBasicDTO(
-        @NotNull @Email String email,
-        @NotBlank @Size(min = 8, max = 20) String password,
-        @NotBlank String name,
+        @EmailConstraint String email,
+        @PasswordConstraint String password,
+        @UserNameConstraint String name,
         String deviceId
 ) {}
