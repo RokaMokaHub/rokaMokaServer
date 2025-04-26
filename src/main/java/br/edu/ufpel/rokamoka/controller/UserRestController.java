@@ -86,7 +86,7 @@ public class UserRestController extends RokaMokaController {
     /**
      * Resets the password of a user using the provided credentials.
      *
-     * @param userDTO A {@link UserBasicDTO} containing the user's credentials, such as email and password.
+     * @param userDTO A {@link UserBasicDTO} containing the user's credentials.
      *
      * @return A {@link ResponseEntity} wrapping an {@code ApiResponseWrapper<Void>} indicating success or failure.
      * @throws RokaMokaContentNotFoundException if the user specified in the request is not found.

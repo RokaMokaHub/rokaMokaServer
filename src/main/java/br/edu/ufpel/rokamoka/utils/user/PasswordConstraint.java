@@ -11,7 +11,22 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * Annotation to indicate that the annotated password must meet specific constraints.
+ *
+ * <p> This annotation ensures that the password:
+ * <ul>
+ *     <li>Is not blank.</li>
+ *     <li>Has a length between 8 and 20 characters, inclusive.</li>
+ * </ul>
+ *
+ *  <p> It is intended to be used on fields, method parameters, or record components.
+ *
  * @author mauriciomucci
+ * @see Size
+ * @see NotBlank
+ * @see Constraint
+ * @see Retention
+ * @see Target
  */
 @NotBlank
 @Size(min = 8, max = 20)

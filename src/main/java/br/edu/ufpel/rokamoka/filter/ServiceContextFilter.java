@@ -1,21 +1,8 @@
 package br.edu.ufpel.rokamoka.filter;
 
-
-import java.io.IOException;
-import java.util.Arrays;
-
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.stereotype.Component;
-import org.springframework.util.AntPathMatcher;
-import org.springframework.web.util.UrlPathHelper;
-
 import br.edu.ufpel.rokamoka.context.ServiceContext;
 import br.edu.ufpel.rokamoka.security.EndpointAccessRules;
 import br.edu.ufpel.rokamoka.security.UserAuthenticated;
-
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -24,6 +11,16 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.web.util.UrlPathHelper;
+
+import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * This filter is responsible for setting up the service context for each request and ensuring that authentication is
@@ -32,11 +29,9 @@ import lombok.extern.slf4j.Slf4j;
  * <p>It skips filtering for specific endpoints that do not require authentication.
  *
  * @author mauriciomucci
- * @see Slf4j
- * @see Component
- * @see RequiredArgsConstructor
  * @see UserDetailsService
  * @see EndpointAccessRules
+ * @see AntPathMatcher
  */
 @Slf4j
 @Component

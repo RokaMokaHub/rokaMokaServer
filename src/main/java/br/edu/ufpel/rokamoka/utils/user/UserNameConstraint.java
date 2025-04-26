@@ -10,7 +10,21 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * Annotation to enforce specific constraints on a username.
+ *
+ * <p>This annotation ensures that the username:
+ * <ul>
+ *     <li>Contains only letters, numbers, hyphens, and underscores.</li>
+ *     <li>Adheres to the pattern defined by the {@link Pattern} annotation.</li>
+ * </ul>
+ *
+ * <p>It is typically used on fields, method parameters, or record components to validate the format automatically.
+ *
  * @author mauriciomucci
+ * @see Pattern
+ * @see Constraint
+ * @see Retention
+ * @see Target
  */
 @Pattern(regexp = "^[a-zA-Z0-9_-]+$")
 @Constraint(validatedBy = {})

@@ -11,7 +11,22 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * Annotation to validate that the annotated element represents a valid email address and is not blank.
+ *
+ * <p>This annotation ensures that the email:
+ * <ul>
+ *     <li>Is formatted correctly as an email address.</li>
+ *     <li>Is not blank.</li>
+ * </ul>
+ *
+ * <p>It is intended to be used on fields, method parameters, or record components.
+ *
  * @author mauriciomucci
+ * @see Email
+ * @see NotBlank
+ * @see Constraint
+ * @see Retention
+ * @see Target
  */
 @Email
 @NotBlank

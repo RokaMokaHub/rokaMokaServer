@@ -10,7 +10,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
+ * Handles global exceptions for the application by providing appropriate responses for various HTTP error scenarios.
+ *
+ * <p>This controller provides centralized exception handling for all controllers by responding with a consistent
+ * structure using {@link ApiResponseWrapper}.
+ *
  * @author mauriciomucci
+ * @see RokaMokaController
  */
 @Slf4j
 @RestControllerAdvice
