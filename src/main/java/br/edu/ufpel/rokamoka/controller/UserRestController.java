@@ -83,13 +83,29 @@ public class UserRestController extends RokaMokaController {
         return success("Ok, funcionou");
     }
 
-    @Operation(summary = "Redefinição de senha do usuário",
-            description = "Permite que um usuário redefina sua senha fornecendo suas credenciais")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Senha alterada")})
+    /**
+     * Resets the password of a user using the provided credentials.
+     *
+     * @param userDTO A {@link UserBasicDTO} containing the user's credentials, such as email and password.
+     *
+     * @return A {@link ResponseEntity} wrapping an {@code ApiResponseWrapper<Void>} indicating success or failure.
+     * @throws RokaMokaContentNotFoundException if the user specified in the request is not found.
+     * @throws RokaMokaForbiddenException if the user does not have permission to perform this action.
+     */
+    @Operation(
+            summary = "Redefinição de senha do usuário",
+            description = "Permite que um usuário redefina sua senha fornecendo suas credenciais"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Senha alterada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Usuário não encontrado"),
+            @ApiResponse(responseCode = "403", description = "Ação proibida a este usuário")
+    })
     @PostMapping(
-            value = "/password-reset",
+            value = "/reset-password",
             consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
     public ResponseEntity<ApiResponseWrapper<Void>> resetPassword(@RequestBody UserBasicDTO userDTO)
             throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
         this.userService.resetUserPassword(userDTO);
