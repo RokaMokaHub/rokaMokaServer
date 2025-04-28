@@ -1,9 +1,26 @@
 package br.edu.ufpel.rokamoka.core;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import org.hibernate.Hibernate;
+import org.hibernate.proxy.HibernateProxy;
 
-import jakarta.persistence.*;
-import lombok.*;
-
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -40,4 +57,23 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "perfil_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_perfil"))
     )
     private Set<Role> roles;
+
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
+            return false;
+        }
+        User user = (User) o;
+        return this.id != null && Objects.equals(this.id, user.getId());
+    }
+
+    @Override
+    public final int hashCode() {
+        return this instanceof HibernateProxy
+                ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode()
+                : getClass().hashCode();
+    }
 }

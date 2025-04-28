@@ -1,11 +1,8 @@
 package br.edu.ufpel.rokamoka.dto.user.input;
 
-
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import br.edu.ufpel.rokamoka.utils.user.EmailConstraint;
+import br.edu.ufpel.rokamoka.utils.user.PasswordConstraint;
+import br.edu.ufpel.rokamoka.utils.user.UserNameConstraint;
 
 /**
  * A Data Transfer Object for basic user information.
@@ -13,14 +10,19 @@ import jakarta.validation.constraints.Size;
  * This record is used to capture the basic information required for creating or authenticating a user.
  * </p>
  *
- * @param email    The email of the user. Must be a valid email format and not null.
+ * @param email The email of the user. Must be a valid email format and not null.
  * @param password The user's password. Must be between 8 and 20 characters, inclusive, and not blank.
- * @param name     The name of the user. Must not be blank.
+ * @param name The name of the user. Must not be blank.
  * @param deviceId The ID of the user's device.
- * @Author: iyisakuma
+ *
+ * @author iyisakuma
+ * @see EmailConstraint
+ * @see PasswordConstraint
+ * @see UserNameConstraint
  */
 public record UserBasicDTO(
-        @NotNull @Email String email, @NotBlank @Size(min = 8, max = 20) String password,
-        @Pattern(regexp = "^[a-zA-Z0-9_-]+$", message = "Apenas letras, números, hífen e underline são permitidos") String name,
+        @EmailConstraint String email,
+        @PasswordConstraint String password,
+        @UserNameConstraint String name,
         String deviceId
 ) {}

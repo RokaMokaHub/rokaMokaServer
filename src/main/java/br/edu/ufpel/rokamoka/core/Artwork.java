@@ -1,16 +1,16 @@
 package br.edu.ufpel.rokamoka.core;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import org.hibernate.Hibernate;
 import org.hibernate.proxy.HibernateProxy;
 
@@ -18,19 +18,20 @@ import java.util.Objects;
 
 @Getter
 @Setter
-@Builder
-@ToString(of = {"name"})
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
-@Table(name = "acao")
-public class Action {
+@Table(name = "obra")
+public class Artwork {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
-    private String name;
+    @Column(nullable = false) private String nome;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "exposicao_id")
+    private Exhibition exhibition;
+
 
     @Override
     public final boolean equals(Object o) {
@@ -40,8 +41,8 @@ public class Action {
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
             return false;
         }
-        Action action = (Action) o;
-        return this.id != null && Objects.equals(this.id, action.getId());
+        Artwork artwork = (Artwork) o;
+        return this.id != null && Objects.equals(this.id, artwork.getId());
     }
 
     @Override
