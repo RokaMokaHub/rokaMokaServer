@@ -63,7 +63,9 @@ INSERT INTO public.perfil_acao(acao_id, perfil_id) VALUES(1, 1);
 -- }
 INSERT INTO public.usuario ( email, nome, senha) VALUES( 'test@test.com', 'teste', '$2a$10$C.g8gn8iC9zu0..ALTIcButWBetd/fyH3a40Dc/sWhFCc3YsiNy6e');
 INSERT INTO public.usuario_perfil (perfil_id, usario_id) VALUES(1, 1);
-
+INSERT INTO public.perfil("name") VALUES('RESEARCHER');
+-- senha: researcher
+INSERT INTO public.usuario(email, nome, senha) VALUES('researcher@teste.com', 'researcher', '$2a$10$F.uLDuRLVnzhrJOOPkTD7uknLKPwOWHTzHXG8WFUT5yN.JAcXFe/u');
 CREATE TABLE Exposicao
 (
     ID        SERIAL PRIMARY KEY,

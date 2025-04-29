@@ -10,7 +10,7 @@ public class EndpointAccessRules {
 
     private final String[] endpointsWithoutAuthentication = {
             "/user/login", "/user/anonymous/create", "/user/normal/create", "/error", "/swagger-ui/**",
-            "/v3/api-docs/**", "/swagger-resources/**"
+            "/v3/api-docs/**", "/swagger-resources/**", "/researcher/create"
     };
 
     private final String[] endpointsWithAuthentication = {

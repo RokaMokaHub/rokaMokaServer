@@ -152,6 +152,24 @@ public class UserServiceImpl implements UserService {
         this.userRepository.save(user);
     }
 
+    @Override
+    public UserResponseDTO createReseacher(UserBasicDTO userDTO) throws RokaMokaContentDuplicatedException {
+        var undecodedPasswd = userDTO.password();
+        var user = User.builder()
+                .nome(userDTO.name())
+                .email(userDTO.email())
+                .senha(this.passwordEncoder.encode(undecodedPasswd))
+                .roles(Set.of(this.roleRepository.findByName(RoleEnum.RESEARCHER)))
+                .build();
+
+        this.validateOrThrowExecption(user);
+        User newUser = this.userRepository.save(user);
+
+        String userJWT =
+                this.authenticationService.basicAuthenticationAndGenerateJWT(newUser.getNome(), undecodedPasswd);
+        return new UserResponseDTO(userJWT);
+    }
+
     /**
      * Validates that the user's email and name are not already in use.
      *
