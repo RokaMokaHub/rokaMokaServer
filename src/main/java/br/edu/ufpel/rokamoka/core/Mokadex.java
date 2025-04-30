@@ -1,19 +1,13 @@
 package br.edu.ufpel.rokamoka.core;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.Hibernate;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.util.Objects;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -25,9 +19,17 @@ public class Mokadex {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "usuario_id")
+    @OneToOne
     private User usuario;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "mokadex_obra",
+            joinColumns = @JoinColumn(
+                    name = "mokadex_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_mokadex")),
+            inverseJoinColumns = @JoinColumn(
+                    name = "obra_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_obra"))
+    )
+    private Set<Artwork> artworks;
 
     @Override
     public final boolean equals(Object o) {
