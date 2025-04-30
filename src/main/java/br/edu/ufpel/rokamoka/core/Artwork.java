@@ -1,5 +1,6 @@
 package br.edu.ufpel.rokamoka.core;
 
+import br.edu.ufpel.rokamoka.dto.artwork.input.ArtworkInputDTO;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.Hibernate;
@@ -26,7 +27,11 @@ public class Artwork {
     @JoinColumn(name = "exposicao_id")
     private Exhibition exhibition;
 
-
+    public Artwork(ArtworkInputDTO dto, Exhibition exhibition) {
+        this.nome = dto.nome();
+        ;
+        this.exhibition = exhibition;
+    }
     @Override
     public final boolean equals(Object o) {
         if (this == o) {
