@@ -13,4 +13,9 @@ public class RokaMokaContentNotFoundException extends Throwable {
     public RokaMokaContentNotFoundException(String message) {
         super(message);
     }
+
+    public RokaMokaContentNotFoundException() {
+        super("O conteúdo não foi encontrado");
+    }
+
 }

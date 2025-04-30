@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/researcher")
 @RequiredArgsConstructor
-public class SearcherController extends RokaMokaController {
+public class ResearcherController extends RokaMokaController {
 
     private final UserService userService;
 
