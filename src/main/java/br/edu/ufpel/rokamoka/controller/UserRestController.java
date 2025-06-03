@@ -16,6 +16,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -73,7 +75,7 @@ public class UserRestController extends RokaMokaController {
      * @param authentication An {@link Authentication} object containing the user's credentials.
      * @return A {@link ResponseEntity} containing the user's JWT.
      */
-    @Operation(summary = "Login de um determinado usuário", description = "Login de um determinado usuário")
+    @Operation(security = @SecurityRequirement(name = "basic"), summary = "Login de um determinado usuário", description = "Login de um determinado usuário")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Login de usuário") })
     @GetMapping(value = "/login", consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseWrapper<UserResponseDTO>> login(Authentication authentication) {
