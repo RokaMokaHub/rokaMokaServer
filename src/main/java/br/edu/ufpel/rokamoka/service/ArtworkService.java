@@ -1,16 +1,16 @@
 package br.edu.ufpel.rokamoka.service;
 
 import br.edu.ufpel.rokamoka.core.Artwork;
+import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import jakarta.validation.Valid;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface ArtworkService {
 
     List<Artwork> findAll();
 
-    Optional<Artwork> findById(Long id);
+    Artwork findById(Long id) throws RokaMokaContentNotFoundException;
 
     Artwork save(@Valid Artwork artwork);
 

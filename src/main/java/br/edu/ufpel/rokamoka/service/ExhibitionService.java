@@ -1,18 +1,20 @@
 package br.edu.ufpel.rokamoka.service;
 
-import br.edu.ufpel.rokamoka.core.Artwork;
 import br.edu.ufpel.rokamoka.core.Exhibition;
+import br.edu.ufpel.rokamoka.dto.exhibition.input.ExhibitionInputDTO;
+import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface ExhibitionService {
 
     List<Exhibition> findAll();
 
-    Optional<Exhibition> findById(Long id);
+    Exhibition findById(Long id) throws RokaMokaContentNotFoundException;
 
-    Exhibition save(Exhibition exhibition, List<Artwork> artworks);
+    Exhibition save(Long id, ExhibitionInputDTO exhibition) throws RokaMokaContentNotFoundException;
+
+    Exhibition save(ExhibitionInputDTO exhibition) throws RokaMokaContentNotFoundException;
 
     void deleteById(Long id);
 }

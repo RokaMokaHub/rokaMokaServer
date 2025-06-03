@@ -1,6 +1,7 @@
 package br.edu.ufpel.rokamoka.service.implementation;
 
 import br.edu.ufpel.rokamoka.core.Artwork;
+import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.repository.ArtworkRepository;
 import br.edu.ufpel.rokamoka.service.ArtworkService;
 import jakarta.validation.Valid;
@@ -8,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ArtworkServiceImpl implements ArtworkService {
@@ -22,8 +22,8 @@ public class ArtworkServiceImpl implements ArtworkService {
     }
 
     @Override
-    public Optional<Artwork> findById(Long id) {
-        return obraRepository.findById(id);
+    public Artwork findById(Long id) throws RokaMokaContentNotFoundException {
+        return obraRepository.findById(id).orElseThrow(RokaMokaContentNotFoundException::new);
     }
 
     @Override

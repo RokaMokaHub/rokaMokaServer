@@ -23,8 +23,8 @@ public class ArtworkController extends RokaMokaController {
 
     @Operation(summary = "Buscar obra por ID", description = "Retorna uma obra com base no ID informado")
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> findById(@PathVariable Long id) {
-        Artwork artwork = artworkService.findById(id).orElseThrow();
+    public ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> findById(@PathVariable Long id) throws RokaMokaContentNotFoundException {
+        Artwork artwork = artworkService.findById(id);
         return success(new ArtworkOutputDTO(artwork));
     }
 
@@ -39,19 +39,16 @@ public class ArtworkController extends RokaMokaController {
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> update(@PathVariable Long id,
                                                                        @RequestBody ArtworkInputDTO updatedArtworkDTO) throws RokaMokaContentNotFoundException {
-        Artwork artwork = artworkService.findById(id)
-                .orElseThrow(RokaMokaContentNotFoundException::new);
+        Artwork artwork = artworkService.findById(id);
         artwork.setNome(updatedArtworkDTO.nome());
         return success(new ArtworkOutputDTO(this.artworkService.save(artwork)));
     }
 
     @Operation(summary = "Deletar obra", description = "Remove uma obra com base no ID informado")
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponseWrapper<Void>> deletar(@PathVariable Long id) {
-        if (artworkService.findById(id).isPresent()) {
-            artworkService.deleteById(id);
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+    public ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> deletar(@PathVariable Long id) throws RokaMokaContentNotFoundException {
+        var artwork = artworkService.findById(id);
+        artworkService.deleteById(id);
+        return success(new ArtworkOutputDTO(artwork));
     }
 }
