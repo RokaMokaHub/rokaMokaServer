@@ -1,12 +1,7 @@
 package br.edu.ufpel.rokamoka.core;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 import org.hibernate.Hibernate;
 import org.hibernate.proxy.HibernateProxy;
 
@@ -14,17 +9,22 @@ import java.util.Objects;
 
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "exposicao")
 public class Exhibition {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
-    private String nome;
+    @Column(name = "nome")
+    private String name;
 
-    private String descricao;
+    @Column(name = "descricao")
+    private String description;
 
     @Override
     public final boolean equals(Object o) {

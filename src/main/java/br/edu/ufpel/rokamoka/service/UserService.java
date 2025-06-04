@@ -20,4 +20,6 @@ public interface UserService {
 
     void resetUserPassword(@Valid UserBasicDTO userDTO)
             throws RokaMokaContentNotFoundException, RokaMokaForbiddenException;
+
+    UserResponseDTO createReseacher(UserBasicDTO userDTO) throws RokaMokaContentDuplicatedException;
 }
