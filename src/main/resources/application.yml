@@ -1,24 +1,30 @@
 spring:
   application:
     name: roka-moka
-  profiles:
-    active: dev
   datasource:
     url: jdbc:postgresql://localhost:5432/RokaMokaDb
     username: rokamoka
     password: teste123
     driver-class-name: org.postgresql.Driver
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      pool-name: HikariCP-Pool
+      maximum-pool-size: 10 # Maximum number of connections that HikariCP will keep in the pool
+      minimum-idle: 5 # Minimum number of idle connections that HikariCP maintains at all times
+      idle-timeout: 180000 # Maximum time a connection can sit idle in the pool before being retired (3 minutes)
+      max-lifetime: 900000 # Maximum lifetime of a connection in the pool (close after this time even if active - 15 minutes)
+      connection-timeout: 3000 # Maximum time to wait for a connection from the pool (timeout if exceeded - 3 seconds)
+      validation-timeout: 5000 # Maximum time to wait for a connection validation query (5 seconds)
   jpa:
     hibernate:
       ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: false
 jwt:
   private:
     key: classpath:app.key
   public:
     key: classpath:app.pub
-
-logging:
-  level:
-    org.springframework.security: DEBUG
-
-
