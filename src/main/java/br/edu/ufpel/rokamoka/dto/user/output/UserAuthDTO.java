@@ -5,6 +5,6 @@ package br.edu.ufpel.rokamoka.dto.user.output;
  *
  * @author iyisakuma
  */
-public record UserResponseDTO(String jwt) {
+public record UserAuthDTO(String jwt) {
 
 }

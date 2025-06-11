@@ -1,11 +1,28 @@
 package br.edu.ufpel.rokamoka.core;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.Hibernate;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * A user of the system.
@@ -47,8 +64,11 @@ public class User {
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
             return false;
         }
-        User user = (User) o;
-        return this.id != null && Objects.equals(this.id, user.getId());
+        User other = (User) o;
+        if (this.id != null && Objects.equals(this.id, other.getId())) {
+            return true;
+        }
+        return this.nome != null && Objects.equals(this.nome, other.getNome());
     }
 
     @Override

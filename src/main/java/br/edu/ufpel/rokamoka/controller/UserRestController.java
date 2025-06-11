@@ -1,10 +1,12 @@
 package br.edu.ufpel.rokamoka.controller;
 
 import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
-import br.edu.ufpel.rokamoka.dto.user.input.UserAnonymousDTO;
+import br.edu.ufpel.rokamoka.dto.user.input.UserAnonymousRequestDTO;
 import br.edu.ufpel.rokamoka.dto.user.input.UserBasicDTO;
+import br.edu.ufpel.rokamoka.dto.user.input.UserResetPasswordDTO;
 import br.edu.ufpel.rokamoka.dto.user.output.UserAnonymousResponseDTO;
-import br.edu.ufpel.rokamoka.dto.user.output.UserResponseDTO;
+import br.edu.ufpel.rokamoka.dto.user.output.UserAuthDTO;
+import br.edu.ufpel.rokamoka.dto.user.output.UserOutputDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaForbiddenException;
@@ -50,7 +52,7 @@ public class UserRestController extends RokaMokaController {
     @Operation(summary = "Criação de usuário \"normal\"", description = "Cria usuário normal, isto é, aqueles com email e senha.")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Usuário criado") })
     @PostMapping(value = "/normal/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponseWrapper<UserResponseDTO>> register(@RequestBody UserBasicDTO userDTO)
+    public ResponseEntity<ApiResponseWrapper<UserAuthDTO>> register(@RequestBody UserBasicDTO userDTO)
             throws RokaMokaContentDuplicatedException {
         return success(IUserService.createNormalUser(userDTO));
     }
@@ -59,7 +61,7 @@ public class UserRestController extends RokaMokaController {
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Usuário criado") })
     @PostMapping(value = "/anonymous/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseWrapper<UserAnonymousResponseDTO>> anonymousRegister(
-            @RequestBody UserAnonymousDTO userDTO)
+            @RequestBody UserAnonymousRequestDTO userDTO)
             throws RokaMokaContentDuplicatedException {
         return success(this.IUserService.createAnonymousUser(userDTO));
     }
@@ -73,8 +75,8 @@ public class UserRestController extends RokaMokaController {
     @Operation(security = @SecurityRequirement(name = "basic"), summary = "Login de um determinado usuário", description = "Login de um determinado usuário")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Login de usuário") })
     @GetMapping(value = "/login", consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponseWrapper<UserResponseDTO>> login(Authentication authentication) {
-        return success(new UserResponseDTO(authenticationService.authenticate(authentication)));
+    public ResponseEntity<ApiResponseWrapper<UserAuthDTO>> login(Authentication authentication) {
+        return success(new UserAuthDTO(authenticationService.authenticate(authentication)));
     }
 
     @GetMapping(value = "/teste-acao", consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -141,9 +143,15 @@ public class UserRestController extends RokaMokaController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<ApiResponseWrapper<Void>> resetPassword(@RequestBody UserBasicDTO userDTO)
+    public ResponseEntity<ApiResponseWrapper<Void>> resetPassword(@RequestBody UserResetPasswordDTO userDTO)
             throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
         this.IUserService.resetUserPassword(userDTO);
         return success();
+    }
+
+    @GetMapping(value = "/me")
+    public ResponseEntity<ApiResponseWrapper<UserOutputDTO>> getLoggedUserInformation()
+            throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
+        return success(this.userService.getLoggedUserInformation());
     }
 }

@@ -4,10 +4,12 @@ import br.edu.ufpel.rokamoka.context.ServiceContext;
 import br.edu.ufpel.rokamoka.core.Role;
 import br.edu.ufpel.rokamoka.core.RoleEnum;
 import br.edu.ufpel.rokamoka.core.User;
-import br.edu.ufpel.rokamoka.dto.user.input.UserAnonymousDTO;
+import br.edu.ufpel.rokamoka.dto.user.input.UserAnonymousRequestDTO;
 import br.edu.ufpel.rokamoka.dto.user.input.UserBasicDTO;
+import br.edu.ufpel.rokamoka.dto.user.input.UserResetPasswordDTO;
 import br.edu.ufpel.rokamoka.dto.user.output.UserAnonymousResponseDTO;
-import br.edu.ufpel.rokamoka.dto.user.output.UserResponseDTO;
+import br.edu.ufpel.rokamoka.dto.user.output.UserAuthDTO;
+import br.edu.ufpel.rokamoka.dto.user.output.UserOutputDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaForbiddenException;
@@ -66,11 +68,11 @@ public class UserService implements IUserService {
      *
      * @param userDTO A {@link UserBasicDTO} containing the user's name, email, and password.
      *
-     * @return A {@link UserResponseDTO} containing the generated JWT.
+     * @return A {@link UserAuthDTO} containing the generated JWT.
      * @throws RokaMokaContentDuplicatedException if the user's email or name already exists.
      */
     @Override
-    public UserResponseDTO createNormalUser(@Valid UserBasicDTO userDTO) throws RokaMokaContentDuplicatedException {
+    public UserAuthDTO createNormalUser(@Valid UserBasicDTO userDTO) throws RokaMokaContentDuplicatedException {
         var undecodedPasswd = userDTO.password();
         var user = User.builder()
                 .nome(userDTO.name())
@@ -79,27 +81,27 @@ public class UserService implements IUserService {
                 .role(this.roleRepository.findByName(RoleEnum.USER))
                 .build();
 
-        this.validateOrThrowExecption(user);
+        this.validateOrThrowException(user);
         User newUser = this.userRepository.save(user);
 
         String userJWT =
                 this.authenticationService.basicAuthenticationAndGenerateJWT(newUser.getNome(), undecodedPasswd);
-        return new UserResponseDTO(userJWT);
+        return new UserAuthDTO(userJWT);
     }
 
     /**
      * Creates an anonymous user with the provided username and generates a JWT.
-     * <p>This method takes a {@link UserAnonymousDTO} object containing the user's name,
+     * <p>This method takes a {@link UserAnonymousRequestDTO} object containing the user's name,
      * generates a random password, and creates a new user in the system. The user is then authenticated, and a JWT is
      * generated and returned along with the user's name.
      *
-     * @param userDTO A {@link UserAnonymousDTO} containing the user's name.
+     * @param userDTO A {@link UserAnonymousRequestDTO} containing the user's name.
      *
      * @return A {@link UserAnonymousResponseDTO} containing the generated JWT and the user's name.
      * @throws RokaMokaContentDuplicatedException if the user's name already exists.
      */
     @Override
-    public UserAnonymousResponseDTO createAnonymousUser(@Valid UserAnonymousDTO userDTO)
+    public UserAnonymousResponseDTO createAnonymousUser(@Valid UserAnonymousRequestDTO userDTO)
             throws RokaMokaContentDuplicatedException {
         var undecodedPasswd = this.generateRandomPassword();
         var user = User.builder()
@@ -108,7 +110,7 @@ public class UserService implements IUserService {
                 .role(this.roleRepository.findByName(RoleEnum.USER))
                 .build();
 
-        this.validateOrThrowExecption(user);
+        this.validateOrThrowException(user);
 
         User newUser = this.userRepository.save(user);
         String userJWT =
@@ -129,30 +131,43 @@ public class UserService implements IUserService {
      * @throws RokaMokaForbiddenException if the user does not have permission to perform this action.
      */
     @Override
-    public void resetUserPassword(@Valid UserBasicDTO userDTO)
+    public void resetUserPassword(@Valid UserResetPasswordDTO userDTO)
             throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
-
-        if (!this.userRepository.existsByNomeAndEmail(userDTO.name(), userDTO.email())) {
-            throw new RokaMokaContentNotFoundException("Usuário não encontrado");
-        }
-
-        User user = this.userRepository
-                .findByNome(userDTO.name())
-                .orElseThrow(() -> new RokaMokaContentNotFoundException("Usuário não encontrado"));
-
-        User loggedInUser = this.userRepository
-                .findByNome(ServiceContext.getContext().getUser().getUsername())
-                .orElseThrow(() -> new RokaMokaContentNotFoundException("Usuário não encontrado"));
-        if (!loggedInUser.equals(user)) {
-            throw new RokaMokaForbiddenException("Apenas o próprio usuário pode alterar a sua senha");
-        }
-
-        user.setSenha(this.passwordEncoder.encode(userDTO.password()));
+        User user = getResetPasswordUser(userDTO);
+        user.setSenha(this.passwordEncoder.encode(userDTO.newPassword()));
         this.userRepository.save(user);
     }
 
+    private User getResetPasswordUser(UserResetPasswordDTO userDTO)
+            throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
+        if (!this.userRepository.existsByNomeAndEmail(userDTO.name(), userDTO.email())) {
+            throw new RokaMokaContentNotFoundException("Nome de usuário ou email inválido");
+        }
+        User user = this.userRepository
+                .findByNome(userDTO.name())
+                .orElseThrow(() -> new RokaMokaContentNotFoundException("Usuário não encontrado"));
+        if (!this.passwordEncoder.matches(userDTO.oldPassword(), user.getSenha())) {
+            throw new RokaMokaForbiddenException("A senha informada é inválida");
+        }
+        User loggedUser = this.userRepository
+                .findByNome(ServiceContext.getContext().getUser().getUsername())
+                .orElseThrow(() -> new RokaMokaForbiddenException("Usuário logado não encontrado"));
+        if (!loggedUser.equals(user)) {
+            throw new RokaMokaForbiddenException("Apenas o próprio usuário pode alterar a sua senha");
+        }
+        return user;
+    }
+
     @Override
-    public UserResponseDTO createReseacher(UserBasicDTO userDTO) throws RokaMokaContentDuplicatedException {
+    public UserOutputDTO getLoggedUserInformation() throws RokaMokaForbiddenException {
+        User loggedUser = this.userRepository
+                .findByNome(ServiceContext.getContext().getUser().getUsername())
+                .orElseThrow(() -> new RokaMokaForbiddenException("Usuário logado não encontrado"));
+        return new UserOutputDTO(loggedUser);
+    }
+
+    @Override
+    public UserAuthDTO createReseacher(UserBasicDTO userDTO) throws RokaMokaContentDuplicatedException {
         var undecodedPasswd = userDTO.password();
         var user = User.builder()
                 .nome(userDTO.name())
@@ -161,12 +176,12 @@ public class UserService implements IUserService {
                 .role(this.roleRepository.findByName(RoleEnum.RESEARCHER))
                 .build();
 
-        this.validateOrThrowExecption(user);
+        this.validateOrThrowException(user);
         User newUser = this.userRepository.save(user);
 
         String userJWT =
                 this.authenticationService.basicAuthenticationAndGenerateJWT(newUser.getNome(), undecodedPasswd);
-        return new UserResponseDTO(userJWT);
+        return new UserAuthDTO(userJWT);
     }
 
     @Override
@@ -186,7 +201,7 @@ public class UserService implements IUserService {
      *
      * @throws RokaMokaContentDuplicatedException if the user's email or name already exists.
      */
-    private void validateOrThrowExecption(User user) throws RokaMokaContentDuplicatedException {
+    private void validateOrThrowException(User user) throws RokaMokaContentDuplicatedException {
         if (user.getEmail() != null && this.userRepository.existsByEmail(user.getEmail())) {
             throw new RokaMokaContentDuplicatedException("O email já está sendo utilizado,");
         }

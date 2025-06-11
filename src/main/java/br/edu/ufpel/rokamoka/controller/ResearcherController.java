@@ -2,7 +2,7 @@ package br.edu.ufpel.rokamoka.controller;
 
 import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
 import br.edu.ufpel.rokamoka.dto.user.input.UserBasicDTO;
-import br.edu.ufpel.rokamoka.dto.user.output.UserResponseDTO;
+import br.edu.ufpel.rokamoka.dto.user.output.UserAuthDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.service.IUserService;
 import br.edu.ufpel.rokamoka.wrapper.RokaMokaController;
@@ -36,7 +36,7 @@ public class ResearcherController extends RokaMokaController {
     @Operation(summary = "Criação de pesquisador", description = "Cria um pesquisador")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Usuário criado")})
     @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponseWrapper<UserResponseDTO>> register(@RequestBody UserBasicDTO userDTO)
+    public ResponseEntity<ApiResponseWrapper<UserAuthDTO>> register(@RequestBody UserBasicDTO userDTO)
             throws RokaMokaContentDuplicatedException {
         return success(IUserService.createReseacher(userDTO));
     }
