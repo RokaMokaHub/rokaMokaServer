@@ -28,8 +28,8 @@ import java.lang.annotation.Target;
  * @see Retention
  * @see Target
  */
-@Email
-@NotBlank
+@Email(message = "O formato do e-mail é inválido, por favor, insira um e-mail válido (ex: apelido@provedor.com)")
+@NotBlank(message = "O campo de e-mail não pode ficar em branco")
 @Constraint(validatedBy = {})
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.RECORD_COMPONENT})

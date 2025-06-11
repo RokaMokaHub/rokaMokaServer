@@ -26,13 +26,14 @@ import java.lang.annotation.Target;
  * @see Retention
  * @see Target
  */
-@Pattern(regexp = "^[a-zA-Z0-9_-]+$")
+@Pattern(regexp = "^[a-zA-Z0-9_-]+$",
+        message = "Nome de usuário inválido - apenas letras, números, hífen e underline são permitidos")
 @Constraint(validatedBy = {})
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.RECORD_COMPONENT})
 public @interface UserNameConstraint {
 
-    String message() default "Nome de usuário inválido: apenas letras, números, hífen e underline são permitidos";
+    String message() default "Nome de usuário inválido";
 
     Class<?>[] groups() default {};
 
