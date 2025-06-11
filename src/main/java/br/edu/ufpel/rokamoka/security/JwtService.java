@@ -1,9 +1,6 @@
 package br.edu.ufpel.rokamoka.security;
 
-
-import java.time.Instant;
-import java.util.stream.Collectors;
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
@@ -11,7 +8,8 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
 
-import lombok.RequiredArgsConstructor;
+import java.time.Instant;
+import java.util.stream.Collectors;
 
 /**
  * A service for generating JSON Web Tokens (JWTs).
@@ -23,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 public class JwtService {
 
     private static final String ROKAMOKA = "ROKAMOKA";
+
     private final JwtEncoder jwtEncoder;
 
     /**
@@ -38,6 +37,7 @@ public class JwtService {
      * </ul>
      *
      * @param authentication the authentication object to generate the token for
+     *
      * @return the generated token
      */
     public String generateToken(Authentication authentication) {
@@ -49,7 +49,7 @@ public class JwtService {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(" "));
 
-        JwtClaimsSet claims = JwtClaimsSet.builder().issuer(this.ROKAMOKA)
+        JwtClaimsSet claims = JwtClaimsSet.builder().issuer(ROKAMOKA)
                 .issuedAt(now)
                 .expiresAt(now.plusSeconds(expiry))
                 .subject(authentication.getName())
