@@ -13,7 +13,6 @@ public class EndpointAccessRules {
             "/v3/api-docs/**", "/swagger-resources/**", "/researcher/create"
     };
 
-    private final String[] endpointsWithAuthentication = {
-            "user/teste-acao"
-    };
+
+    private final String[] permissionsEndpoints = {"/evaluation/permission/**"};
 }

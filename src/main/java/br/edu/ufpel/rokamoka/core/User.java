@@ -36,6 +36,7 @@ public class User {
     @Column(nullable = false) private String senha;
 
     @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "perfil_id")
     private Role role;
 
     @Override
