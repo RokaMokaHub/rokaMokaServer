@@ -7,36 +7,24 @@ import org.hibernate.proxy.HibernateProxy;
 
 import java.util.Objects;
 
-/**
- * A user of the system.
- *
- * <p>This entity is used to represent a user of the system. The user can have
- * multiple roles and can be associated with multiple devices.
- *
- * @author iyisakuma
- */
 @Getter
 @Setter
 @Builder
-@ToString(of = {"email"})
+@ToString(of = {"statu", "role"})
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "solicitao")
 @Entity
-@Table(name = "usuario")
-public class User {
-
+public class PermissionReq {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    private String nome;
-
-    private String email;
-
-    @Column(nullable = false) private String senha;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    private Role role;
+    @OneToOne
+    @JoinColumn(name = "solicitante_id")
+    private User requester;
+    @Enumerated(EnumType.STRING)
+    private RequisitionStatus status;
+    @Enumerated(EnumType.STRING)
+    private RoleEnum role;
 
     @Override
     public final boolean equals(Object o) {
@@ -46,8 +34,8 @@ public class User {
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
             return false;
         }
-        User user = (User) o;
-        return this.id != null && Objects.equals(this.id, user.getId());
+        Action action = (Action) o;
+        return this.id != null && Objects.equals(this.id, action.getId());
     }
 
     @Override

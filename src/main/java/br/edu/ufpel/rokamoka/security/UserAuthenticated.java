@@ -33,8 +33,7 @@ public class UserAuthenticated implements UserDetails {
      */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return this.user.getRoles()
-                .stream().flatMap(role -> role.getActions().stream())
+        return this.user.getRole().getActions().stream()
                 .map(action -> new SimpleGrantedAuthority(action.getName()))
                 .toList();
     }

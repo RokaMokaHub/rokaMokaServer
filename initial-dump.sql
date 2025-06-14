@@ -41,7 +41,7 @@ ALTER TABLE public.dispositivo ADD CONSTRAINT fk_usuario FOREIGN KEY (user_id) R
 CREATE TABLE public.usuario_perfil (
     perfil_id int8 NOT NULL,
     usuario_id int8 NOT NULL,
-    CONSTRAINT usario_perfil_pkey PRIMARY KEY (perfil_id,usuario_id),
+    CONSTRAINT usuario_perfil_pkey PRIMARY KEY (perfil_id,usuario_id),
     foreign key (usuario_id) references usuario(id),
     foreign key (perfil_id) references perfil(id)
 );
@@ -55,10 +55,10 @@ CREATE TABLE solicitacao (
 
 create table registro_solicitacao(
                                      id SERIAL primary key,
-                                     avaliador_id integer not null,
+                                     revisor_id integer not null,
                                      solicitacao_id integer not null,
                                      justificativa VARCHAR(255),
-                                     foreign key (avaliador_id) references usuario(id),
+                                     foreign key (revisor_id) references usuario(id),
                                      foreign key (solicitacao_id) references solicitacao(id)
 );
 

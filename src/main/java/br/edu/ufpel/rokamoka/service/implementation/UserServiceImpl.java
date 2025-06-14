@@ -21,8 +21,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.Set;
-
 /**
  * Implementation of the {@link UserService} interface.
  *
@@ -77,7 +75,7 @@ public class UserServiceImpl implements UserService {
                 .nome(userDTO.name())
                 .email(userDTO.email())
                 .senha(this.passwordEncoder.encode(undecodedPasswd))
-                .roles(Set.of(this.roleRepository.findByName(RoleEnum.USER)))
+                .role(this.roleRepository.findByName(RoleEnum.USER))
                 .build();
 
         this.validateOrThrowExecption(user);
@@ -106,7 +104,7 @@ public class UserServiceImpl implements UserService {
         var user = User.builder()
                 .nome(userDTO.userName())
                 .senha(this.passwordEncoder.encode(undecodedPasswd))
-                .roles(Set.of(this.roleRepository.findByName(RoleEnum.USER)))
+                .role(this.roleRepository.findByName(RoleEnum.USER))
                 .build();
 
         this.validateOrThrowExecption(user);
@@ -159,7 +157,7 @@ public class UserServiceImpl implements UserService {
                 .nome(userDTO.name())
                 .email(userDTO.email())
                 .senha(this.passwordEncoder.encode(undecodedPasswd))
-                .roles(Set.of(this.roleRepository.findByName(RoleEnum.RESEARCHER)))
+                .role(this.roleRepository.findByName(RoleEnum.RESEARCHER))
                 .build();
 
         this.validateOrThrowExecption(user);
