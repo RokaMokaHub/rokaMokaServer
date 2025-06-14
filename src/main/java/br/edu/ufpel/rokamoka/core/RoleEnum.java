@@ -1,5 +1,14 @@
 package br.edu.ufpel.rokamoka.core;
 
+import lombok.Getter;
+
+@Getter
 public enum RoleEnum {
-    ADMINISTRATOR, RESEARCHER, CURATOR, USER
+    ADMINISTRATOR("admin"), RESEARCHER("pesquisador"), CURATOR("curador"), USER("usuario");
+
+    private final String description;
+
+    RoleEnum(String description) {
+        this.description = description;
+    }
 }

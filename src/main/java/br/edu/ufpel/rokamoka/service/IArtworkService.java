@@ -6,7 +6,7 @@ import jakarta.validation.Valid;
 
 import java.util.List;
 
-public interface ArtworkService {
+public interface IArtworkService {
 
     List<Artwork> findAll();
 

@@ -6,7 +6,7 @@ import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 
 import java.util.List;
 
-public interface ExhibitionService {
+public interface IExhibitionService {
 
     List<Exhibition> findAll();
 

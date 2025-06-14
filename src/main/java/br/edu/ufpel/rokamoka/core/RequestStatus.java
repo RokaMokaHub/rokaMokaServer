@@ -1,5 +1,5 @@
 package br.edu.ufpel.rokamoka.core;
 
-public enum RequisitionStatus {
+public enum RequestStatus {
     PENDING, CONFIRM, DENY
 }

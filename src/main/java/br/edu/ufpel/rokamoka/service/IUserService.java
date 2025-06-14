@@ -1,5 +1,7 @@
 package br.edu.ufpel.rokamoka.service;
 
+import br.edu.ufpel.rokamoka.core.Role;
+import br.edu.ufpel.rokamoka.core.User;
 import br.edu.ufpel.rokamoka.dto.user.input.UserAnonymousDTO;
 import br.edu.ufpel.rokamoka.dto.user.input.UserBasicDTO;
 import br.edu.ufpel.rokamoka.dto.user.output.UserAnonymousResponseDTO;
@@ -11,7 +13,7 @@ import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
 
 @Validated
-public interface UserService {
+public interface IUserService {
 
     UserResponseDTO createNormalUser(@Valid UserBasicDTO userDTO) throws RokaMokaContentDuplicatedException;
 
@@ -22,4 +24,6 @@ public interface UserService {
             throws RokaMokaContentNotFoundException, RokaMokaForbiddenException;
 
     UserResponseDTO createReseacher(UserBasicDTO userDTO) throws RokaMokaContentDuplicatedException;
+
+    void updateRole(User requester, Role role);
 }
