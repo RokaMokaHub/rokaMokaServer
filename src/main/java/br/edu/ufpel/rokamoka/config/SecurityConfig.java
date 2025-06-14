@@ -1,6 +1,7 @@
 package br.edu.ufpel.rokamoka.config;
 
 
+import br.edu.ufpel.rokamoka.core.RoleEnum;
 import br.edu.ufpel.rokamoka.security.EndpointAccessRules;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -43,7 +44,7 @@ public class SecurityConfig {
                 .httpBasic(Customizer.withDefaults())
                 .authorizeHttpRequests(authorizeHttpRequests ->
                         authorizeHttpRequests
-                                .requestMatchers(endpointAccessRules.getEndpointsWithAuthentication()).hasAuthority("acao_teste")//exemplo ne gurizes
+                                .requestMatchers(endpointAccessRules.getPermissionsEndpoints()).hasAnyAuthority(RoleEnum.CURATOR.name(), RoleEnum.ADMINISTRATOR.name())
                                 .requestMatchers(endpointAccessRules.getEndpointsWithoutAuthentication())
                                 .permitAll()
                                 .anyRequest()

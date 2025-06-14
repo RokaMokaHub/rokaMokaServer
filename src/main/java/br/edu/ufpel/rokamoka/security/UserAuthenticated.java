@@ -8,6 +8,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * A {@link UserDetails} implementation for {@link User} objects.
@@ -33,9 +34,7 @@ public class UserAuthenticated implements UserDetails {
      */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return this.user.getRole().getActions().stream()
-                .map(action -> new SimpleGrantedAuthority(action.getName()))
-                .toList();
+        return List.of(new SimpleGrantedAuthority(this.user.getRole().getName().name()));
     }
 
     /**
