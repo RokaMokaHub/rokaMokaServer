@@ -10,7 +10,7 @@ import java.util.Objects;
 @Getter
 @Setter
 @Builder
-@ToString(of = {"statu", "role"})
+@ToString(of = {"status", "role"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "solicitacao")
@@ -37,8 +37,8 @@ public class PermissionReq {
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
             return false;
         }
-        Action action = (Action) o;
-        return this.id != null && Objects.equals(this.id, action.getId());
+        PermissionReq pq = (PermissionReq) o;
+        return this.id != null && Objects.equals(this.id, pq.getId());
     }
 
     @Override

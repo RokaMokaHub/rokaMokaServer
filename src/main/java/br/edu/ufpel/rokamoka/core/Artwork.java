@@ -7,6 +7,7 @@ import org.hibernate.Hibernate;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.util.Objects;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -21,15 +22,21 @@ public class Artwork {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false) private String nome;
-
+    @Column(nullable = false)
+    private String nome;
+    private String nomeArtista;
+    private String descricao;
+    private String link;
+    private String qrCode;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "exposicao_id")
     private Exhibition exhibition;
-
+    @OneToMany
+    @JoinColumn(name = "obra_id")
+    private Set<Image> images;
+    
     public Artwork(ArtworkInputDTO dto, Exhibition exhibition) {
         this.nome = dto.nome();
-        ;
         this.exhibition = exhibition;
     }
     @Override

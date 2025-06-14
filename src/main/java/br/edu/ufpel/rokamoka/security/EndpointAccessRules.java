@@ -13,6 +13,7 @@ public class EndpointAccessRules {
             "/v3/api-docs/**", "/swagger-resources/**", "/researcher/create"
     };
 
+    private final String[] exhibitionEndpoints = {"/exhibition/**"};
 
     private final String[] permissionsEndpoints = {"/evaluation/permission/**"};
 }
