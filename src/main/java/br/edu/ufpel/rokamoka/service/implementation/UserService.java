@@ -1,6 +1,7 @@
 package br.edu.ufpel.rokamoka.service.implementation;
 
 import br.edu.ufpel.rokamoka.context.ServiceContext;
+import br.edu.ufpel.rokamoka.core.Role;
 import br.edu.ufpel.rokamoka.core.RoleEnum;
 import br.edu.ufpel.rokamoka.core.User;
 import br.edu.ufpel.rokamoka.dto.user.input.UserAnonymousDTO;
@@ -13,7 +14,7 @@ import br.edu.ufpel.rokamoka.exceptions.RokaMokaForbiddenException;
 import br.edu.ufpel.rokamoka.repository.RoleRepository;
 import br.edu.ufpel.rokamoka.repository.UserRepository;
 import br.edu.ufpel.rokamoka.security.AuthenticationService;
-import br.edu.ufpel.rokamoka.service.UserService;
+import br.edu.ufpel.rokamoka.service.IUserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.apache.commons.text.RandomStringGenerator;
@@ -22,7 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 /**
- * Implementation of the {@link UserService} interface.
+ * Implementation of the {@link IUserService} interface.
  *
  * <p>This service provides operations related to user management, including
  * creating users and ensuring their uniqueness in the system. It also handles authentication processes by collaborating
@@ -39,7 +40,7 @@ import org.springframework.validation.annotation.Validated;
  * to receive its dependencies.
  *
  * @author iyisakuma
- * @see UserService
+ * @see IUserService
  * @see UserRepository
  * @see AuthenticationService
  * @see PasswordEncoder
@@ -48,7 +49,7 @@ import org.springframework.validation.annotation.Validated;
 @Service
 @Validated
 @AllArgsConstructor
-public class UserServiceImpl implements UserService {
+public class UserService implements IUserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -166,6 +167,12 @@ public class UserServiceImpl implements UserService {
         String userJWT =
                 this.authenticationService.basicAuthenticationAndGenerateJWT(newUser.getNome(), undecodedPasswd);
         return new UserResponseDTO(userJWT);
+    }
+
+    @Override
+    public void updateRole(User requester, Role role) {
+        requester.setRole(role);
+        this.userRepository.save(requester);
     }
 
     /**

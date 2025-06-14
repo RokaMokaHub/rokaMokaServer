@@ -5,7 +5,7 @@ import br.edu.ufpel.rokamoka.core.Artwork;
 import br.edu.ufpel.rokamoka.dto.artwork.input.ArtworkInputDTO;
 import br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
-import br.edu.ufpel.rokamoka.service.ArtworkService;
+import br.edu.ufpel.rokamoka.service.IArtworkService;
 import br.edu.ufpel.rokamoka.wrapper.RokaMokaController;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ArtworkController extends RokaMokaController {
 
-    private final ArtworkService artworkService;
+    private final IArtworkService artworkService;
 
     @Operation(summary = "Buscar obra por ID", description = "Retorna uma obra com base no ID informado")
     @GetMapping("/{id}")

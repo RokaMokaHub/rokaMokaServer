@@ -3,7 +3,7 @@ package br.edu.ufpel.rokamoka.service.implementation;
 import br.edu.ufpel.rokamoka.core.Artwork;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.repository.ArtworkRepository;
-import br.edu.ufpel.rokamoka.service.ArtworkService;
+import br.edu.ufpel.rokamoka.service.IArtworkService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class ArtworkServiceImpl implements ArtworkService {
+public class ArtworkService implements IArtworkService {
 
     @Autowired
     private ArtworkRepository obraRepository;

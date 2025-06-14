@@ -9,7 +9,7 @@ import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaForbiddenException;
 import br.edu.ufpel.rokamoka.security.AuthenticationService;
-import br.edu.ufpel.rokamoka.service.UserService;
+import br.edu.ufpel.rokamoka.service.IUserService;
 import br.edu.ufpel.rokamoka.wrapper.RokaMokaController;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -17,17 +17,12 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 /**
@@ -42,7 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class UserRestController extends RokaMokaController {
 
-    private final UserService userService;
+    private final IUserService IUserService;
     private final AuthenticationService authenticationService;
 
     /**
@@ -57,7 +52,7 @@ public class UserRestController extends RokaMokaController {
     @PostMapping(value = "/normal/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseWrapper<UserResponseDTO>> register(@RequestBody UserBasicDTO userDTO)
             throws RokaMokaContentDuplicatedException {
-        return success(userService.createNormalUser(userDTO));
+        return success(IUserService.createNormalUser(userDTO));
     }
 
     @Operation(summary = "Criação de usuário anônimo", description = "Cria usuário anônimo")
@@ -66,7 +61,7 @@ public class UserRestController extends RokaMokaController {
     public ResponseEntity<ApiResponseWrapper<UserAnonymousResponseDTO>> anonymousRegister(
             @RequestBody UserAnonymousDTO userDTO)
             throws RokaMokaContentDuplicatedException {
-        return success(this.userService.createAnonymousUser(userDTO));
+        return success(this.IUserService.createAnonymousUser(userDTO));
     }
 
     /**
@@ -148,7 +143,7 @@ public class UserRestController extends RokaMokaController {
     )
     public ResponseEntity<ApiResponseWrapper<Void>> resetPassword(@RequestBody UserBasicDTO userDTO)
             throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
-        this.userService.resetUserPassword(userDTO);
+        this.IUserService.resetUserPassword(userDTO);
         return success();
     }
 }

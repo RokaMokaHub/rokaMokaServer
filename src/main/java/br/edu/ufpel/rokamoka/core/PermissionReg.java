@@ -13,6 +13,7 @@ import lombok.*;
 @Entity
 public class PermissionReg {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @OneToOne
     @JoinColumn(name = "revisor_id")

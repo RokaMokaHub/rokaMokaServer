@@ -6,7 +6,7 @@ import br.edu.ufpel.rokamoka.dto.exhibition.input.ExhibitionInputDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.repository.ArtworkRepository;
 import br.edu.ufpel.rokamoka.repository.ExhibitionRepository;
-import br.edu.ufpel.rokamoka.service.ExhibitionService;
+import br.edu.ufpel.rokamoka.service.IExhibitionService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
-public class ExhibitionServiceImpl implements ExhibitionService {
+public class ExhibitionService implements IExhibitionService {
 
     private ExhibitionRepository exhibitionRepository;
     private ArtworkRepository artworkRepository;

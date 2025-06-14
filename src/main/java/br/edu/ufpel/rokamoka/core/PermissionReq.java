@@ -13,18 +13,21 @@ import java.util.Objects;
 @ToString(of = {"statu", "role"})
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "solicitao")
+@Table(name = "solicitacao")
 @Entity
 public class PermissionReq {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @OneToOne
     @JoinColumn(name = "solicitante_id")
     private User requester;
     @Enumerated(EnumType.STRING)
-    private RequisitionStatus status;
-    @Enumerated(EnumType.STRING)
-    private RoleEnum role;
+    private RequestStatus status;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "perfil_objetivo_id")
+    private Role targetRole;
+
 
     @Override
     public final boolean equals(Object o) {
