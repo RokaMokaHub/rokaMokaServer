@@ -2,7 +2,7 @@ package br.edu.ufpel.rokamoka.service;
 
 import br.edu.ufpel.rokamoka.core.Role;
 import br.edu.ufpel.rokamoka.core.User;
-import br.edu.ufpel.rokamoka.dto.user.input.UserAnonymousDTO;
+import br.edu.ufpel.rokamoka.dto.user.input.UserAnonymousRequestDTO;
 import br.edu.ufpel.rokamoka.dto.user.input.UserBasicDTO;
 import br.edu.ufpel.rokamoka.dto.user.input.UserResetPasswordDTO;
 import br.edu.ufpel.rokamoka.dto.user.output.UserAnonymousResponseDTO;
