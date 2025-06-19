@@ -1,4 +1,4 @@
-package br.edu.ufpel.rokamoka.service;
+package br.edu.ufpel.rokamoka.service.evaluation;
 
 import br.edu.ufpel.rokamoka.dto.permission.output.RequestDetailsDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;

@@ -1,4 +1,4 @@
-package br.edu.ufpel.rokamoka.service.implementation;
+package br.edu.ufpel.rokamoka.service.evaluation;
 
 import br.edu.ufpel.rokamoka.core.PermissionReg;
 import br.edu.ufpel.rokamoka.core.PermissionReq;
@@ -9,8 +9,7 @@ import br.edu.ufpel.rokamoka.exceptions.RokaMokaForbiddenException;
 import br.edu.ufpel.rokamoka.repository.PermissionRegRepository;
 import br.edu.ufpel.rokamoka.repository.PermissionReqRepository;
 import br.edu.ufpel.rokamoka.repository.UserRepository;
-import br.edu.ufpel.rokamoka.service.IEvaluationPermissionService;
-import br.edu.ufpel.rokamoka.service.IUserService;
+import br.edu.ufpel.rokamoka.service.user.IUserService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
