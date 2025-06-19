@@ -21,7 +21,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
+ * Service implementation of the {@link IMokadexService} interface for managing Mokadex-related operations.
+ *
  * @author mauri
+ * @see MokadexRepository
  */
 @Slf4j
 @Service
@@ -64,6 +67,7 @@ public class MokadexService implements IMokadexService {
                     .map(ArtworkOutputDTO::new)
                     .collect(Collectors.toUnmodifiableSet());
             collectionDTOSet.add(new CollectionDTO(exhibitionDTO, artworkDTOSet));
+
         });
 
         MokadexOutputDTO resultDTO = new MokadexOutputDTO(collectionDTOSet);
