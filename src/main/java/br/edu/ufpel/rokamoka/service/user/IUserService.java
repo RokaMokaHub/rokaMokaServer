@@ -1,4 +1,4 @@
-package br.edu.ufpel.rokamoka.service;
+package br.edu.ufpel.rokamoka.service.user;
 
 import br.edu.ufpel.rokamoka.core.Role;
 import br.edu.ufpel.rokamoka.core.User;
