@@ -110,7 +110,21 @@ public class UserRestController extends RokaMokaController {
         return success();
     }
 
-    @GetMapping(value = "/me")
+    /**
+     * Retrieves information about the currently logged-in user.
+     *
+     * @return A {@link ResponseEntity} wrapping an {@link ApiResponseWrapper}<{@link UserOutputDTO}>
+     * @throws RokaMokaContentNotFoundException if the logged-in user's data cannot be found in the system.
+     */
+    @Operation(
+            summary = "Visualizar dados do usuário",
+            description = "Retorna alguns dados do usuário logado como: nome, email, perfil e mokadex"
+    )
+    @GetMapping(
+            value = "/me",
+            consumes = {},
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
     public ResponseEntity<ApiResponseWrapper<UserOutputDTO>> getLoggedUserInformation()
             throws RokaMokaContentNotFoundException {
         return success(this.IUserService.getLoggedUserInformation());

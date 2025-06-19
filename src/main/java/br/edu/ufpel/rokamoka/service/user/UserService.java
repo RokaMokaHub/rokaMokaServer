@@ -165,6 +165,13 @@ public class UserService implements IUserService {
         return user;
     }
 
+    /**
+     * Retrieves the information of the currently logged-in user.
+     *
+     * @return A {@code UserOutputDTO} containing the information of the logged-in user. If a Mokadex is associated with
+     * the user, its details will also be included; otherwise, only basic user details are provided.
+     * @throws RokaMokaContentNotFoundException If the logged user cannot be found in the repository.
+     */
     @Override
     public UserOutputDTO getLoggedUserInformation() throws RokaMokaContentNotFoundException {
         log.info("Buscando as informações do usuário logado");
