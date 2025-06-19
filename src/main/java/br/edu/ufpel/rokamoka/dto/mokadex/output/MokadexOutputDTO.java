@@ -5,4 +5,4 @@ import java.util.Set;
 /**
  * @author mauri
  */
-public record MokaDexOutputDTO(Set<CollectionDTO> collectionSet) {}
+public record MokadexOutputDTO(Set<CollectionDTO> collectionSet) {}
