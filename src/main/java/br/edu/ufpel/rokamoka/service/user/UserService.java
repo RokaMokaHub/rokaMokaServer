@@ -1,9 +1,11 @@
-package br.edu.ufpel.rokamoka.service.implementation;
+package br.edu.ufpel.rokamoka.service.user;
 
 import br.edu.ufpel.rokamoka.context.ServiceContext;
+import br.edu.ufpel.rokamoka.core.Mokadex;
 import br.edu.ufpel.rokamoka.core.Role;
 import br.edu.ufpel.rokamoka.core.RoleEnum;
 import br.edu.ufpel.rokamoka.core.User;
+import br.edu.ufpel.rokamoka.dto.mokadex.output.MokadexOutputDTO;
 import br.edu.ufpel.rokamoka.dto.user.input.UserAnonymousRequestDTO;
 import br.edu.ufpel.rokamoka.dto.user.input.UserBasicDTO;
 import br.edu.ufpel.rokamoka.dto.user.input.UserResetPasswordDTO;
@@ -16,13 +18,16 @@ import br.edu.ufpel.rokamoka.exceptions.RokaMokaForbiddenException;
 import br.edu.ufpel.rokamoka.repository.RoleRepository;
 import br.edu.ufpel.rokamoka.repository.UserRepository;
 import br.edu.ufpel.rokamoka.security.AuthenticationService;
-import br.edu.ufpel.rokamoka.service.IUserService;
+import br.edu.ufpel.rokamoka.service.mokadex.MokadexService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.RandomStringGenerator;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+
+import java.util.Optional;
 
 /**
  * Implementation of the {@link IUserService} interface.
@@ -48,6 +53,7 @@ import org.springframework.validation.annotation.Validated;
  * @see PasswordEncoder
  * @see RokaMokaContentDuplicatedException
  */
+@Slf4j
 @Service
 @Validated
 @AllArgsConstructor
@@ -57,6 +63,7 @@ public class UserService implements IUserService {
     private final RoleRepository roleRepository;
     private final AuthenticationService authenticationService;
     private final PasswordEncoder passwordEncoder;
+    private final MokadexService mokadexService;
 
     /**
      * Creates a normal user with the provided user information and generates a JWT.
@@ -160,9 +167,23 @@ public class UserService implements IUserService {
 
     @Override
     public UserOutputDTO getLoggedUserInformation() throws RokaMokaForbiddenException {
+        log.info("Buscando as informações do usuário logado");
+
         User loggedUser = this.userRepository
                 .findByNome(ServiceContext.getContext().getUser().getUsername())
                 .orElseThrow(() -> new RokaMokaForbiddenException("Usuário logado não encontrado"));
+        Optional<Mokadex> maybeMokadex = mokadexService.getMokadexByUsuario(loggedUser);
+
+        if (maybeMokadex.isPresent()) {
+
+            log.info("Retornando as informações com {}", Mokadex.class.getSimpleName());
+            Mokadex mokadex = maybeMokadex.get();
+            MokadexOutputDTO mokadexOutputDTO = mokadexService.buildMokadexOutputDTOByMokadex(mokadex);
+            return new UserOutputDTO(loggedUser, mokadexOutputDTO);
+
+        }
+
+        log.info("Retornando as informações sem {}", Mokadex.class.getSimpleName());
         return new UserOutputDTO(loggedUser);
     }
 
