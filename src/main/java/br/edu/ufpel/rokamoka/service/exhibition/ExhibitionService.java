@@ -1,4 +1,4 @@
-package br.edu.ufpel.rokamoka.service.implementation;
+package br.edu.ufpel.rokamoka.service.exhibition;
 
 import br.edu.ufpel.rokamoka.core.Address;
 import br.edu.ufpel.rokamoka.core.Artwork;
@@ -11,7 +11,6 @@ import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.repository.AddressRepository;
 import br.edu.ufpel.rokamoka.repository.ArtworkRepository;
 import br.edu.ufpel.rokamoka.repository.ExhibitionRepository;
-import br.edu.ufpel.rokamoka.service.IExhibitionService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
