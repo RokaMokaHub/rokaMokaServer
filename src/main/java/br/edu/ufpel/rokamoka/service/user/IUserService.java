@@ -29,5 +29,5 @@ public interface IUserService {
 
     void updateRole(User requester, Role role);
 
-    UserOutputDTO getLoggedUserInformation() throws RokaMokaForbiddenException;
+    UserOutputDTO getLoggedUserInformation() throws RokaMokaContentNotFoundException;
 }

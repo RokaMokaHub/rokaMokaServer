@@ -166,12 +166,12 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public UserOutputDTO getLoggedUserInformation() throws RokaMokaForbiddenException {
+    public UserOutputDTO getLoggedUserInformation() throws RokaMokaContentNotFoundException {
         log.info("Buscando as informações do usuário logado");
 
         User loggedUser = this.userRepository
                 .findByNome(ServiceContext.getContext().getUser().getUsername())
-                .orElseThrow(() -> new RokaMokaForbiddenException("Usuário logado não encontrado"));
+                .orElseThrow(() -> new RokaMokaContentNotFoundException("Usuário logado não encontrado"));
         Optional<Mokadex> maybeMokadex = mokadexService.getMokadexByUsuario(loggedUser);
 
         if (maybeMokadex.isPresent()) {

@@ -14,8 +14,6 @@ import br.edu.ufpel.rokamoka.security.AuthenticationService;
 import br.edu.ufpel.rokamoka.service.user.IUserService;
 import br.edu.ufpel.rokamoka.wrapper.RokaMokaController;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -101,47 +99,6 @@ public class UserRestController extends RokaMokaController {
             summary = "Redefinição de senha do usuário",
             description = "Permite que um usuário redefina sua senha fornecendo suas credenciais"
     )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Senha alterada com sucesso",
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            examples = @ExampleObject(
-                                    name = "Success Example",
-                                    value = """
-                                            {
-                                            "body": null,
-                                              "httpStatus": 200,
-                                              "exception": "",
-                                              "exceptionMessage": ""
-                                            }""")
-                    )),
-            @ApiResponse(responseCode = "400", description = "Usuário não encontrado",
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            examples = @ExampleObject(
-                                    name = "Bad Request Example",
-                                    value = """
-                                            {
-                                              "body": {},
-                                              "httpStatus": 400,
-                                              "exception": "RokaMokaContentNotFoundException",
-                                              "exceptionMessage": "Entity not found."
-                                            }""")
-                    )),
-            @ApiResponse(responseCode = "403", description = "Ação proibida a este usuário",
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            examples = @ExampleObject(
-                                    name = "Forbidden Request Example",
-                                    value = """
-                                            {
-                                              "body": {},
-                                              "httpStatus": 403,
-                                              "exception": "RokaMokaForbiddenException",
-                                              "exceptionMessage": "You do not have permission to perform this action."
-                                            }""")
-                    ))
-    })
     @PostMapping(
             value = "/reset-password",
             consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -155,7 +112,7 @@ public class UserRestController extends RokaMokaController {
 
     @GetMapping(value = "/me")
     public ResponseEntity<ApiResponseWrapper<UserOutputDTO>> getLoggedUserInformation()
-            throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
+            throws RokaMokaContentNotFoundException {
         return success(this.IUserService.getLoggedUserInformation());
     }
 }
