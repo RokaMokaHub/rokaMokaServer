@@ -25,6 +25,9 @@ public class Exhibition {
 
     @Column(name = "descricao")
     private String description;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "endereco_id")
+    private Address address;
 
     @Override
     public final boolean equals(Object o) {

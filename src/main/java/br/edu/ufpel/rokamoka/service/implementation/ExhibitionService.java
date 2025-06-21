@@ -1,9 +1,14 @@
 package br.edu.ufpel.rokamoka.service.implementation;
 
+import br.edu.ufpel.rokamoka.core.Address;
 import br.edu.ufpel.rokamoka.core.Artwork;
 import br.edu.ufpel.rokamoka.core.Exhibition;
+import br.edu.ufpel.rokamoka.dto.artwork.input.ArtworkInputDTO;
+import br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO;
 import br.edu.ufpel.rokamoka.dto.exhibition.input.ExhibitionInputDTO;
+import br.edu.ufpel.rokamoka.dto.exhibition.output.ExhibitionWithArtworksDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
+import br.edu.ufpel.rokamoka.repository.AddressRepository;
 import br.edu.ufpel.rokamoka.repository.ArtworkRepository;
 import br.edu.ufpel.rokamoka.repository.ExhibitionRepository;
 import br.edu.ufpel.rokamoka.service.IExhibitionService;
@@ -17,8 +22,9 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class ExhibitionService implements IExhibitionService {
 
-    private ExhibitionRepository exhibitionRepository;
-    private ArtworkRepository artworkRepository;
+    private final ExhibitionRepository exhibitionRepository;
+    private final ArtworkRepository artworkRepository;
+    private final AddressRepository addressRepository;
 
     @Override
     public List<Exhibition> findAll() {
@@ -35,23 +41,22 @@ public class ExhibitionService implements IExhibitionService {
         Exhibition exhibition = Exhibition.builder()
                 .name(dto.name())
                 .description(dto.description())
+                .address(this.addressRepository.save(new Address(dto.enderecoDTO())))
                 .build();
-        List<Artwork> artworks = dto.artworks().stream().map(a -> new Artwork(a, exhibition)).collect(Collectors.toList());
-        this.artworkRepository.saveAll(artworks);
-        return this.exhibitionRepository.save(exhibition);
-    }
-
-    @Override
-    public Exhibition save(Long id, ExhibitionInputDTO dto) throws RokaMokaContentNotFoundException {
-        Exhibition exhibition = this.findById(id);
-        exhibition.setName(dto.name());
-        exhibition.setDescription(dto.description());
         return this.exhibitionRepository.save(exhibition);
     }
 
     @Override
     public void deleteById(Long id) {
         this.exhibitionRepository.deleteById(id);
+    }
+
+    @Override
+    public ExhibitionWithArtworksDTO addArtworks(Long exhibitionId, List<ArtworkInputDTO> artworkInputDTOS) throws RokaMokaContentNotFoundException {
+        var exhibition = this.exhibitionRepository.findById(exhibitionId).orElseThrow(RokaMokaContentNotFoundException::new);
+        List<Artwork> artworks = artworkInputDTOS.stream().map(a -> new Artwork(a, exhibition)).collect(Collectors.toList());
+        artworks = this.artworkRepository.saveAll(artworks);
+        return new ExhibitionWithArtworksDTO(exhibition.getName(), artworks.stream().map(ArtworkOutputDTO::new).toList());
     }
 
 }
