@@ -1,4 +1,4 @@
-package br.edu.ufpel.rokamoka.service;
+package br.edu.ufpel.rokamoka.service.artwork;
 
 import br.edu.ufpel.rokamoka.core.Artwork;
 import br.edu.ufpel.rokamoka.dto.artwork.input.ArtworkInputDTO;

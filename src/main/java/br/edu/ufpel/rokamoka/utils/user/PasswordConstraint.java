@@ -28,14 +28,13 @@ import java.lang.annotation.Target;
  * @see Retention
  * @see Target
  */
-@NotBlank
-@Size(min = 8, max = 20)
+@Size(min = 8, max = 20, message = "Senha inválida - a senha deve ter entre 8 e 20 caracteres")
 @Constraint(validatedBy = {})
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.RECORD_COMPONENT})
 public @interface PasswordConstraint {
 
-    String message() default "Senha inválida: a senha deve ter entre 8 e 20 caracteres";
+    String message() default "Senha inválida";
 
     Class<?>[] groups() default {};
 

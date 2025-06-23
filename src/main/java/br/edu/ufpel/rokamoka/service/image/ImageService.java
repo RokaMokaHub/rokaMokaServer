@@ -1,8 +1,7 @@
-package br.edu.ufpel.rokamoka.service.implementation;
+package br.edu.ufpel.rokamoka.service.image;
 
 import br.edu.ufpel.rokamoka.core.Image;
 import br.edu.ufpel.rokamoka.repository.ImageRepository;
-import br.edu.ufpel.rokamoka.service.IIMageService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

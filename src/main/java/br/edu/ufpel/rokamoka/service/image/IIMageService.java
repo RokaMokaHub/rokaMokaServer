@@ -1,4 +1,4 @@
-package br.edu.ufpel.rokamoka.service;
+package br.edu.ufpel.rokamoka.service.image;
 
 import br.edu.ufpel.rokamoka.core.Image;
 import org.springframework.web.multipart.MultipartFile;

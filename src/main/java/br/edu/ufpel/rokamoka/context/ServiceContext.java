@@ -14,10 +14,11 @@ import org.springframework.http.HttpStatus;
 @Slf4j
 public class ServiceContext {
 
-    private static String USERNAME = "username";
-    private static String EXECUTION_UUID = "executionUUID";
-
     private static final ThreadLocal<ServiceContext> threadLocal = new ThreadLocal<>();
+
+    // MDC - Mapped Diagnostic Context
+    private final static String USERNAME = "username";
+    private final static String EXECUTION_UUID = "executionUUID";
 
     // for thread timing
     private final long startTime = System.currentTimeMillis();

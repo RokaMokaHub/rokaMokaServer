@@ -1,4 +1,4 @@
-package br.edu.ufpel.rokamoka.service.implementation;
+package br.edu.ufpel.rokamoka.service.artwork;
 
 import br.edu.ufpel.rokamoka.core.Artwork;
 import br.edu.ufpel.rokamoka.core.Exhibition;
@@ -7,8 +7,7 @@ import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaForbiddenException;
 import br.edu.ufpel.rokamoka.repository.ArtworkRepository;
 import br.edu.ufpel.rokamoka.repository.ExhibitionRepository;
-import br.edu.ufpel.rokamoka.service.IArtworkService;
-import br.edu.ufpel.rokamoka.service.IIMageService;
+import br.edu.ufpel.rokamoka.service.image.IIMageService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
