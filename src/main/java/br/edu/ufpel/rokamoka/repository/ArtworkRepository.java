@@ -22,4 +22,6 @@ public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
                 where a.id = ?1
             """)
     Optional<Artwork> findByIdWithinImage(Long id);
+
+    Optional<Artwork> findByQrCode(String qrCode);
 }

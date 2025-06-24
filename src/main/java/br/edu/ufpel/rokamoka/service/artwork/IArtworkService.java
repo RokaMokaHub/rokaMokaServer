@@ -8,12 +8,17 @@ import jakarta.validation.Valid;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface IArtworkService {
 
     List<Artwork> findAll();
 
     Artwork findById(Long id) throws RokaMokaContentNotFoundException;
+
+    Optional<Artwork> findByQrCode(String qrCode);
+
+    Artwork getByQrCodeOrThrow(String qrCode) throws RokaMokaContentNotFoundException;
 
     Artwork create(Long exhibitionId, @Valid ArtworkInputDTO artworkInputDTO) throws RokaMokaContentNotFoundException;
 
