@@ -8,8 +8,12 @@ import br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO;
 import br.edu.ufpel.rokamoka.dto.exhibition.output.ExhibitionOutputDTO;
 import br.edu.ufpel.rokamoka.dto.mokadex.output.CollectionDTO;
 import br.edu.ufpel.rokamoka.dto.mokadex.output.MokadexOutputDTO;
+import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.repository.MokadexRepository;
+import br.edu.ufpel.rokamoka.service.artwork.IArtworkService;
+import br.edu.ufpel.rokamoka.service.user.IUserService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -33,6 +37,9 @@ import java.util.stream.Collectors;
 public class MokadexService implements IMokadexService {
 
     private final MokadexRepository mokadexRepository;
+
+    private final IUserService userService;
+    private final IArtworkService artworkService;
 
     @Override
     public Optional<Mokadex> getMokadexByUsuario(@Valid User usuario) {
@@ -73,5 +80,26 @@ public class MokadexService implements IMokadexService {
         MokadexOutputDTO resultDTO = new MokadexOutputDTO(collectionDTOSet);
         log.info("Retornando {} para o {} informado", resultDTO, mokadex);
         return resultDTO;
+    }
+
+    @Override
+    public MokadexOutputDTO collectStar(@NotBlank String qrCode) throws RokaMokaContentNotFoundException {
+        Mokadex mokadex = getLoggedUserMokadexOrThrow();
+        Artwork artwork = artworkService.getByQrCodeOrThrow(qrCode);
+
+        if (mokadex.addArtwork(artwork)) {
+            log.info("Estrela coletada com sucesso!");
+            mokadex = mokadexRepository.save(mokadex);
+        } else {
+            log.warn("Nenhuma estrela foi coletada");
+        }
+
+        return this.buildMokadexOutputDTOByMokadex(mokadex);
+    }
+
+    @Override
+    public Mokadex getLoggedUserMokadexOrThrow() throws RokaMokaContentNotFoundException {
+        return getMokadexByUsuario(userService.findLoggedUser())
+                .orElseThrow(() -> new RokaMokaContentNotFoundException("Mokadex não encontrado para usuário logado"));
     }
 }

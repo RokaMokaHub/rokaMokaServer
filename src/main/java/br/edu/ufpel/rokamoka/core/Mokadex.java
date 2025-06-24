@@ -59,4 +59,11 @@ public class Mokadex {
                 ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode()
                 : getClass().hashCode();
     }
+
+    public boolean addArtwork(Artwork artwork) {
+        if (artwork == null || this.artworks == null) {
+            return false;
+        }
+        return this.artworks.add(artwork);
+    }
 }
