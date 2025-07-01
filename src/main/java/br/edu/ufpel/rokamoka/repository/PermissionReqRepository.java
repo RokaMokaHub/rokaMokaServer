@@ -1,6 +1,9 @@
 package br.edu.ufpel.rokamoka.repository;
 
 import br.edu.ufpel.rokamoka.core.PermissionReq;
+import br.edu.ufpel.rokamoka.core.RequestStatus;
+import br.edu.ufpel.rokamoka.core.Role;
+import br.edu.ufpel.rokamoka.core.User;
 import br.edu.ufpel.rokamoka.dto.permission.output.RequestDetailsDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,4 +20,6 @@ public interface PermissionReqRepository extends JpaRepository<PermissionReq, Lo
                 ORDER  BY  user.nome DESC
             """)
     List<RequestDetailsDTO> findAllPendingRequestDetailed();
+
+    boolean existsByRequesterAndStatusAndTargetRole(User requester, RequestStatus requestStatus, Role targetRole);
 }
