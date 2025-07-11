@@ -17,11 +17,11 @@ services:
       - hoka-moka-network
 
   db:
-    image: postgres
+    image: postgres:15-alpine
     container_name: roka-moka-db
     restart: on-failure
     volumes:
-      - ./db-data:/var/lib/postgresql/data/
+      - db-data:/var/lib/postgresql/data/
       - ./initial-dump.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
       POSTGRES_USER: ${DB_USER}
@@ -29,12 +29,35 @@ services:
       POSTGRES_DB: ${DB_NAME}
     ports:
       - "${DB_PORT_EXPOSE}:${DB_PORT}"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hoka-moka-network
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: roka-moka-broker
+    ports:
+      - "${RABBITMQ_PORT_EXPOSE}:${RABBITMQ_PORT}"
+      - "${RABBITMQ_MANAGEMENT_PORT_EXPOSE}:${RABBITMQ_MANAGEMENT_PORT}"
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-guest}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD:-guest}
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
     networks:
       - hoka-moka-network
 
 volumes:
   db-data:
     name: rokamoka-db
+
 networks:
   hoka-moka-network:
     driver: bridge

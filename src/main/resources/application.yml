@@ -1,4 +1,5 @@
 spring:
+
   application:
     name: roka-moka
 
@@ -45,6 +46,14 @@ spring:
       hibernate:
         format_sql: true
     show-sql: false
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT}
+    username: ${RABBITMQ_USER}
+    password: ${RABBITMQ_PASSWORD}
+    connection-timeout: 30000
+
 jwt:
   private:
     key: classpath:app.key
