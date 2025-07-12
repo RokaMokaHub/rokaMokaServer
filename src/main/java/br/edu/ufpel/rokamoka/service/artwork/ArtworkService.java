@@ -11,6 +11,8 @@ import br.edu.ufpel.rokamoka.service.image.IIMageService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -34,6 +36,7 @@ public class ArtworkService implements IArtworkService {
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public Artwork create(Long exhibitionId, @Valid ArtworkInputDTO artworkInputDTO) throws RokaMokaContentNotFoundException {
         Exhibition exhibition = this.exhibitionRepository.findById(exhibitionId).orElseThrow(RokaMokaContentNotFoundException::new);
         Artwork artwork = Artwork.builder()
@@ -41,7 +44,7 @@ public class ArtworkService implements IArtworkService {
                 .nomeArtista(artworkInputDTO.nomeArtista())
                 .link(artworkInputDTO.link())
                 .qrCode(artworkInputDTO.qrCode())
-                .images(this.imageService.upload(artworkInputDTO.imageDTO().image()))
+                .images(this.imageService.upload(artworkInputDTO.image()))
                 .exhibition(exhibition)
                 .build();
         return obraRepository.save(artwork);
@@ -54,7 +57,7 @@ public class ArtworkService implements IArtworkService {
 
     @Override
     public void addImage(Long artworkId, MultipartFile image) throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
-        var obra = this.obraRepository.findById(artworkId).orElseThrow(RokaMokaContentNotFoundException::new);
+        var obra = this.obraRepository.findByIdWithinImage(artworkId).orElseThrow(RokaMokaContentNotFoundException::new);
         if (!obra.getImages().isEmpty()) {
             throw new RokaMokaForbiddenException("Já existe uma imagem associada a essa obra");
         }
