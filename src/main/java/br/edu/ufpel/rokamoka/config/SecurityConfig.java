@@ -45,7 +45,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeHttpRequests ->
                         authorizeHttpRequests
                                 .requestMatchers(endpointAccessRules.getPermissionsEndpoints()).hasAnyAuthority(RoleEnum.CURATOR.name(), RoleEnum.ADMINISTRATOR.name())
-                                .requestMatchers(endpointAccessRules.getExhibitionEndpoints()).hasAuthority(RoleEnum.RESEARCHER.name())
+                                .requestMatchers(endpointAccessRules.getExhibitionEndpoints()).hasAnyAuthority(RoleEnum.RESEARCHER.name(), RoleEnum.ADMINISTRATOR.name())
                                 .requestMatchers(endpointAccessRules.getEndpointsWithoutAuthentication())
                                 .permitAll()
                                 .anyRequest()

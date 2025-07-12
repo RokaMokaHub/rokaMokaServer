@@ -22,7 +22,6 @@ public class Image {
     @Column(name = "tamanho_bytes")
     private Long tamanhoBytes;
 
-    @Lob // Indicação para o JPA/Hibernate que é um Large Object (pode ser grande)
     @Column(name = "conteudo", nullable = false)
     private byte[] conteudo;
 

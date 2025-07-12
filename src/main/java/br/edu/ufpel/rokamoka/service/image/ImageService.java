@@ -17,6 +17,9 @@ public class ImageService implements IIMageService {
 
     @Override
     public Set<Image> upload(MultipartFile image) {
+        if (image == null || image.getSize() == 0) {
+            return null;
+        }
         try {
             var imageSize = image.getSize();
             var imageBytes = image.getBytes();
