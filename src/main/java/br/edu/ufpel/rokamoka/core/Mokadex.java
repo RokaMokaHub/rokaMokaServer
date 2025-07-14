@@ -33,6 +33,18 @@ public class Mokadex {
     private User usuario;
 
     @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "mokadex_emblema",
+            joinColumns = @JoinColumn(
+                    name = "mokadex_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_mokadex")
+            ),
+            inverseJoinColumns = @JoinColumn(
+                    name = "emblema_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_emblema")
+            )
+    )
+    private Set<Emblem> emblems;
+
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "mokadex_obra",
             joinColumns = @JoinColumn(
                     name = "mokadex_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_mokadex")),
@@ -65,5 +77,12 @@ public class Mokadex {
             return false;
         }
         return this.artworks.add(artwork);
+    }
+
+    public boolean addEmblem(Emblem emblem) {
+        if (emblem == null || this.emblems == null) {
+            return false;
+        }
+        return this.emblems.add(emblem);
     }
 }
