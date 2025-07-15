@@ -4,6 +4,7 @@ import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
 import br.edu.ufpel.rokamoka.wrapper.RokaMokaController;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.service.spi.ServiceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -36,5 +37,12 @@ public class GlobalExceptionHandler extends RokaMokaController {
     })
     public ResponseEntity<ApiResponseWrapper<Void>> handleForbidden(Exception ex) {
         return error(ex, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(value = {
+            ServiceException.class
+    })
+    public ResponseEntity<ApiResponseWrapper<Void>> handleInternalServerError(Exception ex) {
+        return error(ex, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
