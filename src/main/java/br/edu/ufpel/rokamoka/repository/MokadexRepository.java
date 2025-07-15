@@ -3,6 +3,7 @@ package br.edu.ufpel.rokamoka.repository;
 import br.edu.ufpel.rokamoka.core.Mokadex;
 import br.edu.ufpel.rokamoka.core.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.Optional;
 
@@ -23,4 +24,7 @@ public interface MokadexRepository extends JpaRepository<Mokadex, Long> {
      * if no match is found for the given user.
      */
     Optional<Mokadex> findMokadexByUsuario(User usuario);
+
+    @Query(value = "SELECT m FROM Mokadex m JOIN m.usuario u WHERE u.nome = :username")
+    Optional<Mokadex> findMokadexByUsername(String username);
 }

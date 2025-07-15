@@ -21,8 +21,6 @@ public interface IMokadexService {
 
     Optional<Mokadex> getMokadexByUsuario(@Valid User usuario);
 
-    Mokadex getLoggedUserMokadexOrThrow() throws RokaMokaContentNotFoundException;
-
     MokadexOutputDTO buildMokadexOutputDTOByMokadex(@Valid Mokadex mokadex);
 
     MokadexOutputDTO collectStar(@NotBlank String qrCode) throws RokaMokaContentNotFoundException;
