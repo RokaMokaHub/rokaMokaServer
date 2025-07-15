@@ -48,10 +48,10 @@ spring:
     show-sql: false
 
   rabbitmq:
-    host: ${RABBITMQ_HOST}
-    port: ${RABBITMQ_PORT}
-    username: ${RABBITMQ_USER}
-    password: ${RABBITMQ_PASSWORD}
+    host: localhost
+    port: 5672
+    username: rokamoka
+    password: teste123
     connection-timeout: 30000
 
 jwt:
@@ -59,3 +59,6 @@ jwt:
     key: classpath:app.key
   public:
     key: classpath:app.pub
+
+server:
+  port: 8080
