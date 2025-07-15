@@ -41,7 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class UserRestController extends RokaMokaController {
 
-    private final IUserService IUserService;
+    private final IUserService userService;
     private final AuthenticationService authenticationService;
 
     /**
@@ -56,7 +56,7 @@ public class UserRestController extends RokaMokaController {
     @PostMapping(value = "/normal/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseWrapper<UserAuthDTO>> register(@RequestBody UserBasicDTO userDTO)
             throws RokaMokaContentDuplicatedException {
-        return success(IUserService.createNormalUser(userDTO));
+        return success(userService.createNormalUser(userDTO));
     }
 
     @Operation(summary = "Criação de usuário anônimo", description = "Cria usuário anônimo")
@@ -65,7 +65,7 @@ public class UserRestController extends RokaMokaController {
     public ResponseEntity<ApiResponseWrapper<UserAnonymousResponseDTO>> anonymousRegister(
             @RequestBody UserAnonymousRequestDTO userDTO)
             throws RokaMokaContentDuplicatedException {
-        return success(this.IUserService.createAnonymousUser(userDTO));
+        return success(this.userService.createAnonymousUser(userDTO));
     }
 
     /**
@@ -106,7 +106,7 @@ public class UserRestController extends RokaMokaController {
     )
     public ResponseEntity<ApiResponseWrapper<Void>> resetPassword(@RequestBody UserResetPasswordDTO userDTO)
             throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
-        this.IUserService.resetUserPassword(userDTO);
+        this.userService.resetUserPassword(userDTO);
         return success();
     }
 
@@ -127,6 +127,6 @@ public class UserRestController extends RokaMokaController {
     )
     public ResponseEntity<ApiResponseWrapper<UserOutputDTO>> getLoggedUserInformation()
             throws RokaMokaContentNotFoundException {
-        return success(this.IUserService.getLoggedUserInformation());
+        return success(this.userService.getLoggedUserInformation());
     }
 }
