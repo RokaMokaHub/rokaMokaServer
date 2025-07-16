@@ -1,6 +1,7 @@
 package br.edu.ufpel.rokamoka.dto.mokadex.output;
 
 import br.edu.ufpel.rokamoka.core.Mokadex;
+import br.edu.ufpel.rokamoka.dto.emblem.output.EmblemOutputDTO;
 
 import java.util.Set;
 
@@ -13,4 +14,7 @@ import java.util.Set;
  * @see Mokadex
  * @see CollectionDTO
  */
-public record MokadexOutputDTO(Set<CollectionDTO> collectionSet) {}
+public record MokadexOutputDTO(
+        Set<CollectionDTO> collectionSet,
+        Set<EmblemOutputDTO> emblemSet
+) {}
