@@ -17,6 +17,7 @@ import lombok.ToString;
 import org.hibernate.Hibernate;
 import org.hibernate.proxy.HibernateProxy;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -44,7 +45,7 @@ public class Mokadex {
                     name = "emblema_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_emblema")
             )
     )
-    private Set<Emblem> emblems;
+    private Set<Emblem> emblems = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "mokadex_obra",
@@ -53,7 +54,7 @@ public class Mokadex {
             inverseJoinColumns = @JoinColumn(
                     name = "obra_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_obra"))
     )
-    private Set<Artwork> artworks;
+    private Set<Artwork> artworks = new HashSet<>();
 
     @Override
     public final boolean equals(Object o) {
@@ -74,11 +75,19 @@ public class Mokadex {
                 : getClass().hashCode();
     }
 
+    public boolean containsArtwork(Artwork artwork) {
+        return this.artworks.contains(artwork);
+    }
+
     public boolean addArtwork(Artwork artwork) {
         if (artwork == null || this.artworks == null) {
             return false;
         }
         return this.artworks.add(artwork);
+    }
+
+    public boolean containsEmblem(Emblem emblem) {
+        return this.emblems.contains(emblem);
     }
 
     public boolean addEmblem(Emblem emblem) {
