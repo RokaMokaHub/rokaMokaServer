@@ -5,4 +5,4 @@ import jakarta.validation.constraints.NotNull;
 /**
  * @author MauricioMucci
  */
-public record CollectEmblemDTO(@NotNull Long mokadexId, @NotNull Long newlyAddedArtworkId) {}
+public record CollectEmblemDTO(@NotNull Long mokadexId, @NotNull Long artworkId) {}
