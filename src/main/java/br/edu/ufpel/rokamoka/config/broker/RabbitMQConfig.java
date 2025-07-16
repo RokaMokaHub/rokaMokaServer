@@ -1,6 +1,10 @@
-package br.edu.ufpel.rokamoka.config;
+package br.edu.ufpel.rokamoka.config.broker;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
@@ -14,11 +18,22 @@ import org.springframework.context.annotation.Configuration;
  * @author MauricioMucci
  */
 @Configuration
+@RequiredArgsConstructor
 public class RabbitMQConfig {
 
     @Bean
-    public Queue createEmblemQueue() {
-        return new Queue("emblems.v1.create-emblem", true);
+    public FanoutExchange emblemsV1FanoutExchange(RabbitMQExchangeConfigProperties properties) {
+        return new FanoutExchange(properties.getEmblems());
+    }
+
+    @Bean
+    public Queue emblemsV1CollectQueue(RabbitMQQueueConfigProperties properties) {
+        return new Queue(properties.getCollectEmblem());
+    }
+
+    @Bean
+    public Binding collectEmblemBinding(Queue emblemsV1CollectQueue, FanoutExchange emblemsV1FanoutExchange) {
+        return BindingBuilder.bind(emblemsV1CollectQueue).to(emblemsV1FanoutExchange);
     }
 
     @Bean
@@ -27,7 +42,8 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public ApplicationListener<ApplicationReadyEvent> applicationReadyEventApplicationListener(RabbitAdmin rabbitAdmin) {
+    public ApplicationListener<ApplicationReadyEvent> applicationReadyEventApplicationListener(
+            RabbitAdmin rabbitAdmin) {
         return event -> rabbitAdmin.initialize();
     }
 

@@ -62,3 +62,11 @@ jwt:
 
 server:
   port: 8080
+
+
+## CUSTOM CONFIGURATIONS
+broker:
+  exchange:
+    emblems: emblems.v1
+  queue:
+    collect-emblem: emblems.v1.collect
