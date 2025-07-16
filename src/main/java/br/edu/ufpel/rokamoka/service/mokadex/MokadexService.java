@@ -14,7 +14,6 @@ import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.repository.MokadexRepository;
 import br.edu.ufpel.rokamoka.security.UserAuthenticated;
 import br.edu.ufpel.rokamoka.service.artwork.IArtworkService;
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.service.spi.ServiceException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.HashSet;
@@ -46,18 +47,33 @@ public class MokadexService implements IMokadexService {
     private final RabbitTemplate rabbitTemplate;
 
     @Override
-    public Optional<Mokadex> getMokadexByUsuario(@Valid User usuario) {
-        log.info("Buscando pelo {} do {}", Mokadex.class.getSimpleName(), usuario);
+    @Transactional(propagation = Propagation.REQUIRED)
+    public Mokadex getOrCreateMokadexByUser(@Valid User usuario){
+        return getMokadexByUser(usuario)
+                .orElseGet(() -> createMokadexByUser(usuario));
+    }
 
-        Optional<Mokadex> maybeMokadex = mokadexRepository.findMokadexByUsuario(usuario);
-        if (maybeMokadex.isPresent()) {
-            Mokadex mokadex = maybeMokadex.get();
-            log.info("{} encontrado: {}", Mokadex.class.getSimpleName(), mokadex.getId());
-            return maybeMokadex;
-        }
+    private Optional<Mokadex> getMokadexByUser(User usuario) {
+        log.info("Buscando pelo [{}] do [{}]", Mokadex.class.getSimpleName(), usuario);
 
-        log.info("Não foi encontrado nenhum {} para o {} informado", Mokadex.class.getSimpleName(), usuario);
+        Optional<Mokadex> maybeMokadex = mokadexRepository.findMokadexByUsername(usuario.getNome());
+        maybeMokadex.ifPresentOrElse(
+                mokadex -> log.info("[{}] foi encontrado", mokadex),
+                () -> log.info("Não foi encontrado nenhum [{}] para o [{}] informado", Mokadex.class.getSimpleName(), usuario)
+        );
+
         return maybeMokadex;
+    }
+
+    private Mokadex createMokadexByUser(User usuario) {
+        log.info("Criando [{}] para o [{}]", Mokadex.class.getSimpleName(), usuario);
+
+        var mokadex = new Mokadex();
+        mokadex.setUsuario(usuario);
+        mokadex = mokadexRepository.save(mokadex);
+
+        log.info("Novo [{}] criado com sucesso para o [{}] informado", mokadex, usuario);
+        return mokadex;
     }
 
     @Override
@@ -84,8 +100,8 @@ public class MokadexService implements IMokadexService {
         return resultDTO;
     }
 
-    @Transactional
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public MokadexOutputDTO collectStar(@NotBlank String qrCode) throws RokaMokaContentNotFoundException {
         Mokadex mokadex = getMokadexByLoggedUser();
         Artwork artwork = artworkService.getByQrCodeOrThrow(qrCode);
@@ -97,7 +113,7 @@ public class MokadexService implements IMokadexService {
         log.info("Estrela coletada com sucesso!");
         mokadex = mokadexRepository.save(mokadex);
         CollectEmblemDTO collectEmblemDTO = new CollectEmblemDTO(mokadex.getId(), artwork.getId());
-        rabbitTemplate.convertAndSend("emblems.v1.create-emblem", collectEmblemDTO);
+        rabbitTemplate.convertAndSend("emblems.v1.collect", collectEmblemDTO);
 
         return this.buildMokadexOutputDTOByMokadex(mokadex);
     }

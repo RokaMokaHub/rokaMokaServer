@@ -8,8 +8,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.Optional;
-
 /**
  * Service interface for managing and retrieving information related to {@link Mokadex}.
  *
@@ -19,7 +17,7 @@ import java.util.Optional;
 @Validated
 public interface IMokadexService {
 
-    Optional<Mokadex> getMokadexByUsuario(@Valid User usuario);
+    Mokadex getOrCreateMokadexByUser(@Valid User usuario);
 
     MokadexOutputDTO buildMokadexOutputDTOByMokadex(@Valid Mokadex mokadex);
 

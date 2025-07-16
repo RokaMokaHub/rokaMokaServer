@@ -13,6 +13,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.Hibernate;
 import org.hibernate.proxy.HibernateProxy;
 
@@ -21,6 +22,7 @@ import java.util.Set;
 
 @Getter
 @Setter
+@ToString(of = {"id", "usuario"})
 @Entity
 @Table(name = "mokadex")
 public class Mokadex {
