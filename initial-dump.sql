@@ -23,8 +23,9 @@ CREATE TABLE public.usuario
     nome      VARCHAR(255)                                                                                                             NOT NULL,
     senha     VARCHAR(255)                                                                                                             NOT NULL,
     perfil_id INT8                                                                                                                     NOT NULL,
-    CONSTRAINT usuario_pkey PRIMARY KEY (id),
-    FOREIGN KEY (perfil_id) REFERENCES perfil (id)
+    CONSTRAINT pk_usuario PRIMARY KEY (id),
+    CONSTRAINT fk_perfil FOREIGN KEY (perfil_id) REFERENCES perfil (id),
+    CONSTRAINT unq_nome UNIQUE (nome)
 );
 
 CREATE TABLE public.dispositivo

@@ -42,9 +42,9 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String nome;
-
     private String email;
+
+    @Column(nullable = false, unique = true) private String nome;
 
     @Column(nullable = false) private String senha;
 
