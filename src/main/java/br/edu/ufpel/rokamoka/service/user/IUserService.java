@@ -12,9 +12,13 @@ import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaForbiddenException;
 import jakarta.validation.Valid;
-import org.springframework.validation.annotation.Validated;
 
-@Validated
+/**
+ * Service interface for managing and retrieving information related to {@link User}.
+ *
+ * @author MauricioMucci
+ * @see UserService
+ */
 public interface IUserService {
 
     UserAuthDTO createNormalUser(@Valid UserBasicDTO userDTO) throws RokaMokaContentDuplicatedException;

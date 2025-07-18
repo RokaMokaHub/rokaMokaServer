@@ -1,6 +1,7 @@
 package br.edu.ufpel.rokamoka.service.user;
 
 import br.edu.ufpel.rokamoka.context.ServiceContext;
+import br.edu.ufpel.rokamoka.core.Device;
 import br.edu.ufpel.rokamoka.core.Mokadex;
 import br.edu.ufpel.rokamoka.core.Role;
 import br.edu.ufpel.rokamoka.core.RoleEnum;
@@ -18,10 +19,12 @@ import br.edu.ufpel.rokamoka.exceptions.RokaMokaForbiddenException;
 import br.edu.ufpel.rokamoka.repository.RoleRepository;
 import br.edu.ufpel.rokamoka.repository.UserRepository;
 import br.edu.ufpel.rokamoka.security.AuthenticationService;
+import br.edu.ufpel.rokamoka.service.device.IDeviceService;
 import br.edu.ufpel.rokamoka.service.mokadex.MokadexService;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.RandomStringGenerator;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -30,33 +33,15 @@ import org.springframework.validation.annotation.Validated;
 import java.util.Optional;
 
 /**
- * Implementation of the {@link IUserService} interface.
+ * Service implementation of the {@link IUserService} interface for managing operations on the {@link User} resource.
  *
- * <p>This service provides operations related to user management, including
- * creating users and ensuring their uniqueness in the system. It also handles authentication processes by collaborating
- * with {@link AuthenticationService}.
- *
- * <p>It uses a {@link UserRepository} to interact with the database for user-related
- * operations. The passwords are securely encoded using a {@link PasswordEncoder} before storing them in the database.
- *
- * <p>To maintain data integrity, this service validates user information before
- * creating a user, and throws a {@link RokaMokaContentDuplicatedException} if the provided email or username is already
- * in use.
- *
- * <p>This class is marked as a Spring {@link Service} and uses constructor injection
- * to receive its dependencies.
- *
- * @author iyisakuma
- * @see IUserService
+ * @author MauricioMucci
  * @see UserRepository
- * @see AuthenticationService
- * @see PasswordEncoder
- * @see RokaMokaContentDuplicatedException
  */
 @Slf4j
 @Service
 @Validated
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserService implements IUserService {
 
     private final UserRepository userRepository;
@@ -64,6 +49,7 @@ public class UserService implements IUserService {
     private final AuthenticationService authenticationService;
     private final PasswordEncoder passwordEncoder;
     private final MokadexService mokadexService;
+    private final IDeviceService deviceService;
 
     /**
      * Creates a normal user with the provided user information and generates a JWT.
@@ -90,6 +76,7 @@ public class UserService implements IUserService {
 
         this.validateOrThrowException(user);
         User newUser = this.userRepository.save(user);
+        this.saveUserDevice(userDTO.deviceId(), newUser);
 
         String userJWT =
                 this.authenticationService.basicAuthenticationAndGenerateJWT(newUser.getNome(), undecodedPasswd);
@@ -118,8 +105,9 @@ public class UserService implements IUserService {
                 .build();
 
         this.validateOrThrowException(user);
-
         User newUser = this.userRepository.save(user);
+        this.saveUserDevice(userDTO.deviceId(), newUser);
+
         String userJWT =
                 this.authenticationService.basicAuthenticationAndGenerateJWT(newUser.getNome(), undecodedPasswd);
         return new UserAnonymousResponseDTO(userJWT, undecodedPasswd);
@@ -187,7 +175,6 @@ public class UserService implements IUserService {
             Mokadex mokadex = maybeMokadex.get();
             MokadexOutputDTO mokadexOutputDTO = mokadexService.buildMokadexOutputDTOByMokadex(mokadex);
             return new UserOutputDTO(loggedUser, mokadexOutputDTO);
-
         }
 
         log.info("Retornando as informações sem {}", Mokadex.class.getSimpleName());
@@ -195,7 +182,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public UserAuthDTO createReseacher(UserBasicDTO userDTO) throws RokaMokaContentDuplicatedException {
+    public UserAuthDTO createReseacher(@Valid UserBasicDTO userDTO) throws RokaMokaContentDuplicatedException {
         var undecodedPasswd = userDTO.password();
         var user = User.builder()
                 .nome(userDTO.name())
@@ -206,10 +193,17 @@ public class UserService implements IUserService {
 
         this.validateOrThrowException(user);
         User newUser = this.userRepository.save(user);
+        this.saveUserDevice(userDTO.deviceId(), newUser);
 
         String userJWT =
                 this.authenticationService.basicAuthenticationAndGenerateJWT(newUser.getNome(), undecodedPasswd);
         return new UserAuthDTO(userJWT);
+    }
+
+    private Optional<Device> saveUserDevice(String deviceId, User newUser) {
+        return StringUtils.isNotBlank(deviceId)
+                ? Optional.ofNullable(this.deviceService.save(deviceId, newUser))
+                : Optional.empty();
     }
 
     @Override
