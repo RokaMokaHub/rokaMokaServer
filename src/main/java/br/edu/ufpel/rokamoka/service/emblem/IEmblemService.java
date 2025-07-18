@@ -9,7 +9,10 @@ import jakarta.validation.constraints.NotNull;
 import java.util.Optional;
 
 /**
+ * Service interface for managing and retrieving information related to {@link Emblem}.
+ *
  * @author MauricioMucci
+ * @see EmblemService
  */
 public interface IEmblemService {
 
@@ -20,4 +23,6 @@ public interface IEmblemService {
     Emblem create(@Valid EmblemInputDTO emblemInputDTO) throws RokaMokaContentNotFoundException;
 
     Emblem delete(@NotNull Long emblemId) throws RokaMokaContentNotFoundException;
+
+    boolean existsEmblemByExhibitionId(Long exhibitionId);
 }

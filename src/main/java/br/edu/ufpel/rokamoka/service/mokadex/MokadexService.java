@@ -7,19 +7,21 @@ import br.edu.ufpel.rokamoka.core.Emblem;
 import br.edu.ufpel.rokamoka.core.Exhibition;
 import br.edu.ufpel.rokamoka.core.Mokadex;
 import br.edu.ufpel.rokamoka.core.User;
-import br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO;
 import br.edu.ufpel.rokamoka.dto.emblem.CollectEmblemDTO;
 import br.edu.ufpel.rokamoka.dto.emblem.output.EmblemOutputDTO;
-import br.edu.ufpel.rokamoka.dto.exhibition.output.ExhibitionOutputDTO;
 import br.edu.ufpel.rokamoka.dto.mokadex.output.CollectionDTO;
 import br.edu.ufpel.rokamoka.dto.mokadex.output.MokadexOutputDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
-import br.edu.ufpel.rokamoka.repository.EmblemRepository;
 import br.edu.ufpel.rokamoka.repository.MokadexRepository;
 import br.edu.ufpel.rokamoka.security.UserAuthenticated;
 import br.edu.ufpel.rokamoka.service.artwork.IArtworkService;
+import br.edu.ufpel.rokamoka.service.emblem.IEmblemService;
+import br.edu.ufpel.rokamoka.service.exhibition.ExhibitionService;
+import br.edu.ufpel.rokamoka.utils.mokadex.MokadexCollectionsBuilder;
+import br.edu.ufpel.rokamoka.utils.mokadex.MokadexEmblemsBuilder;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.service.spi.ServiceException;
@@ -29,10 +31,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Service implementation of the {@link IMokadexService} interface for managing operations on the {@link Mokadex}
@@ -48,11 +48,18 @@ import java.util.stream.Collectors;
 public class MokadexService implements IMokadexService {
 
     private final MokadexRepository mokadexRepository;
-    private final EmblemRepository emblemRepository;
-    private final IArtworkService artworkService;
 
-    private final RabbitMQExchangeConfigProperties exchangeConfigProperties;
+    private final IEmblemService emblemService;
+    private final IArtworkService artworkService;
+    private final ExhibitionService exhibitionService;
+
     private final RabbitTemplate rabbitTemplate;
+    private final RabbitMQExchangeConfigProperties exchangeConfigProperties;
+
+    @Override
+    public Mokadex findById(@NotNull Long mokadexId) throws RokaMokaContentNotFoundException {
+        return this.mokadexRepository.findById(mokadexId).orElseThrow(RokaMokaContentNotFoundException::new);
+    }
 
     /**
      * Retrieves an existing {@link Mokadex} associated with the given user or creates a new one if none exists.
@@ -114,50 +121,44 @@ public class MokadexService implements IMokadexService {
         return mokadex;
     }
 
+    /**
+     * Returns a {@link MokadexOutputDTO} based on the given {@link Mokadex}.
+     *
+     * @param mokadex The {@link Mokadex} object from which collections and emblems are derived.
+     * @return A {@link MokadexOutputDTO} containing the processed collections and emblems.
+     * @see MokadexCollectionsBuilder
+     * @see MokadexEmblemsBuilder
+     */
     @Override
-    public MokadexOutputDTO buildMokadexOutputDTOByMokadex(Mokadex mokadex) {
+    public MokadexOutputDTO getMokadexOutputDTOByMokadex(Mokadex mokadex) {
         log.info("Construindo {} para o {} informado", MokadexOutputDTO.class.getSimpleName(), mokadex);
 
-        Set<CollectionDTO> collectionDTOSet = buildCollectionSetByMokadex(mokadex);
-        Set<EmblemOutputDTO> emblemDTOSet = buildEmblemSetByMokadex(mokadex);
+        Set<CollectionDTO> collectionDTOSet = new MokadexCollectionsBuilder(mokadex).buildCollectionSet();
+        Set<EmblemOutputDTO> emblemDTOSet = new MokadexEmblemsBuilder(mokadex).buildEmblemSet();
 
         return new MokadexOutputDTO(collectionDTOSet, emblemDTOSet);
     }
 
-    private Set<CollectionDTO> buildCollectionSetByMokadex(Mokadex mokadex) {
-        Set<Artwork> artworkSet = mokadex.getArtworks();
-        Set<Exhibition> exhibitionSet = artworkSet.stream()
-                .map(Artwork::getExhibition)
-                .collect(Collectors.toUnmodifiableSet());
-
-        Set<CollectionDTO> collectionDTOSet = new HashSet<>();
-        exhibitionSet.forEach(exhibition -> {
-            ExhibitionOutputDTO exhibitionDTO = new ExhibitionOutputDTO(exhibition);
-            Set<ArtworkOutputDTO> artworkDTOSet = artworkSet.stream()
-                    .filter(artwork -> artwork.getExhibition().equals(exhibition))
-                    .map(ArtworkOutputDTO::new)
-                    .collect(Collectors.toUnmodifiableSet());
-            collectionDTOSet.add(new CollectionDTO(exhibitionDTO, artworkDTOSet));
-        });
-
-        return collectionDTOSet;
-    }
-
-    private Set<EmblemOutputDTO> buildEmblemSetByMokadex(Mokadex mokadex) {
-        return emblemRepository.findEmblemsByMokadexId(mokadex.getId())
-                .stream()
-                .map(EmblemOutputDTO::new)
-                .collect(Collectors.toUnmodifiableSet());
-    }
-
+    /**
+     * Tries to collect a star represented by the QR code and associates it with the current user's Mokadex.
+     *
+     * @param qrCode The QR code of the artwork to be collected. Must not be blank.
+     *
+     * @return The updated Mokadex after the artwork has been successfully added.
+     * @throws RokaMokaContentNotFoundException If the artwork corresponding to the QR code is not found.
+     * @throws RokaMokaContentDuplicatedException If the artwork has already been collected and is present in the user's
+     * Mokadex.
+     * @throws ServiceException If there is an internal error while adding the artwork to the Mokadex.
+     */
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public Mokadex collectStar(@NotBlank String qrCode)
             throws RokaMokaContentNotFoundException, RokaMokaContentDuplicatedException {
-        Mokadex mokadex = getMokadexByLoggedUser();
+        Mokadex mokadex = this.getMokadexByLoggedUser();
         Artwork artwork = this.artworkService.getByQrCodeOrThrow(qrCode);
 
         if (mokadex.containsArtwork(artwork)) {
+            this.sendMessageToBrokerIfReady(mokadex, artwork.getExhibition());
             throw new RokaMokaContentDuplicatedException("Obra já foi coletada");
         }
         if (!mokadex.addArtwork(artwork)) {
@@ -166,36 +167,46 @@ public class MokadexService implements IMokadexService {
 
         log.info("Estrela coletada com sucesso!");
         mokadex = this.mokadexRepository.save(mokadex);
-        sendMessageToBrokerIfReady(mokadex, artwork.getExhibition());
+        this.sendMessageToBrokerIfReady(mokadex, artwork.getExhibition());
 
         return mokadex;
     }
 
-    private Mokadex getMokadexByLoggedUser() throws RokaMokaContentNotFoundException {
+    private Mokadex getMokadexByLoggedUser() {
         UserAuthenticated loggedInUser = ServiceContext.getContext().getUser();
         return this.mokadexRepository
                 .findMokadexByUsername(loggedInUser.getUsername())
-                .orElseThrow(() -> new RokaMokaContentNotFoundException("Mokadex não encontrado para usuário logado"));
+                .orElseThrow(() -> new ServiceException("Mokadex não encontrado para usuário logado"));
     }
 
     private void sendMessageToBrokerIfReady(Mokadex mokadex, Exhibition exhibition) {
         CollectEmblemDTO collectEmblemDTO = new CollectEmblemDTO(mokadex.getId(), exhibition.getId());
-        if (!emblemRepository.existsEmblemByExhibitionId(exhibition.getId())) {
+        if (!this.emblemService.existsEmblemByExhibitionId(exhibition.getId())) {
             throw new ServiceException("Emblema não foi criado");
         }
-        if (emblemRepository.hasCollectedAllArtworksInExhibition(mokadex.getId(), exhibition.getId())) {
+        if (this.mokadexRepository.hasCollectedAllArtworksInExhibition(mokadex.getId(), exhibition.getId())) {
             this.rabbitTemplate.convertAndSend(this.exchangeConfigProperties.getEmblems(),
                     "",
                     collectEmblemDTO);
         }
     }
 
+    /**
+     * Tries to collect an emblem and associates it with the specified Mokadex if not already collected.
+     *
+     * @param mokadexId The unique identifier of the Mokadex where the emblem is to be collected.
+     * @param emblem The emblem to be collected.
+     *
+     * @return The updated Mokadex object with the emblem added.
+     * @throws RokaMokaContentNotFoundException If the Mokadex with the given ID is not found.
+     * @throws RokaMokaContentDuplicatedException If the emblem is already collected in the specified Mokadex.
+     * @throws ServiceException If there is an error while adding the emblem to the Mokadex.
+     */
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public Mokadex collectEmblem(Long mokadexId, Emblem emblem)
             throws RokaMokaContentNotFoundException, RokaMokaContentDuplicatedException {
-        Mokadex mokadex = mokadexRepository.findById(mokadexId).orElseThrow(() ->
-                new RokaMokaContentNotFoundException("Mokadex não encontrado com id: " + mokadexId));
+        Mokadex mokadex = findById(mokadexId);
 
         if (mokadex.containsEmblem(emblem)) {
             throw new RokaMokaContentDuplicatedException("Emblema já foi coletado");
@@ -204,6 +215,24 @@ public class MokadexService implements IMokadexService {
             throw new ServiceException("Erro ao coletar emblema na mokadex");
         }
 
-        return mokadexRepository.save(mokadex);
+        return this.mokadexRepository.save(mokadex);
+    }
+
+    /**
+     * Retrieves a set of missing artwork for a specific exhibition that is not yet present in the user's Mokadex
+     * collection.
+     *
+     * @param exhibitionId The unique identifier of the exhibition to retrieve missing stars from.
+     *
+     * @return A set of {@link Artwork} objects representing the missing stars for the given exhibition in the user's
+     * Mokadex.
+     * @throws RokaMokaContentNotFoundException If either the user's Mokadex or the specified exhibition cannot be
+     * found.
+     */
+    @Override
+    public Set<Artwork> getMissingStarsByExhibition(@NotNull Long exhibitionId) throws RokaMokaContentNotFoundException {
+        Mokadex mokadex = this.getMokadexByLoggedUser();
+        Exhibition exhibition = this.exhibitionService.findById(exhibitionId);
+        return this.mokadexRepository.findAllMissingStars(mokadex.getId(), exhibition.getId());
     }
 }

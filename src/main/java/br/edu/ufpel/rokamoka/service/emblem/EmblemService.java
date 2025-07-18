@@ -4,7 +4,7 @@ import br.edu.ufpel.rokamoka.core.Emblem;
 import br.edu.ufpel.rokamoka.dto.emblem.input.EmblemInputDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.repository.EmblemRepository;
-import br.edu.ufpel.rokamoka.service.exhibition.ExhibitionService;
+import br.edu.ufpel.rokamoka.service.exhibition.IExhibitionService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +17,11 @@ import org.springframework.validation.annotation.Validated;
 import java.util.Optional;
 
 /**
+ * Service implementation of the {@link IEmblemService} interface for managing operations on the {@link Emblem}
+ * resource.
+ *
  * @author MauricioMucci
+ * @see EmblemRepository
  */
 @Slf4j
 @Service
@@ -26,7 +30,7 @@ import java.util.Optional;
 public class EmblemService implements IEmblemService {
 
     private final EmblemRepository emblemRepository;
-    private final ExhibitionService exhibitionService;
+    private final IExhibitionService exhibitionService;
 
     @Override
     public Emblem findById(Long exhibitionId) throws RokaMokaContentNotFoundException {
@@ -62,5 +66,10 @@ public class EmblemService implements IEmblemService {
         Emblem emblem = this.emblemRepository.findById(emblemId).orElseThrow(RokaMokaContentNotFoundException::new);
         this.emblemRepository.delete(emblem);
         return emblem;
+    }
+
+    @Override
+    public boolean existsEmblemByExhibitionId(Long exhibitionId) {
+        return this.emblemRepository.existsEmblemByExhibitionId(exhibitionId);
     }
 }

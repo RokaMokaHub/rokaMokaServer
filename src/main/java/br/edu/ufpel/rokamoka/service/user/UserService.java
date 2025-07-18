@@ -173,7 +173,7 @@ public class UserService implements IUserService {
 
         User loggedUser = findLoggedUser();
         Mokadex mokadex = mokadexService.getOrCreateMokadexByUser(loggedUser);
-        MokadexOutputDTO mokadexOutputDTO = mokadexService.buildMokadexOutputDTOByMokadex(mokadex);
+        MokadexOutputDTO mokadexOutputDTO = mokadexService.getMokadexOutputDTOByMokadex(mokadex);
 
         log.info("Informações do usuário logado retornadas com sucesso");
         return new UserOutputDTO(loggedUser, mokadexOutputDTO);

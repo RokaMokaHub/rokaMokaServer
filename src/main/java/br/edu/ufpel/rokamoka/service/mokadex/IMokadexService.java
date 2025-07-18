@@ -1,5 +1,6 @@
 package br.edu.ufpel.rokamoka.service.mokadex;
 
+import br.edu.ufpel.rokamoka.core.Artwork;
 import br.edu.ufpel.rokamoka.core.Emblem;
 import br.edu.ufpel.rokamoka.core.Mokadex;
 import br.edu.ufpel.rokamoka.core.User;
@@ -7,6 +8,9 @@ import br.edu.ufpel.rokamoka.dto.mokadex.output.MokadexOutputDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+import java.util.Set;
 
 /**
  * Service interface for managing and retrieving information related to {@link Mokadex}.
@@ -16,13 +20,17 @@ import jakarta.validation.constraints.NotBlank;
  */
 public interface IMokadexService {
 
+    Mokadex findById(@NotNull Long mokadexId) throws RokaMokaContentNotFoundException;
+
     Mokadex getOrCreateMokadexByUser(User usuario);
 
-    MokadexOutputDTO buildMokadexOutputDTOByMokadex(Mokadex mokadex);
+    MokadexOutputDTO getMokadexOutputDTOByMokadex(Mokadex mokadex);
 
     Mokadex collectStar(@NotBlank String qrCode)
             throws RokaMokaContentNotFoundException, RokaMokaContentDuplicatedException;
 
     Mokadex collectEmblem(Long mokadexId, Emblem emblem)
             throws RokaMokaContentNotFoundException, RokaMokaContentDuplicatedException;
+
+    Set<Artwork> getMissingStarsByExhibition(@NotNull Long exhibitionId) throws RokaMokaContentNotFoundException;
 }

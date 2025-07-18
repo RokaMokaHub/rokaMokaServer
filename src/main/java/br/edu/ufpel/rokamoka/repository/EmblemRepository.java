@@ -2,25 +2,31 @@ package br.edu.ufpel.rokamoka.repository;
 
 import br.edu.ufpel.rokamoka.core.Emblem;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 
 import java.util.Optional;
-import java.util.Set;
 
 /**
+ * Repository interface for managing the {@link Emblem} resource.
+ *
  * @author MauricioMucci
+ * @see JpaRepository
  */
 public interface EmblemRepository extends JpaRepository<Emblem, Long> {
 
+    /**
+     * Checks whether an {@link Emblem} entity exists for a given {@code exhibitionId}.
+     *
+     * @param exhibitionId The ID of the exhibition to check.
+     * @return {@code true} if an {@link Emblem} exists for the given exhibition ID, {@code false} otherwise.
+     */
     boolean existsEmblemByExhibitionId(Long exhibitionId);
 
-    @Query("""
-           SELECT COUNT(a1) = 0 FROM Artwork a1 WHERE a1.exhibition.id = :exhibitionId AND
-           NOT EXISTS (SELECT 1 FROM Mokadex m JOIN m.artworks a2 WHERE a1.id = a2.id and m.id = :mokadexId)""")
-    boolean hasCollectedAllArtworksInExhibition(Long mokadexId, Long exhibitionId);
-
+    /**
+     * Retrieves an {@link Emblem} associated with the specified exhibition ID.
+     *
+     * @param exhibitionId The unique identifier of the exhibition whose emblem needs to be retrieved.
+     *
+     * @return An {@link Optional} containing the {@link Emblem} if found, or an empty {@link Optional} otherwise.
+     */
     Optional<Emblem> findEmblemByExhibitionId(Long exhibitionId);
-
-    @Query("SELECT e FROM Mokadex m JOIN m.emblems e WHERE m.id = :mokadexId")
-    Set<Emblem> findEmblemsByMokadexId(Long mokadexId);
 }
