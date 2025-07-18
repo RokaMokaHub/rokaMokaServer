@@ -1,13 +1,12 @@
 package br.edu.ufpel.rokamoka.service.mokadex;
 
-import br.edu.ufpel.rokamoka.config.broker.RabbitMQExchangeConfigProperties;
+import br.edu.ufpel.rokamoka.component.CollectEmblemProducer;
 import br.edu.ufpel.rokamoka.context.ServiceContext;
 import br.edu.ufpel.rokamoka.core.Artwork;
 import br.edu.ufpel.rokamoka.core.Emblem;
 import br.edu.ufpel.rokamoka.core.Exhibition;
 import br.edu.ufpel.rokamoka.core.Mokadex;
 import br.edu.ufpel.rokamoka.core.User;
-import br.edu.ufpel.rokamoka.dto.emblem.CollectEmblemDTO;
 import br.edu.ufpel.rokamoka.dto.emblem.output.EmblemOutputDTO;
 import br.edu.ufpel.rokamoka.dto.mokadex.output.CollectionDTO;
 import br.edu.ufpel.rokamoka.dto.mokadex.output.MokadexOutputDTO;
@@ -25,7 +24,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.service.spi.ServiceException;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,9 +50,7 @@ public class MokadexService implements IMokadexService {
     private final IEmblemService emblemService;
     private final IArtworkService artworkService;
     private final ExhibitionService exhibitionService;
-
-    private final RabbitTemplate rabbitTemplate;
-    private final RabbitMQExchangeConfigProperties exchangeConfigProperties;
+    private final CollectEmblemProducer collectEmblemProducer;
 
     @Override
     public Mokadex findById(@NotNull Long mokadexId) throws RokaMokaContentNotFoundException {
@@ -180,14 +176,11 @@ public class MokadexService implements IMokadexService {
     }
 
     private void sendMessageToBrokerIfReady(Mokadex mokadex, Exhibition exhibition) {
-        CollectEmblemDTO collectEmblemDTO = new CollectEmblemDTO(mokadex.getId(), exhibition.getId());
         if (!this.emblemService.existsEmblemByExhibitionId(exhibition.getId())) {
             throw new ServiceException("Emblema não foi criado");
         }
         if (this.mokadexRepository.hasCollectedAllArtworksInExhibition(mokadex.getId(), exhibition.getId())) {
-            this.rabbitTemplate.convertAndSend(this.exchangeConfigProperties.getEmblems(),
-                    "",
-                    collectEmblemDTO);
+            this.collectEmblemProducer.publishCollectEmblem(mokadex, exhibition);
         }
     }
 

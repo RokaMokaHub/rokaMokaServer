@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class CollectEmblemListener {
+public class CollectEmblemConsumer {
 
     private final IEmblemService emblemService;
     private final IMokadexService mokadexService;
@@ -32,7 +32,7 @@ public class CollectEmblemListener {
      * emblem.
      */
     @RabbitListener(queues = "#{@rabbitMQQueueConfigProperties.collectEmblem}")
-    public void onCollectStar(CollectEmblemDTO collectEmblemDTO) {
+    public void consumeCollectEmblem(CollectEmblemDTO collectEmblemDTO) {
         log.info("Listener coletar emblema acionado para [{}]", collectEmblemDTO);
 
         emblemService
