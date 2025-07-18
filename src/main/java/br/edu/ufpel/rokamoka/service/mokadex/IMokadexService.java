@@ -1,5 +1,6 @@
 package br.edu.ufpel.rokamoka.service.mokadex;
 
+import br.edu.ufpel.rokamoka.core.Emblem;
 import br.edu.ufpel.rokamoka.core.Mokadex;
 import br.edu.ufpel.rokamoka.core.User;
 import br.edu.ufpel.rokamoka.dto.mokadex.output.MokadexOutputDTO;
@@ -19,6 +20,9 @@ public interface IMokadexService {
 
     MokadexOutputDTO buildMokadexOutputDTOByMokadex(Mokadex mokadex);
 
-    MokadexOutputDTO collectStar(@NotBlank String qrCode)
+    Mokadex collectStar(@NotBlank String qrCode)
+            throws RokaMokaContentNotFoundException, RokaMokaContentDuplicatedException;
+
+    Mokadex collectEmblem(Long mokadexId, Emblem emblem)
             throws RokaMokaContentNotFoundException, RokaMokaContentDuplicatedException;
 }

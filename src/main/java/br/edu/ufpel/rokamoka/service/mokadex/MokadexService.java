@@ -3,6 +3,7 @@ package br.edu.ufpel.rokamoka.service.mokadex;
 import br.edu.ufpel.rokamoka.config.broker.RabbitMQExchangeConfigProperties;
 import br.edu.ufpel.rokamoka.context.ServiceContext;
 import br.edu.ufpel.rokamoka.core.Artwork;
+import br.edu.ufpel.rokamoka.core.Emblem;
 import br.edu.ufpel.rokamoka.core.Exhibition;
 import br.edu.ufpel.rokamoka.core.Mokadex;
 import br.edu.ufpel.rokamoka.core.User;
@@ -151,7 +152,7 @@ public class MokadexService implements IMokadexService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public MokadexOutputDTO collectStar(@NotBlank String qrCode)
+    public Mokadex collectStar(@NotBlank String qrCode)
             throws RokaMokaContentNotFoundException, RokaMokaContentDuplicatedException {
         Mokadex mokadex = getMokadexByLoggedUser();
         Artwork artwork = this.artworkService.getByQrCodeOrThrow(qrCode);
@@ -165,9 +166,9 @@ public class MokadexService implements IMokadexService {
 
         log.info("Estrela coletada com sucesso!");
         mokadex = this.mokadexRepository.save(mokadex);
-        sendMessageToBrokerIfReady(mokadex, artwork);
+        sendMessageToBrokerIfReady(mokadex, artwork.getExhibition());
 
-        return this.buildMokadexOutputDTOByMokadex(mokadex);
+        return mokadex;
     }
 
     private Mokadex getMokadexByLoggedUser() throws RokaMokaContentNotFoundException {
@@ -177,17 +178,32 @@ public class MokadexService implements IMokadexService {
                 .orElseThrow(() -> new RokaMokaContentNotFoundException("Mokadex não encontrado para usuário logado"));
     }
 
-    private void sendMessageToBrokerIfReady(Mokadex mokadex, Artwork artwork) {
-        CollectEmblemDTO collectEmblemDTO = new CollectEmblemDTO(mokadex.getId(), artwork.getId());
-
-        if (!emblemRepository.existsEmblemByArtworkId(artwork.getId())) {
+    private void sendMessageToBrokerIfReady(Mokadex mokadex, Exhibition exhibition) {
+        CollectEmblemDTO collectEmblemDTO = new CollectEmblemDTO(mokadex.getId(), exhibition.getId());
+        if (!emblemRepository.existsEmblemByExhibitionId(exhibition.getId())) {
             throw new ServiceException("Emblema não foi criado");
         }
-
-        if (emblemRepository.hasCollectedAllArtworksInExhibition(mokadex.getId(), artwork.getId())) {
+        if (emblemRepository.hasCollectedAllArtworksInExhibition(mokadex.getId(), exhibition.getId())) {
             this.rabbitTemplate.convertAndSend(this.exchangeConfigProperties.getEmblems(),
                     "",
                     collectEmblemDTO);
         }
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public Mokadex collectEmblem(Long mokadexId, Emblem emblem)
+            throws RokaMokaContentNotFoundException, RokaMokaContentDuplicatedException {
+        Mokadex mokadex = mokadexRepository.findById(mokadexId).orElseThrow(() ->
+                new RokaMokaContentNotFoundException("Mokadex não encontrado com id: " + mokadexId));
+
+        if (mokadex.containsEmblem(emblem)) {
+            throw new RokaMokaContentDuplicatedException("Emblema já foi coletado");
+        }
+        if (!mokadex.addEmblem(emblem)) {
+            throw new ServiceException("Erro ao coletar emblema na mokadex");
+        }
+
+        return mokadexRepository.save(mokadex);
     }
 }

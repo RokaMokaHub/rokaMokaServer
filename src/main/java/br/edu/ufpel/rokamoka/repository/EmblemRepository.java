@@ -12,25 +12,14 @@ import java.util.Set;
  */
 public interface EmblemRepository extends JpaRepository<Emblem, Long> {
 
-    @Query(value = """
-                   SELECT e FROM Emblem e
-                   JOIN e.exhibition exh
-                   JOIN Artwork a on a.exhibition = exh
-                   WHERE a.id = :artworkId""")
-    Optional<Emblem> findEmblemByArtworkId(Long artworkId);
-
-    @Query(value = """
-                   SELECT COUNT(e) > 0 FROM Emblem e
-                   JOIN e.exhibition exh
-                   JOIN Artwork a on a.exhibition = exh
-                   WHERE a.id = :artworkId""")
-    boolean existsEmblemByArtworkId(Long artworkId);
+    boolean existsEmblemByExhibitionId(Long exhibitionId);
 
     @Query("""
-           SELECT count(a1) = 0 FROM Artwork a1
-           WHERE a1.exhibition.id = (SELECT a2.exhibition.id FROM Artwork a2 WHERE a2.id = :artworkId)
-           AND NOT EXISTS (SELECT 1 FROM Mokadex m JOIN m.artworks a3 WHERE m.id = a3.id AND m.id = :mokadexId)""")
-    boolean hasCollectedAllArtworksInExhibition(Long mokadexId, Long artworkId);
+           SELECT COUNT(a1) = 0 FROM Artwork a1 WHERE a1.exhibition.id = :exhibitionId AND
+           NOT EXISTS (SELECT 1 FROM Mokadex m JOIN m.artworks a2 WHERE a1.id = a2.id and m.id = :mokadexId)""")
+    boolean hasCollectedAllArtworksInExhibition(Long mokadexId, Long exhibitionId);
+
+    Optional<Emblem> findEmblemByExhibitionId(Long exhibitionId);
 
     @Query("SELECT e FROM Mokadex m JOIN m.emblems e WHERE m.id = :mokadexId")
     Set<Emblem> findEmblemsByMokadexId(Long mokadexId);

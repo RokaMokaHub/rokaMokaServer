@@ -40,6 +40,7 @@ public class MokadexController extends RokaMokaController {
     public ResponseEntity<ApiResponseWrapper<MokadexOutputDTO>> collectStar(
             @PathVariable(value = "qrcode") String qrCode)
             throws RokaMokaContentNotFoundException, RokaMokaContentDuplicatedException {
-        return success(this.mokadexService.collectStar(qrCode));
+        Mokadex mokadex = this.mokadexService.collectStar(qrCode);
+        return success(this.mokadexService.buildMokadexOutputDTOByMokadex(mokadex));
     }
 }

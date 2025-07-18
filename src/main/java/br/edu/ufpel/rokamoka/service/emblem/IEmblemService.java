@@ -1,7 +1,6 @@
 package br.edu.ufpel.rokamoka.service.emblem;
 
 import br.edu.ufpel.rokamoka.core.Emblem;
-import br.edu.ufpel.rokamoka.dto.emblem.CollectEmblemDTO;
 import br.edu.ufpel.rokamoka.dto.emblem.input.EmblemInputDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import jakarta.validation.Valid;
@@ -14,7 +13,9 @@ import java.util.Optional;
  */
 public interface IEmblemService {
 
-    Optional<Emblem> collectEmblem(@Valid CollectEmblemDTO collectEmblemDTO);
+    Emblem findById(Long emblemId) throws RokaMokaContentNotFoundException;
+
+    Optional<Emblem> findByExhibitionId(Long exhibitionId);
 
     Emblem create(@Valid EmblemInputDTO emblemInputDTO) throws RokaMokaContentNotFoundException;
 
