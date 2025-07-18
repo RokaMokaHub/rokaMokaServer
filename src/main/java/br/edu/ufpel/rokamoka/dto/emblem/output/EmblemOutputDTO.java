@@ -7,7 +7,15 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 /**
+ * Data Transfer Object (DTO) for encapsulating the output data of an {@code Emblem} entity.
+ *
+ * @param id         The unique identifier of the {@code Emblem}.
+ * @param nome       The name of the {@code Emblem}.
+ * @param descricao  A brief description of the {@code Emblem}.
+ * @param exhibition The associated {@link ExhibitionOutputDTO}.
+ *
  * @author MauricioMucci
+ * @see br.edu.ufpel.rokamoka.core.Emblem
  */
 public record EmblemOutputDTO(
         @NotNull Long id,
