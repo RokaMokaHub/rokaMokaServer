@@ -6,11 +6,19 @@ services:
     container_name: roka-moka-app
     restart: on-failure
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+      broker:
+        condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${DB_NAME}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:${DB_PORT}/${DB_NAME}
       SPRING_DATASOURCE_USERNAME: ${DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_RABBITMQ_HOST: broker
+      SPRING_RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
+      SPRING_RABBITMQ_USERNAME: ${RABBITMQ_USER:-guest}
+      SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
+      SPRING_RABBITMQ_CONNECTION_TIMEOUT: ${RABBITMQ_CONNECTION_TIMEOUT:-30000}
     ports:
       - "${APP_PORT_EXPOSE:-8080}:8080"
     networks:
@@ -37,7 +45,7 @@ services:
     networks:
       - hoka-moka-network
 
-  rabbitmq:
+  broker:
     image: rabbitmq:3-management-alpine
     container_name: roka-moka-broker
     ports:

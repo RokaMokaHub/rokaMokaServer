@@ -40,7 +40,6 @@ spring:
     hibernate:
       # Define se o Hibernate deve criar/atualizar o schema. Ideal manter como "none" em produção.
       ddl-auto: ${JPA_DDL_AUTO:none}
-
     open-in-view: false
     properties:
       hibernate:
@@ -48,21 +47,17 @@ spring:
     show-sql: false
 
   rabbitmq:
-    host: localhost
-    port: 5672
-    username: rokamoka
-    password: teste123
-    connection-timeout: 30000
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+    port: ${SPRING_RABBITMQ_PORT:5672}
+    username: ${SPRING_RABBITMQ_USERNAME:rokamoka}
+    password: ${SPRING_RABBITMQ_PASSWORD:teste123}
+    connection-timeout: ${SPRING_RABBITMQ_CONNECTION_TIMEOUT:30000}
 
 jwt:
   private:
     key: classpath:app.key
   public:
     key: classpath:app.pub
-
-server:
-  port: 8080
-
 
 ## CUSTOM CONFIGURATIONS
 broker:
