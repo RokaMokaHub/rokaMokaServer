@@ -29,7 +29,7 @@ public interface IUserService {
     void resetUserPassword(@Valid UserResetPasswordDTO userDTO)
             throws RokaMokaContentNotFoundException, RokaMokaForbiddenException;
 
-    UserAuthDTO createReseacher(UserBasicDTO userDTO) throws RokaMokaContentDuplicatedException;
+    UserAuthDTO createReseacher(@Valid UserBasicDTO userDTO) throws RokaMokaContentDuplicatedException;
 
     void updateRole(User requester, Role role);
 
