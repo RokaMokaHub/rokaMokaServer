@@ -10,13 +10,16 @@ import br.edu.ufpel.rokamoka.repository.ExhibitionRepository;
 import br.edu.ufpel.rokamoka.service.image.IIMageService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class ArtworkService implements IArtworkService {
@@ -33,6 +36,24 @@ public class ArtworkService implements IArtworkService {
     @Override
     public Artwork findById(Long id) throws RokaMokaContentNotFoundException {
         return obraRepository.findById(id).orElseThrow(RokaMokaContentNotFoundException::new);
+    }
+
+    @Override
+    public Optional<Artwork> findByQrCode(String qrCode) {
+        log.info("Buscando por obra usando qrCode: {}", qrCode);
+
+        Optional<Artwork> maybeArtwork = obraRepository.findByQrCode(qrCode);
+        maybeArtwork.ifPresentOrElse(
+                a -> log.info("Encontrou {}", a),
+                () -> log.info("Obra não existe!"));
+
+        return maybeArtwork;
+    }
+
+    @Override
+    public Artwork getByQrCodeOrThrow(String qrCode) throws RokaMokaContentNotFoundException {
+        return this.findByQrCode(qrCode)
+                .orElseThrow(() -> new RokaMokaContentNotFoundException("Obra não encontrada por qrcode"));
     }
 
     @Override

@@ -7,10 +7,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -20,37 +19,26 @@ import org.hibernate.proxy.HibernateProxy;
 
 import java.util.Objects;
 
-/**
- * A user of the system.
- *
- * <p>This entity is used to represent a user of the system. The user can have
- * multiple roles and can be associated with multiple devices.
- *
- * @author iyisakuma
- */
 @Getter
 @Setter
-@Builder
-@ToString(of = {"email"})
+@ToString(of = {"nome"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "usuario")
-public class User {
+@Table(name = "emblema")
+public class Emblem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String email;
+    @Column(nullable = false) private String nome;
 
-    @Column(nullable = false, unique = true) private String nome;
+    @Column(length = 1000) private String descricao;
 
-    @Column(nullable = false) private String senha;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "perfil_id")
-    private Role role;
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "exposicao_id", nullable = false, unique = true)
+    private Exhibition exhibition;
 
     @Override
     public final boolean equals(Object o) {
@@ -60,11 +48,11 @@ public class User {
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
             return false;
         }
-        User other = (User) o;
+        Emblem other = (Emblem) o;
         if (this.id != null && Objects.equals(this.id, other.getId())) {
             return true;
         }
-        return this.nome != null && Objects.equals(this.nome, other.getNome());
+        return this.exhibition != null && Objects.equals(this.exhibition, other.getExhibition());
     }
 
     @Override

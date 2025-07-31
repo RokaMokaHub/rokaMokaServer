@@ -35,7 +35,8 @@ import java.util.Optional;
 /**
  * Service implementation of the {@link IUserService} interface for managing operations on the {@link User} resource.
  *
- * @author MauricioMucci
+ * @author iyisakuma
+ * @see IUserService
  * @see UserRepository
  */
 @Slf4j
@@ -75,12 +76,18 @@ public class UserService implements IUserService {
                 .build();
 
         this.validateOrThrowException(user);
-        User newUser = this.userRepository.save(user);
+        User newUser = this.save(user);
         this.saveUserDevice(userDTO.deviceId(), newUser);
 
         String userJWT =
                 this.authenticationService.basicAuthenticationAndGenerateJWT(newUser.getNome(), undecodedPasswd);
         return new UserAuthDTO(userJWT);
+    }
+
+    private User save(User user) {
+        User newUser = this.userRepository.save(user);
+        mokadexService.getOrCreateMokadexByUser(user);
+        return newUser;
     }
 
     /**
@@ -105,7 +112,7 @@ public class UserService implements IUserService {
                 .build();
 
         this.validateOrThrowException(user);
-        User newUser = this.userRepository.save(user);
+        User newUser = this.save(user);
         this.saveUserDevice(userDTO.deviceId(), newUser);
 
         String userJWT =
@@ -164,21 +171,18 @@ public class UserService implements IUserService {
     public UserOutputDTO getLoggedUserInformation() throws RokaMokaContentNotFoundException {
         log.info("Buscando as informações do usuário logado");
 
-        User loggedUser = this.userRepository
+        User loggedUser = findLoggedUser();
+        Mokadex mokadex = mokadexService.getOrCreateMokadexByUser(loggedUser);
+        MokadexOutputDTO mokadexOutputDTO = mokadexService.getMokadexOutputDTOByMokadex(mokadex);
+
+        log.info("Informações do usuário logado retornadas com sucesso");
+        return new UserOutputDTO(loggedUser, mokadexOutputDTO);
+    }
+
+    public User findLoggedUser() throws RokaMokaContentNotFoundException {
+        return this.userRepository
                 .findByNome(ServiceContext.getContext().getUser().getUsername())
                 .orElseThrow(() -> new RokaMokaContentNotFoundException("Usuário logado não encontrado"));
-        Optional<Mokadex> maybeMokadex = mokadexService.getMokadexByUsuario(loggedUser);
-
-        if (maybeMokadex.isPresent()) {
-
-            log.info("Retornando as informações com {}", Mokadex.class.getSimpleName());
-            Mokadex mokadex = maybeMokadex.get();
-            MokadexOutputDTO mokadexOutputDTO = mokadexService.buildMokadexOutputDTOByMokadex(mokadex);
-            return new UserOutputDTO(loggedUser, mokadexOutputDTO);
-        }
-
-        log.info("Retornando as informações sem {}", Mokadex.class.getSimpleName());
-        return new UserOutputDTO(loggedUser);
     }
 
     @Override
@@ -192,7 +196,7 @@ public class UserService implements IUserService {
                 .build();
 
         this.validateOrThrowException(user);
-        User newUser = this.userRepository.save(user);
+        User newUser = this.save(user);
         this.saveUserDevice(userDTO.deviceId(), newUser);
 
         String userJWT =
