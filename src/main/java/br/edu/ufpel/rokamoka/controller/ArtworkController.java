@@ -34,6 +34,13 @@ public class ArtworkController extends RokaMokaController {
         return success(this.artworkRepository.createFullArtworkInfo(artwork.getId()));
     }
 
+    @Operation(summary = "Obter informações da obra via QR code", description = "Retorna uma obra com base no QR code informado")
+    @GetMapping("/{qrcode}")
+    public ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> getArtworkByQrCode(@PathVariable String qrcode) throws RokaMokaContentNotFoundException {
+        Artwork artwork = artworkService.getByQrCodeOrThrow(qrcode);
+        return success(this.artworkRepository.createFullArtworkInfo(artwork.getId()));
+    }
+
     @Operation(summary = "Upload de uma image em uma obra", description = "Faz upload de uma image, caso já exista estoura um erro")
     @PostMapping(value = "/upload/{artworkId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponseWrapper<Void>> uploadImage(@PathVariable Long artworkId, @RequestParam("image") MultipartFile image) throws BadRequestException, RokaMokaForbiddenException, RokaMokaContentNotFoundException {
