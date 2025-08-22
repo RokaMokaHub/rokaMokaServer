@@ -11,6 +11,7 @@ services:
       broker:
         condition: service_healthy
     environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILE:-dev}
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:${DB_PORT}/${DB_NAME}
       SPRING_DATASOURCE_USERNAME: ${DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
@@ -21,6 +22,8 @@ services:
       SPRING_RABBITMQ_CONNECTION_TIMEOUT: ${RABBITMQ_CONNECTION_TIMEOUT:-30000}
     ports:
       - "${APP_PORT_EXPOSE:-8080}:8080"
+    volumes:
+      - app-logs:/app/logs
     networks:
       - hoka-moka-network
 
@@ -65,6 +68,8 @@ services:
 volumes:
   db-data:
     name: rokamoka-db
+  app-logs:
+    name: rokamoka-logs
 
 networks:
   hoka-moka-network:
