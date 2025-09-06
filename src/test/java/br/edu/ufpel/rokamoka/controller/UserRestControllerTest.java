@@ -18,13 +18,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -44,7 +40,7 @@ import static org.mockito.Mockito.when;
  * @see AuthenticationService
  */
 @ExtendWith(MockitoExtension.class)
-class UserRestControllerTest {
+class UserRestControllerTest implements ControllerResponseValidator {
 
     @InjectMocks private UserRestController userRestController;
 
@@ -66,26 +62,10 @@ class UserRestControllerTest {
                 this.userRestController.register(mock(UserBasicDTO.class));
 
         // Assert
-        this.assertSuccessfulResponse(response, expectedOutput);
+        this.assertExpectedResponse(response, expectedOutput);
 
         verify(this.userService, times(1)).createNormalUser(any(UserBasicDTO.class));
         verifyNoInteractions(this.authenticationService);
-    }
-
-    private <T> void assertSuccessfulResponse(ResponseEntity<ApiResponseWrapper<T>> response, T expected) {
-        assertNotNull(response, "Response não deve ser null");
-        assertEquals(HttpStatus.OK, response.getStatusCode(), "Status code deve ser OK");
-
-        ApiResponseWrapper<T> body = response.getBody();
-        assertNotNull(body, "Body do response não deve ser null");
-
-        T actual = body.getBody();
-        if (expected != null) {
-            assertNotNull(actual, "Output atual não deve ser null");
-            assertEquals(expected, actual, "Output atual deve conter atributos esperados");
-        } else {
-            assertNull(actual, "Output atual deve ser null");
-        }
     }
 
     @Test
@@ -119,7 +99,7 @@ class UserRestControllerTest {
                 this.userRestController.anonymousRegister(mock(UserAnonymousRequestDTO.class));
 
         // Assert
-        this.assertSuccessfulResponse(response, expectedOutput);
+        this.assertExpectedResponse(response, expectedOutput);
 
         verify(this.userService, times(1))
                 .createAnonymousUser(any(UserAnonymousRequestDTO.class));
@@ -158,7 +138,7 @@ class UserRestControllerTest {
                 this.userRestController.login(mock(Authentication.class));
 
         // Assert
-        this.assertSuccessfulResponse(response, expectedOutput);
+        this.assertExpectedResponse(response, expectedOutput);
 
         verify(this.authenticationService, times(1))
                 .authenticate(any(Authentication.class));
@@ -176,7 +156,7 @@ class UserRestControllerTest {
         ResponseEntity<ApiResponseWrapper<String>> response = this.userRestController.teste();
 
         // Assert
-        this.assertSuccessfulResponse(response, expectedOutput);
+        this.assertExpectedResponse(response, expectedOutput);
 
         verifyNoInteractions(this.userService, this.authenticationService);
     }
@@ -195,7 +175,7 @@ class UserRestControllerTest {
         ResponseEntity<ApiResponseWrapper<Void>> response = this.userRestController.resetPassword(userDTO);
 
         // Assert
-        this.assertSuccessfulResponse(response, null);
+        this.assertVoidResponse(response);
 
         verify(this.userService, times(1))
                 .resetUserPassword(any(UserResetPasswordDTO.class));
@@ -248,7 +228,7 @@ class UserRestControllerTest {
         ResponseEntity<ApiResponseWrapper<UserOutputDTO>> response = this.userRestController.getLoggedUserInformation();
 
         // Assert
-        this.assertSuccessfulResponse(response, expectedOutput);
+        this.assertExpectedResponse(response, expectedOutput);
 
         verify(this.userService, times(1)).getLoggedUserInformation();
         verifyNoInteractions(this.authenticationService);
