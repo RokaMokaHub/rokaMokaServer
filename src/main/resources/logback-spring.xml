@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <configuration>
 
-    <property name="LOG_FILE" value=".logs/roka-moka.log"/>
-    <property name="FILE_NAME_PATTERN" value=".logs/roka-moka"/>
+    <property name="LOG_FILE" value="/app/logs/roka-moka.log"/>
+    <property name="FILE_NAME_PATTERN" value="/app/logs/roka-moka"/>
 
-    <!-- Console Appender with Colors -->
+    <!-- Console Appender colorido -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>
@@ -14,27 +14,38 @@
         </encoder>
     </appender>
 
-    <!-- File Appender with Rolling Policy -->
+    <!-- File Appender incolor -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_FILE}</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>${FILE_NAME_PATTERN}.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-            <maxHistory>5</maxHistory>
-            <maxFileSize>10MB</maxFileSize>
-            <totalSizeCap>1GB</totalSizeCap>
+            <maxHistory>30</maxHistory>
+            <maxFileSize>50MB</maxFileSize>
+            <totalSizeCap>5GB</totalSizeCap>
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
         </rollingPolicy>
         <encoder>
             <pattern>
-                %d{yyyy-MM-dd HH:mm:ss} | %-5level | [%X{username}] | [%X{executionUUID})] | %-40.40logger{39} : %m%n
+                %d{yyyy-MM-dd HH:mm:ss} | %-5level | [%X{username:-NONE}] | [%X{executionUUID:-NONE}] | %-40.40logger{39} : %m%n
             </pattern>
             <charset>UTF-8</charset>
         </encoder>
     </appender>
 
+    <!-- Appender assíncrono para melhor desempenho -->
+    <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="FILE"/>
+        <queueSize>2048</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <maxFlushTime>10000</maxFlushTime>
+        <includeCallerData>true</includeCallerData>
+        <neverBlock>false</neverBlock>
+    </appender>
+
     <springProfile name="default">
         <root level="WARN">
             <appender-ref ref="CONSOLE"/>
-            <appender-ref ref="FILE"/>
+            <appender-ref ref="ASYNC_FILE"/>
         </root>
         <logger name="br.edu.ufpel" level="DEBUG"/>
         <logger name="org.springframework.security" level="DEBUG"/>
@@ -43,19 +54,16 @@
     <springProfile name="dev">
         <root level="WARN">
             <appender-ref ref="CONSOLE"/>
-            <appender-ref ref="FILE"/>
         </root>
-        <logger name="br.edu.ufpel" level="DEBUG"/>
+        <logger name="br.edu.ufpel" level="TRACE"/>
         <logger name="org.springframework.security" level="DEBUG"/>
     </springProfile>
 
     <springProfile name="prod">
         <root level="WARN">
-            <appender-ref ref="CONSOLE"/>
-            <appender-ref ref="FILE"/>
+            <appender-ref ref="ASYNC_FILE"/>
         </root>
         <logger name="br.edu.ufpel" level="INFO"/>
-        <logger name="org.springframework.security" level="DEBUG"/>
     </springProfile>
 
 </configuration>
