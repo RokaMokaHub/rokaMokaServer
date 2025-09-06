@@ -55,8 +55,16 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 /**
+ * Unit tests for the {@link UserService} class, which is responsible for handling user-related API operations.
  *
  * @author MauricioMucci
+ * @see UserService
+ * @see UserRepository
+ * @see RoleRepository
+ * @see AuthenticationService
+ * @see MokadexService
+ * @see DeviceService
+ * @see PasswordEncoder
  */
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {

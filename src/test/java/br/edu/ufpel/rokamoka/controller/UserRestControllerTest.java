@@ -32,7 +32,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 /**
- * Unit tests for the {@link UserRestController} class, which is responsible for handling user-related API operations.
+ * Unit tests for the {@link UserRestController} class, which is responsible for handling user-related endpoints.
  *
  * @author MauricioMucci
  * @see UserRestController

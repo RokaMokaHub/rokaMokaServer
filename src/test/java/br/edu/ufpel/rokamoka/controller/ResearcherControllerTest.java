@@ -21,8 +21,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
+ * Unit tests for the {@link ResearcherController} class, which is responsible for handling researcher-related endpoints.
  *
  * @author MauricioMucci
+ * @see ResearcherController
+ * @see UserService
  */
 @ExtendWith(MockitoExtension.class)
 class ResearcherControllerTest implements ControllerResponseValidator<UserAuthDTO> {
