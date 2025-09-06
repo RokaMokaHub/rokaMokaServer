@@ -56,7 +56,8 @@ public class UserRestController extends RokaMokaController {
     @PostMapping(value = "/normal/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseWrapper<UserAuthDTO>> register(@RequestBody UserBasicDTO userDTO)
             throws RokaMokaContentDuplicatedException {
-        return this.success(this.userService.createNormalUser(userDTO));
+        UserAuthDTO normalUser = this.userService.createNormalUser(userDTO);
+        return this.success(normalUser);
     }
 
     @Operation(summary = "Criação de usuário anônimo", description = "Cria usuário anônimo")
@@ -65,7 +66,8 @@ public class UserRestController extends RokaMokaController {
     public ResponseEntity<ApiResponseWrapper<UserAnonymousResponseDTO>> anonymousRegister(
             @RequestBody UserAnonymousRequestDTO userDTO)
             throws RokaMokaContentDuplicatedException {
-        return this.success(this.userService.createAnonymousUser(userDTO));
+        UserAnonymousResponseDTO anonymousUser = this.userService.createAnonymousUser(userDTO);
+        return this.success(anonymousUser);
     }
 
     /**
@@ -78,7 +80,8 @@ public class UserRestController extends RokaMokaController {
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Login de usuário") })
     @GetMapping(value = "/login", consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseWrapper<UserAuthDTO>> login(Authentication authentication) {
-        return this.success(new UserAuthDTO(this.authenticationService.authenticate(authentication)));
+        String jwt = this.authenticationService.authenticate(authentication);
+        return this.success(new UserAuthDTO(jwt));
     }
 
     @GetMapping(value = "/teste-acao", consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -123,6 +126,7 @@ public class UserRestController extends RokaMokaController {
     @GetMapping(value = "/me", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseWrapper<UserOutputDTO>> getLoggedUserInformation()
             throws RokaMokaContentNotFoundException {
-        return this.success(this.userService.getLoggedUserInformation());
+        UserOutputDTO loggedUserInformation = this.userService.getLoggedUserInformation();
+        return this.success(loggedUserInformation);
     }
 }
