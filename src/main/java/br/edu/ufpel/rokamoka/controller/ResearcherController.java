@@ -38,6 +38,7 @@ public class ResearcherController extends RokaMokaController {
     @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseWrapper<UserAuthDTO>> register(@RequestBody UserBasicDTO userDTO)
             throws RokaMokaContentDuplicatedException {
-        return this.success(this.userService.createResearcher(userDTO));
+        UserAuthDTO researcher = this.userService.createResearcher(userDTO);
+        return this.success(researcher);
     }
 }
