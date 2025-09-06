@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class ResearcherController extends RokaMokaController {
 
-    private final IUserService IUserService;
+    private final IUserService userService;
 
     /**
      * Creates a new user using the provided data.
@@ -38,6 +38,7 @@ public class ResearcherController extends RokaMokaController {
     @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseWrapper<UserAuthDTO>> register(@RequestBody UserBasicDTO userDTO)
             throws RokaMokaContentDuplicatedException {
-        return success(IUserService.createReseacher(userDTO));
+        UserAuthDTO researcher = this.userService.createResearcher(userDTO);
+        return this.success(researcher);
     }
 }

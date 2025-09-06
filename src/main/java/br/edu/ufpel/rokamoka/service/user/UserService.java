@@ -22,6 +22,7 @@ import br.edu.ufpel.rokamoka.security.AuthenticationService;
 import br.edu.ufpel.rokamoka.service.device.IDeviceService;
 import br.edu.ufpel.rokamoka.service.mokadex.MokadexService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -86,7 +87,7 @@ public class UserService implements IUserService {
 
     private User save(User user) {
         User newUser = this.userRepository.save(user);
-        mokadexService.getOrCreateMokadexByUser(user);
+        this.mokadexService.getOrCreateMokadexByUser(user);
         return newUser;
     }
 
@@ -135,7 +136,7 @@ public class UserService implements IUserService {
     @Override
     public void resetUserPassword(@Valid UserResetPasswordDTO userDTO)
             throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
-        User user = getResetPasswordUser(userDTO);
+        User user = this.getResetPasswordUser(userDTO);
         user.setSenha(this.passwordEncoder.encode(userDTO.newPassword()));
         this.userRepository.save(user);
     }
@@ -151,9 +152,7 @@ public class UserService implements IUserService {
         if (!this.passwordEncoder.matches(userDTO.oldPassword(), user.getSenha())) {
             throw new RokaMokaForbiddenException("A senha informada é inválida");
         }
-        User loggedUser = this.userRepository
-                .findByNome(ServiceContext.getContext().getUser().getUsername())
-                .orElseThrow(() -> new RokaMokaForbiddenException("Usuário logado não encontrado"));
+        User loggedUser = this.findLoggedUser();
         if (!loggedUser.equals(user)) {
             throw new RokaMokaForbiddenException("Apenas o próprio usuário pode alterar a sua senha");
         }
@@ -171,22 +170,22 @@ public class UserService implements IUserService {
     public UserOutputDTO getLoggedUserInformation() throws RokaMokaContentNotFoundException {
         log.info("Buscando as informações do usuário logado");
 
-        User loggedUser = findLoggedUser();
-        Mokadex mokadex = mokadexService.getOrCreateMokadexByUser(loggedUser);
-        MokadexOutputDTO mokadexOutputDTO = mokadexService.getMokadexOutputDTOByMokadex(mokadex);
+        User loggedUser = this.findLoggedUser();
+        Mokadex mokadex = this.mokadexService.getOrCreateMokadexByUser(loggedUser);
+        MokadexOutputDTO mokadexOutputDTO = this.mokadexService.getMokadexOutputDTOByMokadex(mokadex);
 
         log.info("Informações do usuário logado retornadas com sucesso");
         return new UserOutputDTO(loggedUser, mokadexOutputDTO);
     }
 
-    public User findLoggedUser() throws RokaMokaContentNotFoundException {
+    private User findLoggedUser() throws RokaMokaContentNotFoundException {
         return this.userRepository
                 .findByNome(ServiceContext.getContext().getUser().getUsername())
                 .orElseThrow(() -> new RokaMokaContentNotFoundException("Usuário logado não encontrado"));
     }
 
     @Override
-    public UserAuthDTO createReseacher(@Valid UserBasicDTO userDTO) throws RokaMokaContentDuplicatedException {
+    public UserAuthDTO createResearcher(@Valid UserBasicDTO userDTO) throws RokaMokaContentDuplicatedException {
         var undecodedPasswd = userDTO.password();
         var user = User.builder()
                 .nome(userDTO.name())
@@ -211,7 +210,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public void updateRole(User requester, Role role) {
+    public void updateRole(@NotNull User requester, Role role) {
         requester.setRole(role);
         this.userRepository.save(requester);
     }
