@@ -22,6 +22,7 @@ import br.edu.ufpel.rokamoka.security.AuthenticationService;
 import br.edu.ufpel.rokamoka.service.device.IDeviceService;
 import br.edu.ufpel.rokamoka.service.mokadex.MokadexService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -209,7 +210,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public void updateRole(User requester, Role role) {
+    public void updateRole(@NotNull @Valid User requester, Role role) {
         requester.setRole(role);
         this.userRepository.save(requester);
     }
