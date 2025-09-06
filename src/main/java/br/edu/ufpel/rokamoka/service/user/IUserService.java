@@ -27,14 +27,14 @@ public interface IUserService {
     UserAuthDTO createNormalUser(@Valid UserBasicDTO userDTO) throws RokaMokaContentDuplicatedException;
 
     UserAnonymousResponseDTO createAnonymousUser(@Valid UserAnonymousRequestDTO userDTO)
-            throws RokaMokaContentDuplicatedException;
+    throws RokaMokaContentDuplicatedException;
 
     void resetUserPassword(@Valid UserResetPasswordDTO userDTO)
-            throws RokaMokaContentNotFoundException, RokaMokaForbiddenException;
+    throws RokaMokaContentNotFoundException, RokaMokaForbiddenException;
 
     UserAuthDTO createResearcher(@Valid UserBasicDTO userDTO) throws RokaMokaContentDuplicatedException;
 
-    void updateRole(@NotNull @Valid User requester, Role role);
+    void updateRole(@NotNull User requester, Role role);
 
     UserOutputDTO getLoggedUserInformation() throws RokaMokaContentNotFoundException;
 }

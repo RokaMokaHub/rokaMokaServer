@@ -210,7 +210,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public void updateRole(@NotNull @Valid User requester, Role role) {
+    public void updateRole(@NotNull User requester, Role role) {
         requester.setRole(role);
         this.userRepository.save(requester);
     }
