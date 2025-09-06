@@ -12,6 +12,8 @@ import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaForbiddenException;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * Service interface for managing and retrieving information related to {@link User}.
@@ -19,6 +21,7 @@ import jakarta.validation.Valid;
  * @author MauricioMucci
  * @see UserService
  */
+@Validated
 public interface IUserService {
 
     UserAuthDTO createNormalUser(@Valid UserBasicDTO userDTO) throws RokaMokaContentDuplicatedException;
@@ -29,11 +32,9 @@ public interface IUserService {
     void resetUserPassword(@Valid UserResetPasswordDTO userDTO)
             throws RokaMokaContentNotFoundException, RokaMokaForbiddenException;
 
-    UserAuthDTO createReseacher(@Valid UserBasicDTO userDTO) throws RokaMokaContentDuplicatedException;
+    UserAuthDTO createResearcher(@Valid UserBasicDTO userDTO) throws RokaMokaContentDuplicatedException;
 
-    void updateRole(User requester, Role role);
+    void updateRole(@NotNull @Valid User requester, Role role);
 
     UserOutputDTO getLoggedUserInformation() throws RokaMokaContentNotFoundException;
-
-    User findLoggedUser() throws RokaMokaContentNotFoundException;
 }
