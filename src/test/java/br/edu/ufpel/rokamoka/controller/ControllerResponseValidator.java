@@ -14,12 +14,17 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
+ * This utility provides a set of default methods to assert various conditions for responses returned by controllers in
+ * a standardized manner. It simplifies the testing of response structures by performing common assertions on the HTTP
+ * status, response body, and the contents of that body.
  *
  * @author MauricioMucci
+ * @see ApiResponseWrapper
+ * @see ResponseEntity
  */
-public interface ControllerResponseValidator<T> {
+public interface ControllerResponseValidator {
 
-    default void assertExpectedResponse(ResponseEntity<ApiResponseWrapper<T>> response, T expected) {
+    default <T> void assertExpectedResponse(ResponseEntity<ApiResponseWrapper<T>> response, T expected) {
         assertNotNull(response, "Response não deve ser null");
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Status code deve ser OK");
 
@@ -31,7 +36,7 @@ public interface ControllerResponseValidator<T> {
         assertEquals(expected, actual, "Output atual deve conter atributos esperados");
     }
 
-    default void assertVoidResponse(ResponseEntity<ApiResponseWrapper<T>> response) {
+    default <T> void assertVoidResponse(ResponseEntity<ApiResponseWrapper<T>> response) {
         assertNotNull(response, "Response não deve ser null");
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Status code deve ser OK");
 
@@ -42,7 +47,7 @@ public interface ControllerResponseValidator<T> {
         assertNull(actual, "Output atual deve ser null");
     }
 
-    default void assertCollectionResponse(ResponseEntity<ApiResponseWrapper<Collection<T>>> response) {
+    default <T> void assertCollectionResponse(ResponseEntity<ApiResponseWrapper<Collection<T>>> response) {
         assertNotNull(response, "Response não deve ser null");
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Status code deve ser OK");
 
@@ -55,7 +60,7 @@ public interface ControllerResponseValidator<T> {
         actual.forEach(Assertions::assertNotNull);
     }
 
-    default void assertEmptyCollectionResponse(ResponseEntity<ApiResponseWrapper<Collection<T>>> response) {
+    default <T> void assertEmptyCollectionResponse(ResponseEntity<ApiResponseWrapper<Collection<T>>> response) {
         assertNotNull(response, "Response não deve ser null");
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Status code deve ser OK");
 

@@ -28,7 +28,7 @@ import static org.mockito.Mockito.when;
  * @see UserService
  */
 @ExtendWith(MockitoExtension.class)
-class ResearcherControllerTest implements ControllerResponseValidator<UserAuthDTO> {
+class ResearcherControllerTest implements ControllerResponseValidator {
 
     @InjectMocks private ResearcherController researcherController;
 
