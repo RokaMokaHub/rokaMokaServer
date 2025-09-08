@@ -19,7 +19,7 @@ import br.edu.ufpel.rokamoka.exceptions.RokaMokaForbiddenException;
 import br.edu.ufpel.rokamoka.repository.RoleRepository;
 import br.edu.ufpel.rokamoka.repository.UserRepository;
 import br.edu.ufpel.rokamoka.security.AuthenticationService;
-import br.edu.ufpel.rokamoka.security.UserAuthenticated;
+import br.edu.ufpel.rokamoka.service.MockUserSession;
 import br.edu.ufpel.rokamoka.service.device.DeviceService;
 import br.edu.ufpel.rokamoka.service.mokadex.MokadexService;
 import org.apache.commons.lang3.StringUtils;
@@ -67,7 +67,7 @@ import static org.mockito.Mockito.when;
  * @see PasswordEncoder
  */
 @ExtendWith(MockitoExtension.class)
-class UserServiceTest {
+class UserServiceTest implements MockUserSession {
 
     @InjectMocks private UserService userService;
 
@@ -79,8 +79,6 @@ class UserServiceTest {
     @Mock private DeviceService deviceService;
 
     @Mock private PasswordEncoder passwordEncoder;
-
-    private static final String LOGGED_USER_NAME = "loggedUserName";
 
     //region createNormalUser
     @Test
@@ -299,12 +297,12 @@ class UserServiceTest {
         // Arrange
         UserResetPasswordDTO userDTO = Instancio.create(UserResetPasswordDTO.class);
         User foundByName = Instancio.create(User.class);
+        ServiceContext mockContext = this.mockServiceContext();
 
         when(this.userRepository.existsByNomeAndEmail(userDTO.name(), userDTO.email())).thenReturn(true);
         when(this.userRepository.findByNome(userDTO.name())).thenReturn(Optional.of(foundByName));
         when(this.passwordEncoder.matches(userDTO.oldPassword(), foundByName.getSenha())).thenReturn(true);
-
-        ServiceContext mockContext = this.mockLoggedUserNotFound();
+        when(this.userRepository.findByNome(LOGGED_USER_NAME)).thenReturn(Optional.empty());
 
         // Act & Assert
         try (MockedStatic<ServiceContext> mockedServiceContext = mockStatic(ServiceContext.class)) {
@@ -319,27 +317,18 @@ class UserServiceTest {
         verifyNoInteractions(this.mokadexService, this.deviceService, this.authenticationService, this.roleRepository);
     }
 
-    private ServiceContext mockLoggedUserNotFound() {
-        ServiceContext mockContext = mock(ServiceContext.class);
-        UserAuthenticated mockUserAuthenticated = mock(UserAuthenticated.class);
-        when(mockContext.getUser()).thenReturn(mockUserAuthenticated);
-        when(mockUserAuthenticated.getUsername()).thenReturn(LOGGED_USER_NAME);
-        when(this.userRepository.findByNome(LOGGED_USER_NAME)).thenReturn(Optional.empty());
-        return mockContext;
-    }
-
     @Test
     void resetUserPassword_shouldThrowRokaMokaForbiddenException_whenLoggedInUserDiffersFromInput() {
         // Arrange
         UserResetPasswordDTO userDTO = Instancio.create(UserResetPasswordDTO.class);
         User foundByName = Instancio.create(User.class);
         User loggedIn = Instancio.create(User.class);
+        ServiceContext mockContext = this.mockServiceContext();
 
         when(this.userRepository.existsByNomeAndEmail(userDTO.name(), userDTO.email())).thenReturn(true);
         when(this.userRepository.findByNome(userDTO.name())).thenReturn(Optional.of(foundByName));
         when(this.passwordEncoder.matches(userDTO.oldPassword(), foundByName.getSenha())).thenReturn(true);
-
-        ServiceContext mockContext = this.mockLoggedUserFound(loggedIn);
+        when(this.userRepository.findByNome(LOGGED_USER_NAME)).thenReturn(Optional.of(loggedIn));
 
         // Act & Assert
         try (MockedStatic<ServiceContext> mockedServiceContext = mockStatic(ServiceContext.class)) {
@@ -354,28 +343,19 @@ class UserServiceTest {
         verifyNoInteractions(this.mokadexService, this.deviceService, this.authenticationService, this.roleRepository);
     }
 
-    private ServiceContext mockLoggedUserFound(User loggedIn) {
-        ServiceContext mockContext = mock(ServiceContext.class);
-        UserAuthenticated mockUserAuthenticated = mock(UserAuthenticated.class);
-        when(mockContext.getUser()).thenReturn(mockUserAuthenticated);
-        when(mockUserAuthenticated.getUsername()).thenReturn(LOGGED_USER_NAME);
-        when(this.userRepository.findByNome(LOGGED_USER_NAME)).thenReturn(Optional.of(loggedIn));
-        return mockContext;
-    }
-
     @Test
     void resetUserPassword_shouldResetUserPassword_whenInputIsValid()
     throws RokaMokaForbiddenException, RokaMokaContentNotFoundException {
         // Arrange
         UserResetPasswordDTO userDTO = Instancio.create(UserResetPasswordDTO.class);
         User loggedIn = Instancio.create(User.class);
+        ServiceContext mockContext = this.mockServiceContext();
 
         when(this.userRepository.existsByNomeAndEmail(userDTO.name(), userDTO.email())).thenReturn(true);
         when(this.userRepository.findByNome(userDTO.name())).thenReturn(Optional.of(loggedIn));
         when(this.passwordEncoder.matches(userDTO.oldPassword(), loggedIn.getSenha())).thenReturn(true);
 
-        ServiceContext mockContext = this.mockLoggedUserFound(loggedIn);
-
+        when(this.userRepository.findByNome(LOGGED_USER_NAME)).thenReturn(Optional.of(loggedIn));
         when(this.passwordEncoder.encode(userDTO.newPassword())).thenReturn("encodedPassword");
 
         // Act
@@ -399,7 +379,9 @@ class UserServiceTest {
     @Test
     void getLoggedUserInformation_shouldThrowRokaMokaContentNotFoundException_whenLoggedInUserIsNotFound() {
         // Arrange
-        ServiceContext mockContext = this.mockLoggedUserNotFound();
+        ServiceContext mockContext = this.mockServiceContext();
+
+        when(this.userRepository.findByNome(LOGGED_USER_NAME)).thenReturn(Optional.empty());
 
         // Act & Assert
         try (MockedStatic<ServiceContext> mockedServiceContext = mockStatic(ServiceContext.class)) {
@@ -419,13 +401,14 @@ class UserServiceTest {
     throws RokaMokaContentNotFoundException {
         // Arrange
         User loggedIn = Instancio.create(User.class);
-        ServiceContext mockContext = this.mockLoggedUserFound(loggedIn);
+        ServiceContext mockContext = this.mockServiceContext();
 
         Mokadex mokadex = Instancio.create(Mokadex.class);
         MokadexOutputDTO expectedOutput = Instancio.create(MokadexOutputDTO.class);
 
         when(this.mokadexService.getOrCreateMokadexByUser(loggedIn)).thenReturn(mokadex);
         when(this.mokadexService.getMokadexOutputDTOByMokadex(mokadex)).thenReturn(expectedOutput);
+        when(this.userRepository.findByNome(LOGGED_USER_NAME)).thenReturn(Optional.of(loggedIn));
 
         // Act & Assert
         try (MockedStatic<ServiceContext> mockedServiceContext = mockStatic(ServiceContext.class)) {
