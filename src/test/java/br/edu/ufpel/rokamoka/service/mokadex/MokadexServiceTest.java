@@ -13,6 +13,7 @@ import br.edu.ufpel.rokamoka.dto.mokadex.output.MokadexOutputDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.repository.MokadexRepository;
+import br.edu.ufpel.rokamoka.service.MockRepository;
 import br.edu.ufpel.rokamoka.service.MockUserSession;
 import br.edu.ufpel.rokamoka.service.artwork.ArtworkService;
 import br.edu.ufpel.rokamoka.service.emblem.EmblemService;
@@ -64,7 +65,7 @@ import static org.mockito.Mockito.when;
  * @see CollectEmblemProducer
  */
 @ExtendWith(MockitoExtension.class)
-class MokadexServiceTest implements MockUserSession {
+class MokadexServiceTest implements MockUserSession, MockRepository<Mokadex> {
 
     @InjectMocks private MokadexService mokadexService;
 
@@ -74,6 +75,14 @@ class MokadexServiceTest implements MockUserSession {
     @Mock private ArtworkService artworkService;
     @Mock private ExhibitionService exhibitionService;
     @Mock private CollectEmblemProducer collectEmblemProducer;
+
+    @Override
+    public Mokadex mockRepositorySave(Mokadex mokadex) {
+        if (mokadex.getId() == null) {
+            mokadex.setId(1L);
+        }
+        return mokadex;
+    }
 
     //region findById
     @ParameterizedTest
@@ -123,6 +132,7 @@ class MokadexServiceTest implements MockUserSession {
 
         // Assert
         assertEquals(expected, actual);
+        assertEquals(user, actual.getUsuario());
 
         verify(this.mokadexRepository, times(1)).findMokadexByUsername(user.getNome());
         verifyNoMoreInteractions(this.mokadexRepository);
@@ -137,7 +147,7 @@ class MokadexServiceTest implements MockUserSession {
 
         when(this.mokadexRepository.findMokadexByUsername(user.getNome())).thenReturn(Optional.empty());
         when(this.mokadexRepository.save(any(Mokadex.class))).thenAnswer(
-                inv -> this.mockMokadexRepositorySave(inv.getArgument(0)));
+                inv -> this.mockRepositorySave(inv.getArgument(0)));
 
         // Act
         Mokadex actual = this.mokadexService.getOrCreateMokadexByUser(user);
@@ -150,11 +160,6 @@ class MokadexServiceTest implements MockUserSession {
         verifyNoMoreInteractions(this.mokadexRepository);
         verifyNoInteractions(this.emblemService, this.artworkService, this.exhibitionService,
                 this.collectEmblemProducer);
-    }
-
-    private Mokadex mockMokadexRepositorySave(Mokadex mokadex) {
-        mokadex.setId(1L);
-        return mokadex;
     }
     //endregion
 
@@ -226,13 +231,14 @@ class MokadexServiceTest implements MockUserSession {
     }
 
     @Test
-    void collectStar_shouldThrowRokaMokaContentNotFoundException_whenArtworkDoesNotExistForQRCode() {
+    void collectStar_shouldThrowRokaMokaContentNotFoundException_whenArtworkDoesNotExistForQRCode()
+    throws RokaMokaContentNotFoundException {
         // Arrange
         ServiceContext mockContext = this.mockServiceContext();
 
         when(this.mokadexRepository.findMokadexByUsername(anyString()))
                 .thenReturn(Optional.of(new Mokadex()));
-        when(this.artworkService.findByQrCode(anyString())).thenReturn(Optional.empty());
+        when(this.artworkService.getByQrCodeOrThrow(anyString())).thenThrow(RokaMokaContentNotFoundException.class);
 
         // Act & Assert
         try (MockedStatic<ServiceContext> mockedServiceContext = mockStatic(ServiceContext.class)) {
@@ -243,20 +249,25 @@ class MokadexServiceTest implements MockUserSession {
         }
 
         verify(this.mokadexRepository, times(1)).findMokadexByUsername(anyString());
-        verify(this.artworkService, times(1)).findByQrCode(anyString());
+        verify(this.artworkService, times(1)).getByQrCodeOrThrow(anyString());
         verifyNoMoreInteractions(this.mokadexRepository, this.artworkService);
         verifyNoInteractions(this.exhibitionService, this.emblemService, this.collectEmblemProducer);
     }
 
     @Test
-    void collectStar_shouldThrowRokaMokaContentDuplicatedException_whenMokadexAlreadyContainsArtwork() {
+    void collectStar_shouldPublishMessageAndThrowRokaMokaContentDuplicatedException_whenMokadexAlreadyContainsArtworkButEmblemWasNotCollected()
+    throws RokaMokaContentNotFoundException {
         // Arrange
         ServiceContext mockContext = this.mockServiceContext();
         Mokadex mokadex = mock(Mokadex.class);
+        Artwork artwork = Instancio.create(Artwork.class);
 
         when(this.mokadexRepository.findMokadexByUsername(anyString())).thenReturn(Optional.of(mokadex));
-        when(this.artworkService.findByQrCode(anyString())).thenReturn(Optional.of(new Artwork()));
-        when(mokadex.containsArtwork(any(Artwork.class))).thenReturn(true);
+        when(this.artworkService.getByQrCodeOrThrow(anyString())).thenReturn(artwork);
+        when(mokadex.containsArtwork(artwork)).thenReturn(true);
+        when(this.emblemService.existsEmblemByExhibitionId(anyLong())).thenReturn(true);
+        when(mokadex.getId()).thenReturn(1L);
+        when(this.mokadexRepository.hasCollectedAllArtworksInExhibition(anyLong(), anyLong())).thenReturn(true);
 
         // Act & Assert
         try (MockedStatic<ServiceContext> mockedServiceContext = mockStatic(ServiceContext.class)) {
@@ -267,22 +278,31 @@ class MokadexServiceTest implements MockUserSession {
         }
 
         verify(this.mokadexRepository, times(1)).findMokadexByUsername(anyString());
-        verify(this.artworkService, times(1)).findByQrCode(anyString());
+        verify(this.artworkService, times(1)).getByQrCodeOrThrow(anyString());
         verify(mokadex, times(1)).containsArtwork(any(Artwork.class));
-        verifyNoMoreInteractions(this.mokadexRepository, this.artworkService, mokadex);
-        verifyNoInteractions(this.exhibitionService, this.emblemService, this.collectEmblemProducer);
+        verify(this.emblemService, times(1)).existsEmblemByExhibitionId(anyLong());
+        verify(mokadex, times(1)).getId();
+        verify(this.mokadexRepository, times(1)).hasCollectedAllArtworksInExhibition(
+                anyLong(), anyLong());
+        verify(this.collectEmblemProducer, times(1)).publishCollectEmblem(
+                any(Mokadex.class), any(Exhibition.class));
+        verifyNoMoreInteractions(this.mokadexRepository, this.artworkService, mokadex, this.emblemService,
+                this.collectEmblemProducer);
+        verifyNoInteractions(this.exhibitionService);
     }
 
     @Test
-    void collectStar_shouldThrowServiceException_whenMokadexFailsToCollectStar() {
+    void collectStar_shouldThrowServiceException_whenMokadexAlreadyContainsArtworkButEmblemDoesNotExist()
+    throws RokaMokaContentNotFoundException {
         // Arrange
         ServiceContext mockContext = this.mockServiceContext();
         Mokadex mokadex = mock(Mokadex.class);
+        Artwork artwork = Instancio.create(Artwork.class);
 
         when(this.mokadexRepository.findMokadexByUsername(anyString())).thenReturn(Optional.of(mokadex));
-        when(this.artworkService.findByQrCode(anyString())).thenReturn(Optional.of(new Artwork()));
-        when(mokadex.containsArtwork(any(Artwork.class))).thenReturn(false);
-        when(mokadex.addArtwork(any(Artwork.class))).thenReturn(false);
+        when(this.artworkService.getByQrCodeOrThrow(anyString())).thenReturn(artwork);
+        when(mokadex.containsArtwork(artwork)).thenReturn(true);
+        when(this.emblemService.existsEmblemByExhibitionId(anyLong())).thenReturn(false);
 
         // Act & Assert
         try (MockedStatic<ServiceContext> mockedServiceContext = mockStatic(ServiceContext.class)) {
@@ -293,7 +313,70 @@ class MokadexServiceTest implements MockUserSession {
         }
 
         verify(this.mokadexRepository, times(1)).findMokadexByUsername(anyString());
-        verify(this.artworkService, times(1)).findByQrCode(anyString());
+        verify(this.artworkService, times(1)).getByQrCodeOrThrow(anyString());
+        verify(mokadex, times(1)).containsArtwork(any(Artwork.class));
+        verify(this.emblemService, times(1)).existsEmblemByExhibitionId(anyLong());
+        verifyNoMoreInteractions(this.mokadexRepository, this.artworkService, mokadex, this.emblemService);
+        verifyNoInteractions(this.collectEmblemProducer, this.exhibitionService);
+    }
+
+    @Test
+    void collectStar_shouldThrowRokaMokaContentDuplicatedException_whenMokadexAlreadyContainsArtworkAndEmblemWasAlreadyCollected()
+    throws RokaMokaContentNotFoundException {
+        // Arrange
+        ServiceContext mockContext = this.mockServiceContext();
+        Mokadex mokadex = mock(Mokadex.class);
+        Artwork artwork = Instancio.create(Artwork.class);
+
+        when(this.mokadexRepository.findMokadexByUsername(anyString())).thenReturn(Optional.of(mokadex));
+        when(this.artworkService.getByQrCodeOrThrow(anyString())).thenReturn(artwork);
+        when(mokadex.containsArtwork(artwork)).thenReturn(true);
+        when(this.emblemService.existsEmblemByExhibitionId(anyLong())).thenReturn(true);
+        when(mokadex.getId()).thenReturn(1L);
+        when(this.mokadexRepository.hasCollectedAllArtworksInExhibition(anyLong(), anyLong())).thenReturn(false);
+
+        // Act & Assert
+        try (MockedStatic<ServiceContext> mockedServiceContext = mockStatic(ServiceContext.class)) {
+            mockedServiceContext.when(ServiceContext::getContext).thenReturn(mockContext);
+
+            assertThrows(RokaMokaContentDuplicatedException.class,
+                    () -> this.mokadexService.collectStar("QRCODE"));
+        }
+
+        verify(this.mokadexRepository, times(1)).findMokadexByUsername(anyString());
+        verify(this.artworkService, times(1)).getByQrCodeOrThrow(anyString());
+        verify(mokadex, times(1)).containsArtwork(any(Artwork.class));
+        verify(this.emblemService, times(1)).existsEmblemByExhibitionId(anyLong());
+        verify(mokadex, times(1)).getId();
+        verify(this.mokadexRepository, times(1)).hasCollectedAllArtworksInExhibition(
+                anyLong(), anyLong());
+        verifyNoMoreInteractions(this.mokadexRepository, this.artworkService, mokadex, this.emblemService);
+        verifyNoInteractions(this.collectEmblemProducer, this.exhibitionService);
+    }
+
+    @Test
+    void collectStar_shouldThrowServiceException_whenMokadexFailsToCollectStar()
+    throws RokaMokaContentNotFoundException {
+        // Arrange
+        ServiceContext mockContext = this.mockServiceContext();
+        Mokadex mokadex = mock(Mokadex.class);
+        Artwork artwork = Instancio.create(Artwork.class);
+
+        when(this.mokadexRepository.findMokadexByUsername(anyString())).thenReturn(Optional.of(mokadex));
+        when(this.artworkService.getByQrCodeOrThrow(anyString())).thenReturn(artwork);
+        when(mokadex.containsArtwork(artwork)).thenReturn(false);
+        when(mokadex.addArtwork(artwork)).thenReturn(false);
+
+        // Act & Assert
+        try (MockedStatic<ServiceContext> mockedServiceContext = mockStatic(ServiceContext.class)) {
+            mockedServiceContext.when(ServiceContext::getContext).thenReturn(mockContext);
+
+            assertThrows(ServiceException.class,
+                    () -> this.mokadexService.collectStar("QRCODE"));
+        }
+
+        verify(this.mokadexRepository, times(1)).findMokadexByUsername(anyString());
+        verify(this.artworkService, times(1)).getByQrCodeOrThrow(anyString());
         verify(mokadex, times(1)).containsArtwork(any(Artwork.class));
         verify(mokadex, times(1)).addArtwork(any(Artwork.class));
         verifyNoMoreInteractions(this.mokadexRepository, this.artworkService, mokadex);
@@ -309,11 +392,15 @@ class MokadexServiceTest implements MockUserSession {
         Artwork artwork = Instancio.create(Artwork.class);
 
         when(this.mokadexRepository.findMokadexByUsername(anyString())).thenReturn(Optional.of(mokadex));
-        when(this.artworkService.findByQrCode(anyString())).thenReturn(Optional.of(artwork));
+        when(this.artworkService.getByQrCodeOrThrow(anyString())).thenReturn(artwork);
         when(mokadex.containsArtwork(artwork)).thenReturn(false);
         when(mokadex.addArtwork(artwork)).thenReturn(true);
         when(this.mokadexRepository.save(mokadex)).thenAnswer(
-                inv -> this.mockMokadexRepositorySave(inv.getArgument(0)));
+                inv -> this.mockRepositorySave(inv.getArgument(0)));
+        when(this.emblemService.existsEmblemByExhibitionId(anyLong())).thenReturn(true);
+        when(mokadex.getId()).thenReturn(1L);
+        when(this.mokadexRepository.hasCollectedAllArtworksInExhibition(anyLong(), anyLong()))
+                .thenReturn(true);
 
         // Act & Assert
         try (MockedStatic<ServiceContext> mockedServiceContext = mockStatic(ServiceContext.class)) {
@@ -322,17 +409,21 @@ class MokadexServiceTest implements MockUserSession {
             this.mokadexService.collectStar("QRCODE");
         }
 
-        // TODO finish collect star mocking
-
         verify(this.mokadexRepository, times(1)).findMokadexByUsername(anyString());
-        verify(this.artworkService, times(1)).findByQrCode(anyString());
+        verify(this.artworkService, times(1)).getByQrCodeOrThrow(anyString());
         verify(mokadex, times(1)).containsArtwork(any(Artwork.class));
         verify(mokadex, times(1)).addArtwork(any(Artwork.class));
+        verify(this.emblemService, times(1)).existsEmblemByExhibitionId(anyLong());
         verify(this.mokadexRepository, times(1)).save(any(Mokadex.class));
+        verify(mokadex, times(1)).setId(1L);
+        verify(mokadex, times(1)).getId();
+        verify(this.mokadexRepository, times(1)).hasCollectedAllArtworksInExhibition(
+                anyLong(), anyLong());
         verify(this.collectEmblemProducer, times(1)).publishCollectEmblem(
                 any(Mokadex.class), any(Exhibition.class));
-        verifyNoMoreInteractions(this.mokadexRepository, this.artworkService, mokadex);
-        verifyNoInteractions(this.exhibitionService, this.emblemService);
+        verifyNoMoreInteractions(this.mokadexRepository, this.artworkService, mokadex, this.emblemService,
+                this.collectEmblemProducer);
+        verifyNoInteractions(this.exhibitionService);
     }
     //endregion
 
