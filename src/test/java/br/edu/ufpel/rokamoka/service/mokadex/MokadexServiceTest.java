@@ -76,14 +76,6 @@ class MokadexServiceTest implements MockUserSession, MockRepository<Mokadex> {
     @Mock private ExhibitionService exhibitionService;
     @Mock private CollectEmblemProducer collectEmblemProducer;
 
-    @Override
-    public Mokadex mockRepositorySave(Mokadex mokadex) {
-        if (mokadex.getId() == null) {
-            mokadex.setId(1L);
-        }
-        return mokadex;
-    }
-
     //region findById
     @ParameterizedTest
     @ValueSource(longs = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10})
@@ -398,7 +390,7 @@ class MokadexServiceTest implements MockUserSession, MockRepository<Mokadex> {
         when(this.mokadexRepository.save(mokadex)).thenAnswer(
                 inv -> this.mockRepositorySave(inv.getArgument(0)));
         when(this.emblemService.existsEmblemByExhibitionId(anyLong())).thenReturn(true);
-        when(mokadex.getId()).thenReturn(1L);
+        when(mokadex.getId()).thenReturn(DEFAULT_ID);
         when(this.mokadexRepository.hasCollectedAllArtworksInExhibition(anyLong(), anyLong()))
                 .thenReturn(true);
 
@@ -415,8 +407,6 @@ class MokadexServiceTest implements MockUserSession, MockRepository<Mokadex> {
         verify(mokadex, times(1)).addArtwork(any(Artwork.class));
         verify(this.emblemService, times(1)).existsEmblemByExhibitionId(anyLong());
         verify(this.mokadexRepository, times(1)).save(any(Mokadex.class));
-        verify(mokadex, times(1)).setId(1L);
-        verify(mokadex, times(1)).getId();
         verify(this.mokadexRepository, times(1)).hasCollectedAllArtworksInExhibition(
                 anyLong(), anyLong());
         verify(this.collectEmblemProducer, times(1)).publishCollectEmblem(
