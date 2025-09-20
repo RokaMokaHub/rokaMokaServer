@@ -31,8 +31,11 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 /**
+ * Unit tests for the {@link ArtworkController} class, which is responsible for handling artwork-related endpoints.
  *
  * @author MauricioMucci
+ * @see IArtworkService
+ * @see ArtworkRepository
  */
 @ExtendWith(MockitoExtension.class)
 class ArtworkControllerTest implements ControllerResponseValidator {

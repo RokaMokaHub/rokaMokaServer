@@ -46,8 +46,12 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 /**
+ * Unit tests for the {@link ArtworkService} class, which is responsible for handling artwork-related API operations.
  *
  * @author MauricioMucci
+ * @see ArtworkRepository
+ * @see ExhibitionRepository
+ * @see IIMageService
  */
 @ExtendWith(MockitoExtension.class)
 class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
