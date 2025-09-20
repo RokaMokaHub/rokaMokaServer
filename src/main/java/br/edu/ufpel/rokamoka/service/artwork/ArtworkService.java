@@ -62,6 +62,7 @@ public class ArtworkService implements IArtworkService {
         Exhibition exhibition = this.exhibitionRepository.findById(exhibitionId).orElseThrow(RokaMokaContentNotFoundException::new);
         Artwork artwork = Artwork.builder()
                 .nome(artworkInputDTO.nome())
+                .descricao(artworkInputDTO.descricao())
                 .nomeArtista(artworkInputDTO.nomeArtista())
                 .link(artworkInputDTO.link())
                 .qrCode(artworkInputDTO.qrCode())
