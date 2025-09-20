@@ -15,7 +15,14 @@ import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "Obra", description = "API para operações de CRUD em obras")
@@ -30,15 +37,17 @@ public class ArtworkController extends RokaMokaController {
     @Operation(summary = "Buscar obra por ID", description = "Retorna uma obra com base no ID informado")
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> findById(@PathVariable Long id) throws RokaMokaContentNotFoundException {
-        Artwork artwork = artworkService.findById(id);
-        return success(this.artworkRepository.createFullArtworkInfo(artwork.getId()));
+        Artwork artwork = this.artworkService.findById(id);
+        ArtworkOutputDTO dto = this.artworkRepository.createFullArtworkInfo(artwork.getId());
+        return this.success(dto);
     }
 
     @Operation(summary = "Obter informações da obra via QR code", description = "Retorna uma obra com base no QR code informado")
     @GetMapping("/{qrcode}")
     public ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> getArtworkByQrCode(@PathVariable String qrcode) throws RokaMokaContentNotFoundException {
-        Artwork artwork = artworkService.getByQrCodeOrThrow(qrcode);
-        return success(this.artworkRepository.createFullArtworkInfo(artwork.getId()));
+        Artwork artwork = this.artworkService.getByQrCodeOrThrow(qrcode);
+        ArtworkOutputDTO dto = this.artworkRepository.createFullArtworkInfo(artwork.getId());
+        return this.success(dto);
     }
 
     @Operation(summary = "Upload de uma image em uma obra", description = "Faz upload de uma image, caso já exista estoura um erro")
@@ -48,7 +57,7 @@ public class ArtworkController extends RokaMokaController {
             throw new BadRequestException("É necessário enviar uma imagem");
         }
         this.artworkService.addImage(artworkId, image);
-        return success();
+        return this.success();
     }
 
     @Operation(summary = "Criar nova obra", description = "Cria uma nova obra com os dados fornecidos")
@@ -56,14 +65,14 @@ public class ArtworkController extends RokaMokaController {
     public ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> create(@PathVariable Long exhibitionId,
                                                                        @ModelAttribute ArtworkInputDTO artworkDTO) throws RokaMokaContentNotFoundException {
         Artwork artwork = this.artworkService.create(exhibitionId, artworkDTO);
-        return success(new ArtworkOutputDTO(artwork));
+        return this.success(new ArtworkOutputDTO(artwork));
     }
 
     @Operation(summary = "Deletar obra", description = "Remove uma obra com base no ID informado")
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> deletar(@PathVariable Long id) throws RokaMokaContentNotFoundException {
-        var artwork = artworkService.findById(id);
-        artworkService.deleteById(id);
-        return success(new ArtworkOutputDTO(artwork));
+        var artwork = this.artworkService.findById(id);
+        this.artworkService.deleteById(id);
+        return this.success(new ArtworkOutputDTO(artwork));
     }
 }
