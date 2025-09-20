@@ -5,7 +5,8 @@ import org.junit.jupiter.api.Assertions;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -47,27 +48,52 @@ public interface ControllerResponseValidator {
         assertNull(actual, "Output atual deve ser null");
     }
 
-    default <T> void assertCollectionResponse(ResponseEntity<ApiResponseWrapper<Collection<T>>> response) {
+    default <T> void assertListResponse(ResponseEntity<ApiResponseWrapper<List<T>>> response) {
         assertNotNull(response, "Response não deve ser null");
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Status code deve ser OK");
 
-        ApiResponseWrapper<Collection<T>> body = response.getBody();
+        ApiResponseWrapper<List<T>> body = response.getBody();
         assertNotNull(body, "Body do response não deve ser null");
 
-        Collection<T> actual = body.getBody();
+        List<T> actual = body.getBody();
         assertNotNull(actual, "Output atual não deve ser null");
         assertFalse(actual.isEmpty(), "Output atual deve conter pelo menos um elemento");
         actual.forEach(Assertions::assertNotNull);
     }
 
-    default <T> void assertEmptyCollectionResponse(ResponseEntity<ApiResponseWrapper<Collection<T>>> response) {
+    default <T> void assertEmptyListResponse(ResponseEntity<ApiResponseWrapper<List<T>>> response) {
         assertNotNull(response, "Response não deve ser null");
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Status code deve ser OK");
 
-        ApiResponseWrapper<Collection<T>> body = response.getBody();
+        ApiResponseWrapper<List<T>> body = response.getBody();
         assertNotNull(body, "Body do response não deve ser null");
 
-        Collection<T> actual = body.getBody();
+        List<T> actual = body.getBody();
+        assertNotNull(actual, "Output atual não deve ser null");
+        assertTrue(actual.isEmpty(), "Output atual deve estar vazio");
+    }
+
+    default <T> void assertSetResponse(ResponseEntity<ApiResponseWrapper<Set<T>>> response) {
+        assertNotNull(response, "Response não deve ser null");
+        assertEquals(HttpStatus.OK, response.getStatusCode(), "Status code deve ser OK");
+
+        ApiResponseWrapper<Set<T>> body = response.getBody();
+        assertNotNull(body, "Body do response não deve ser null");
+
+        Set<T> actual = body.getBody();
+        assertNotNull(actual, "Output atual não deve ser null");
+        assertFalse(actual.isEmpty(), "Output atual deve conter pelo menos um elemento");
+        actual.forEach(Assertions::assertNotNull);
+    }
+
+    default <T> void assertEmptySetResponse(ResponseEntity<ApiResponseWrapper<Set<T>>> response) {
+        assertNotNull(response, "Response não deve ser null");
+        assertEquals(HttpStatus.OK, response.getStatusCode(), "Status code deve ser OK");
+
+        ApiResponseWrapper<Set<T>> body = response.getBody();
+        assertNotNull(body, "Body do response não deve ser null");
+
+        Set<T> actual = body.getBody();
         assertNotNull(actual, "Output atual não deve ser null");
         assertTrue(actual.isEmpty(), "Output atual deve estar vazio");
     }

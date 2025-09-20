@@ -48,7 +48,8 @@ public class MokadexController extends RokaMokaController {
             @PathVariable(value = "qrcode") String qrCode)
             throws RokaMokaContentNotFoundException, RokaMokaContentDuplicatedException {
         Mokadex mokadex = this.mokadexService.collectStar(qrCode);
-        return success(this.mokadexService.getMokadexOutputDTOByMokadex(mokadex));
+        MokadexOutputDTO output = this.mokadexService.getMokadexOutputDTOByMokadex(mokadex);
+        return this.success(output);
     }
 
     @Operation(
@@ -60,9 +61,10 @@ public class MokadexController extends RokaMokaController {
     @GetMapping("/missing/{exhibitionId}")
     public ResponseEntity<ApiResponseWrapper<Set<ArtworkOutputDTO>>> findMissingStarsByExhibition(
             @PathVariable Long exhibitionId) throws RokaMokaContentNotFoundException {
-        return success(this.mokadexService.getMissingStarsByExhibition(exhibitionId)
+        Set<ArtworkOutputDTO> output = this.mokadexService.getMissingStarsByExhibition(exhibitionId)
                 .stream()
                 .map(ArtworkOutputDTO::new)
-                .collect(Collectors.toUnmodifiableSet()));
+                .collect(Collectors.toUnmodifiableSet());
+        return this.success(output);
     }
 }

@@ -9,6 +9,7 @@ import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.Set;
 
@@ -18,13 +19,14 @@ import java.util.Set;
  * @author MauricioMucci
  * @see MokadexService
  */
+@Validated
 public interface IMokadexService {
 
     Mokadex findById(@NotNull Long mokadexId) throws RokaMokaContentNotFoundException;
 
-    Mokadex getOrCreateMokadexByUser(User usuario);
+    Mokadex getOrCreateMokadexByUser(@NotNull User usuario);
 
-    MokadexOutputDTO getMokadexOutputDTOByMokadex(Mokadex mokadex);
+    MokadexOutputDTO getMokadexOutputDTOByMokadex(@NotNull Mokadex mokadex);
 
     Mokadex collectStar(@NotBlank String qrCode)
             throws RokaMokaContentNotFoundException, RokaMokaContentDuplicatedException;

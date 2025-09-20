@@ -16,7 +16,7 @@ import br.edu.ufpel.rokamoka.repository.MokadexRepository;
 import br.edu.ufpel.rokamoka.security.UserAuthenticated;
 import br.edu.ufpel.rokamoka.service.artwork.IArtworkService;
 import br.edu.ufpel.rokamoka.service.emblem.IEmblemService;
-import br.edu.ufpel.rokamoka.service.exhibition.ExhibitionService;
+import br.edu.ufpel.rokamoka.service.exhibition.IExhibitionService;
 import br.edu.ufpel.rokamoka.utils.mokadex.MokadexCollectionsBuilder;
 import br.edu.ufpel.rokamoka.utils.mokadex.MokadexEmblemsBuilder;
 import jakarta.validation.constraints.NotBlank;
@@ -49,7 +49,7 @@ public class MokadexService implements IMokadexService {
 
     private final IEmblemService emblemService;
     private final IArtworkService artworkService;
-    private final ExhibitionService exhibitionService;
+    private final IExhibitionService exhibitionService;
     private final CollectEmblemProducer collectEmblemProducer;
 
     @Override
@@ -70,11 +70,8 @@ public class MokadexService implements IMokadexService {
      */
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public Mokadex getOrCreateMokadexByUser(User user) {
-        if (user == null) {
-            throw new ServiceException("O usuário não pode ser nulo ao tentar criar ou recuperar o Mokadex");
-        }
-        return getMokadexByUser(user).orElseGet(() -> createMokadexByUser(user));
+    public Mokadex getOrCreateMokadexByUser(@NotNull User user) {
+        return this.getMokadexByUser(user).orElseGet(() -> this.createMokadexByUser(user));
     }
 
     /**
@@ -126,7 +123,7 @@ public class MokadexService implements IMokadexService {
      * @see MokadexEmblemsBuilder
      */
     @Override
-    public MokadexOutputDTO getMokadexOutputDTOByMokadex(Mokadex mokadex) {
+    public MokadexOutputDTO getMokadexOutputDTOByMokadex(@NotNull Mokadex mokadex) {
         log.info("Construindo {} para o {} informado", MokadexOutputDTO.class.getSimpleName(), mokadex);
 
         Set<CollectionDTO> collectionDTOSet = new MokadexCollectionsBuilder(mokadex).buildCollectionSet();
@@ -199,7 +196,7 @@ public class MokadexService implements IMokadexService {
     @Transactional(propagation = Propagation.REQUIRED)
     public Mokadex collectEmblem(Long mokadexId, Emblem emblem)
             throws RokaMokaContentNotFoundException, RokaMokaContentDuplicatedException {
-        Mokadex mokadex = findById(mokadexId);
+        Mokadex mokadex = this.findById(mokadexId);
 
         if (mokadex.containsEmblem(emblem)) {
             throw new RokaMokaContentDuplicatedException("Emblema já foi coletado");
