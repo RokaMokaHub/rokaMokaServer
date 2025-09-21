@@ -57,5 +57,4 @@ public class ExhibitionService implements IExhibitionService {
         artworks = this.artworkRepository.saveAll(artworks);
         return new ExhibitionWithArtworksDTO(exhibition.getName(), artworks.stream().map(ArtworkOutputDTO::new).toList());
     }
-
 }
