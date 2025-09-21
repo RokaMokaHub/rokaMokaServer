@@ -14,7 +14,7 @@ public interface IExhibitionService {
 
     Exhibition findById(Long id) throws RokaMokaContentNotFoundException;
 
-    Exhibition save(ExhibitionInputDTO exhibition) throws RokaMokaContentNotFoundException;
+    Exhibition save(ExhibitionInputDTO exhibition);
 
     void deleteById(Long id);
 

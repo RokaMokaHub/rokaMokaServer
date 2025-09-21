@@ -41,8 +41,7 @@ public class ExhibitionController extends RokaMokaController {
 
     @Operation(summary = "Criar nova exibição", description = "Cria uma nova exibição com os dados fornecidos")
     @PostMapping
-    public ResponseEntity<ApiResponseWrapper<ExhibitionOutputDTO>> create(@RequestBody ExhibitionInputDTO dto)
-    throws RokaMokaContentNotFoundException {
+    public ResponseEntity<ApiResponseWrapper<ExhibitionOutputDTO>> create(@RequestBody ExhibitionInputDTO dto) {
         Exhibition exhibition = this.exhibitionService.save(dto);
         return this.success(new ExhibitionOutputDTO(exhibition));
     }
