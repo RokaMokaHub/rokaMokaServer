@@ -15,7 +15,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -32,7 +31,11 @@ public class ExhibitionService implements IExhibitionService {
 
     @Override
     public Exhibition findById(Long id) throws RokaMokaContentNotFoundException {
-        return this.exhibitionRepository.findById(id).orElseThrow(RokaMokaContentNotFoundException::new);
+        return this.getOrElseThrow(id);
+    }
+
+    private Exhibition getOrElseThrow(Long exhibitionId) throws RokaMokaContentNotFoundException {
+        return this.exhibitionRepository.findById(exhibitionId).orElseThrow(RokaMokaContentNotFoundException::new);
     }
 
     @Override
@@ -51,10 +54,20 @@ public class ExhibitionService implements IExhibitionService {
     }
 
     @Override
-    public ExhibitionWithArtworksDTO addArtworks(Long exhibitionId, List<ArtworkInputDTO> artworkInputDTOS) throws RokaMokaContentNotFoundException {
-        var exhibition = this.exhibitionRepository.findById(exhibitionId).orElseThrow(RokaMokaContentNotFoundException::new);
-        List<Artwork> artworks = artworkInputDTOS.stream().map(a -> new Artwork(a, exhibition)).collect(Collectors.toList());
-        artworks = this.artworkRepository.saveAll(artworks);
-        return new ExhibitionWithArtworksDTO(exhibition.getName(), artworks.stream().map(ArtworkOutputDTO::new).toList());
+    public ExhibitionWithArtworksDTO addArtworks(Long exhibitionId, List<ArtworkInputDTO> artworkInputDTOS)
+    throws RokaMokaContentNotFoundException {
+        Exhibition exhibition = this.getOrElseThrow(exhibitionId);
+        List<ArtworkOutputDTO> artworks = this.createArtworksForExhibition(exhibition, artworkInputDTOS);
+        return new ExhibitionWithArtworksDTO(exhibition.getName(), artworks);
+    }
+
+    private List<ArtworkOutputDTO> createArtworksForExhibition(Exhibition exhibition, List<ArtworkInputDTO> artworkInputDTOS) {
+        List<Artwork> artworks = artworkInputDTOS.stream()
+                .map(a -> new Artwork(a, exhibition))
+                .toList();
+        return this.artworkRepository.saveAll(artworks)
+                .stream()
+                .map(ArtworkOutputDTO::new)
+                .toList();
     }
 }
