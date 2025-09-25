@@ -1,6 +1,7 @@
 package br.edu.ufpel.rokamoka.controller;
 
 import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
+import br.edu.ufpel.rokamoka.core.Emblem;
 import br.edu.ufpel.rokamoka.dto.emblem.input.EmblemInputDTO;
 import br.edu.ufpel.rokamoka.dto.emblem.output.EmblemOutputDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
@@ -32,21 +33,26 @@ public class EmblemController extends RokaMokaController {
 
     @Operation(summary = "Buscar emblema por ID", description = "Retorna um emblema com base no ID informado")
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponseWrapper<EmblemOutputDTO>> findById(@PathVariable Long id) throws RokaMokaContentNotFoundException {
-        return success(new EmblemOutputDTO(this.emblemService.findById(id)));
+    public ResponseEntity<ApiResponseWrapper<EmblemOutputDTO>> findById(@PathVariable Long id)
+    throws RokaMokaContentNotFoundException {
+        Emblem emblem = this.emblemService.findById(id);
+        return this.success(new EmblemOutputDTO(emblem));
     }
 
     @Operation(summary = "Criar novo emblema", description = "Cria um novo emblema com os dados fornecidos")
-    @PostMapping(path = "/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/create", consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseWrapper<EmblemOutputDTO>> register(@RequestBody EmblemInputDTO emblemInputDTO)
-            throws RokaMokaContentNotFoundException {
-        return success(new EmblemOutputDTO(this.emblemService.create(emblemInputDTO)));
+    throws RokaMokaContentNotFoundException {
+        Emblem emblem = this.emblemService.create(emblemInputDTO);
+        return this.success(new EmblemOutputDTO(emblem));
     }
 
     @Operation(summary = "Deletar emblema", description = "Remove um emblema com base no ID informado")
     @DeleteMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseWrapper<EmblemOutputDTO>> remove(@PathVariable Long id)
-            throws RokaMokaContentNotFoundException {
-        return success(new EmblemOutputDTO(this.emblemService.delete(id)));
+    throws RokaMokaContentNotFoundException {
+        Emblem emblem = this.emblemService.delete(id);
+        return this.success(new EmblemOutputDTO(emblem));
     }
 }
