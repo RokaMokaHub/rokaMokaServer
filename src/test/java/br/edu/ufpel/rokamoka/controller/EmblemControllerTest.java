@@ -1,11 +1,24 @@
 package br.edu.ufpel.rokamoka.controller;
 
+import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
+import br.edu.ufpel.rokamoka.core.Emblem;
+import br.edu.ufpel.rokamoka.dto.emblem.input.EmblemInputDTO;
+import br.edu.ufpel.rokamoka.dto.emblem.output.EmblemOutputDTO;
+import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.service.emblem.EmblemService;
+import org.instancio.Instancio;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for the {@link EmblemController} class, which is responsible for handling emblem-related endpoints.
@@ -22,19 +35,96 @@ class EmblemControllerTest implements ControllerResponseValidator {
 
     //region findById
     @Test
-    void findById() {
+    void findById_shouldReturnEmblemOutputDTO_whenEmblemExistsById() throws RokaMokaContentNotFoundException {
+        // Arrange
+        Emblem emblem = Instancio.create(Emblem.class);
+
+        when(this.emblemService.findById(anyLong())).thenReturn(emblem);
+
+        // Act
+        ResponseEntity<ApiResponseWrapper<EmblemOutputDTO>> response = this.emblemController.findById(1L);
+
+        // Assert
+        this.assertExpectedResponse(response, new EmblemOutputDTO(emblem));
+
+        verify(this.emblemService).findById(anyLong());
+    }
+
+    @Test
+    void findById_shouldThrowRokaMokaContentNotFoundException_whenEmblemDoesNotExistById()
+    throws RokaMokaContentNotFoundException {
+        // Arrange
+        when(this.emblemService.findById(anyLong())).thenThrow(RokaMokaContentNotFoundException.class);
+
+        // Act & Assert
+        assertThrows(RokaMokaContentNotFoundException.class, () -> this.emblemController.findById(1L));
+
+        verify(this.emblemService).findById(anyLong());
     }
     //endregion
 
     //region register
     @Test
-    void register() {
+    void register_shouldReturnEmblemOutputDTO_whenSuccessful()
+    throws RokaMokaContentNotFoundException {
+        // Arrange
+        EmblemInputDTO input = mock(EmblemInputDTO.class);
+        Emblem emblem = Instancio.create(Emblem.class);
+
+        when(this.emblemService.create(input)).thenReturn(emblem);
+
+        // Act
+        ResponseEntity<ApiResponseWrapper<EmblemOutputDTO>> response = this.emblemController.register(input);
+
+        // Assert
+        this.assertExpectedResponse(response, new EmblemOutputDTO(emblem));
+
+        verify(this.emblemService).create(input);
+    }
+
+    @Test
+    void register_shouldThrowRokaMokaContentNotFoundException_whenInputContainsInvalidExhibitionId()
+    throws RokaMokaContentNotFoundException {
+        // Arrange
+        EmblemInputDTO input = mock(EmblemInputDTO.class);
+
+        when(this.emblemService.create(input)).thenThrow(RokaMokaContentNotFoundException.class);
+
+        // Act & Assert
+        assertThrows(RokaMokaContentNotFoundException.class, () -> this.emblemController.register(input));
+
+        verify(this.emblemService).create(input);
     }
     //endregion
 
     //region remove
     @Test
-    void remove() {
+    void remove_shouldReturnEmblemOutputDTO_whenSuccessful()
+    throws RokaMokaContentNotFoundException {
+        // Arrange
+        Emblem emblem = Instancio.create(Emblem.class);
+
+        when(this.emblemService.delete(anyLong())).thenReturn(emblem);
+
+        // Act
+        ResponseEntity<ApiResponseWrapper<EmblemOutputDTO>> response = this.emblemController.remove(1L);
+
+        // Assert
+        this.assertExpectedResponse(response, new EmblemOutputDTO(emblem));
+
+        verify(this.emblemService).delete(anyLong());
+    }
+
+    @Test
+    void remove_shouldThrowRokaMokaContentNotFoundException_whenEmblemDoesNotExistById()
+    throws RokaMokaContentNotFoundException {
+        // Arrange
+        when(this.emblemService.delete(anyLong())).thenThrow(RokaMokaContentNotFoundException.class);
+
+        // Act & Assert
+        assertThrows(RokaMokaContentNotFoundException.class, () -> this.emblemController.remove(1L));
+
+        verify(this.emblemService).delete(anyLong());
     }
     //endregion
 }
