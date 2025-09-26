@@ -10,8 +10,8 @@ import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.repository.PermissionReqRepository;
 import br.edu.ufpel.rokamoka.repository.RoleRepository;
-import br.edu.ufpel.rokamoka.repository.UserRepository;
 import br.edu.ufpel.rokamoka.service.IRequestPermissionService;
+import br.edu.ufpel.rokamoka.service.user.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,14 +20,14 @@ import org.springframework.stereotype.Service;
 public class RequestPermissionService implements IRequestPermissionService {
 
     private final PermissionReqRepository permissionReqRepository;
-    private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+
+    private final IUserService userService;
 
     @Override
     public PermissionRequestStatusDTO createRequest(String userName, RoleEnum role)
     throws RokaMokaContentNotFoundException, RokaMokaContentDuplicatedException {
-        User requester = this.userRepository.findByNome(userName)
-                .orElseThrow(() -> new RokaMokaContentNotFoundException("Usuário não encontrado"));
+        User requester = this.userService.getByNome(userName);
 
         Role targetRole = this.roleRepository.findByName(role);
 
