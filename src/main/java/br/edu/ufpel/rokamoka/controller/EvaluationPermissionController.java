@@ -46,7 +46,7 @@ public class EvaluationPermissionController extends RokaMokaController {
 
     @GetMapping("/list")
     public ResponseEntity<ApiResponseWrapper<List<RequestDetailsDTO>>> list() {
-        List<RequestDetailsDTO> requests = this.evaluationPermissionService.findAllPedingRequest();
+        List<RequestDetailsDTO> requests = this.evaluationPermissionService.findAllPendingRequest();
         return this.success(requests);
     }
 }

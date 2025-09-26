@@ -58,7 +58,7 @@ public class EvaluationPermissionService implements IEvaluationPermissionService
     }
 
     @Override
-    public List<RequestDetailsDTO> findAllPedingRequest() {
+    public List<RequestDetailsDTO> findAllPendingRequest() {
         return this.requestRepository.findAllPendingRequestDetailed();
     }
 }

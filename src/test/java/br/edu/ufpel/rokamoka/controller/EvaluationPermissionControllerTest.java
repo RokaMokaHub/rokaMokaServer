@@ -167,13 +167,13 @@ class EvaluationPermissionControllerTest implements ControllerResponseValidator 
     @MethodSource("buildListInput")
     void list_shouldReturnRequestDetailsList_whenCalled(List<RequestDetailsDTO> requests) {
         // Arrange
-        when(this.evaluationPermissionService.findAllPedingRequest()).thenReturn(requests);
+        when(this.evaluationPermissionService.findAllPendingRequest()).thenReturn(requests);
 
         // Act
         ResponseEntity<ApiResponseWrapper<List<RequestDetailsDTO>>> response = this.evaluationPermissionController.list();
 
         // Assert
-        verify(this.evaluationPermissionService).findAllPedingRequest();
+        verify(this.evaluationPermissionService).findAllPendingRequest();
 
         if (requests.isEmpty()) {
             this.assertEmptyListResponse(response);
