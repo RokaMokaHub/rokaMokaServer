@@ -26,25 +26,25 @@ public class EvaluationPermissionService implements IEvaluationPermissionService
     @Override
     @Transactional(rollbackFor = {RokaMokaContentNotFoundException.class, RokaMokaForbiddenException.class})
     public void deny(Long permissionId, String justificativa, String userName) throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
-        PermissionReq permissionReq = this.getPendingPermissionRequestOrElseThrow(permissionId);
+        PermissionReq request = this.getPendingPermissionRequestOrElseThrow(permissionId);
 
-        permissionReq.setStatus(RequestStatus.DENY);
-        permissionReq = this.requestRepository.save(permissionReq);
+        request.setStatus(RequestStatus.DENY);
+        request = this.requestRepository.save(request);
 
-        this.createPermissionRegistration(justificativa, userName, permissionReq);
+        this.createPermissionRegistration(justificativa, userName, request);
     }
 
     @Override
     @Transactional(rollbackFor = {RokaMokaContentNotFoundException.class, RokaMokaForbiddenException.class})
     public void accept(Long permissionId, String userName) throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
-        PermissionReq permissionReq = this.getPendingPermissionRequestOrElseThrow(permissionId);
+        PermissionReq request = this.getPendingPermissionRequestOrElseThrow(permissionId);
 
-        permissionReq.setStatus(RequestStatus.CONFIRM);
-        permissionReq = this.requestRepository.save(permissionReq);
+        request.setStatus(RequestStatus.CONFIRM);
+        request = this.requestRepository.save(request);
 
-        this.createPermissionRegistration("", userName, permissionReq);
+        this.createPermissionRegistration("", userName, request);
 
-        this.userService.updateRole(permissionReq.getRequester(), permissionReq.getTargetRole());
+        this.userService.updateRole(request.getRequester(), request.getTargetRole());
     }
 
     @Override
@@ -65,12 +65,12 @@ public class EvaluationPermissionService implements IEvaluationPermissionService
         return this.requestRepository.findById(permissionId).orElseThrow(RokaMokaContentNotFoundException::new);
     }
 
-    private PermissionReg createPermissionRegistration(String justificativa, String userName, PermissionReq permissionReq)
+    private PermissionReg createPermissionRegistration(String justificativa, String userName, PermissionReq request)
     throws RokaMokaContentNotFoundException {
         PermissionReg register = PermissionReg.builder()
                 .justification(justificativa)
                 .reviewer(this.userService.getByNome(userName))
-                .request(permissionReq)
+                .request(request)
                 .build();
         return this.registerRepository.save(register);
     }
