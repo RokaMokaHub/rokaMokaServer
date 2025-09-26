@@ -26,7 +26,7 @@ public class EvaluationPermissionService implements IEvaluationPermissionService
     public void deny(Long permissionId, String justificativa, String userName) throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
         PermissionReq permissionReq = this.requestRepository.findById(permissionId).orElseThrow(RokaMokaContentNotFoundException::new);
         if (permissionReq.getStatus() != RequestStatus.PENDING) {
-            throw new RokaMokaForbiddenException("Não é possível aceitar pedido que já foi negado");
+            throw new RokaMokaForbiddenException("Não é possível negar pedido que já foi analisado");
         }
         permissionReq.setStatus(RequestStatus.DENY);
         permissionReq = this.requestRepository.save(permissionReq);
