@@ -8,7 +8,6 @@ import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaForbiddenException;
 import br.edu.ufpel.rokamoka.repository.PermissionRegRepository;
 import br.edu.ufpel.rokamoka.repository.PermissionReqRepository;
-import br.edu.ufpel.rokamoka.repository.UserRepository;
 import br.edu.ufpel.rokamoka.service.user.IUserService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,7 +20,6 @@ public class EvaluationPermissionService implements IEvaluationPermissionService
 
     private final PermissionRegRepository registerRepository;
     private final PermissionReqRepository requestRepository;
-    private final UserRepository userRepository;
     private final IUserService userService;
 
     @Override
@@ -35,7 +33,7 @@ public class EvaluationPermissionService implements IEvaluationPermissionService
 
         PermissionReg register = PermissionReg.builder()
                 .justification(justificativa)
-                .reviewer(this.userRepository.findByNome(userName).get())
+                .reviewer(this.userService.getByNome(userName))
                 .request(permissionReq)
                 .build();
         this.registerRepository.save(register);
@@ -51,7 +49,7 @@ public class EvaluationPermissionService implements IEvaluationPermissionService
         permissionReq = this.requestRepository.save(permissionReq);
         PermissionReg register = PermissionReg.builder()
                 .justification("")
-                .reviewer(this.userRepository.findByNome(userName).get())
+                .reviewer(this.userService.getByNome(userName))
                 .request(permissionReq)
                 .build();
         this.registerRepository.save(register);
