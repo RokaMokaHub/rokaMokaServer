@@ -33,6 +33,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 /**
@@ -76,6 +77,10 @@ class RequestPermissionServiceTest implements MockRepository<PermissionReq> {
         PermissionRequestStatusDTO actual = this.requestPermissionService.createRequest("", roleName);
 
         // Assert
+        verify(this.userService).getByNome(anyString());
+        verify(this.roleRepository).findByName(roleName);
+        verify(this.permissionReqRepository).existsByRequesterAndStatusAndTargetRole(
+                requester, RequestStatus.PENDING, targetRole);
         verify(this.permissionReqRepository).save(this.requestCaptor.capture());
 
         PermissionReq newRequest = this.requestCaptor.getValue();
@@ -87,6 +92,30 @@ class RequestPermissionServiceTest implements MockRepository<PermissionReq> {
         assertEquals(expected.getId(), actual.id());
         assertEquals(expected.getStatus(), actual.status());
         assertEquals(expected.getTargetRole().getName(), actual.targetRole());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = RoleEnum.class)
+    void createRequest_shouldThrowRokaMokaContentDuplicatedException_whenRequestAlreadyExists(RoleEnum roleName)
+    throws RokaMokaContentNotFoundException {
+        // Arrange
+        User requester = mock(User.class);
+        Role targetRole = mock(Role.class);
+
+        when(this.userService.getByNome(anyString())).thenReturn(requester);
+        when(this.roleRepository.findByName(roleName)).thenReturn(targetRole);
+        when(this.permissionReqRepository.existsByRequesterAndStatusAndTargetRole(requester, RequestStatus.PENDING,
+                targetRole)).thenReturn(true);
+
+        // Act & Assert
+        assertThrows(RokaMokaContentDuplicatedException.class,
+                () -> this.requestPermissionService.createRequest("", roleName));
+
+        verify(this.userService).getByNome(anyString());
+        verify(this.roleRepository).findByName(roleName);
+        verify(this.permissionReqRepository).existsByRequesterAndStatusAndTargetRole(
+                requester, RequestStatus.PENDING, targetRole);
+        verifyNoMoreInteractions(this.permissionReqRepository);
     }
     //endregion
 
