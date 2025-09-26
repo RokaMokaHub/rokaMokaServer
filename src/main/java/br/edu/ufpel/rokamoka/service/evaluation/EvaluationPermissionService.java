@@ -11,6 +11,7 @@ import br.edu.ufpel.rokamoka.repository.PermissionReqRepository;
 import br.edu.ufpel.rokamoka.service.user.IUserService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -23,6 +24,7 @@ public class EvaluationPermissionService implements IEvaluationPermissionService
     private final IUserService userService;
 
     @Override
+    @Transactional(rollbackFor = {RokaMokaContentNotFoundException.class, RokaMokaForbiddenException.class})
     public void deny(Long permissionId, String justificativa, String userName) throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
         PermissionReq permissionReq = this.getPendingPermissionRequestOrElseThrow(permissionId);
 
@@ -33,6 +35,7 @@ public class EvaluationPermissionService implements IEvaluationPermissionService
     }
 
     @Override
+    @Transactional(rollbackFor = {RokaMokaContentNotFoundException.class, RokaMokaForbiddenException.class})
     public void accept(Long permissionId, String userName) throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
         PermissionReq permissionReq = this.getPendingPermissionRequestOrElseThrow(permissionId);
 
