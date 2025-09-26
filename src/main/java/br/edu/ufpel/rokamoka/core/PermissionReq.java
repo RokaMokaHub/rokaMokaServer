@@ -62,4 +62,8 @@ public class PermissionReq {
                 ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode()
                 : getClass().hashCode();
     }
+
+    public boolean isPending() {
+        return RequestStatus.PENDING.equals(this.status);
+    }
 }
