@@ -178,6 +178,12 @@ public class UserService implements IUserService {
         return new UserOutputDTO(loggedUser, mokadexOutputDTO);
     }
 
+    @Override
+    public User getByNome(String nome) throws RokaMokaContentNotFoundException {
+        return this.userRepository.findByNome(nome)
+                .orElseThrow(() -> new RokaMokaContentNotFoundException("Usuário não encontrado"));
+    }
+
     private User findLoggedUser() throws RokaMokaContentNotFoundException {
         return this.userRepository
                 .findByNome(ServiceContext.getContext().getUser().getUsername())
