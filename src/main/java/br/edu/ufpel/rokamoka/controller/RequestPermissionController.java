@@ -5,7 +5,7 @@ import br.edu.ufpel.rokamoka.core.RoleEnum;
 import br.edu.ufpel.rokamoka.dto.permission.output.PermissionRequestStatusDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
-import br.edu.ufpel.rokamoka.service.implementation.RequestPermissionService;
+import br.edu.ufpel.rokamoka.service.IRequestPermissionService;
 import br.edu.ufpel.rokamoka.wrapper.RokaMokaController;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class RequestPermissionController extends RokaMokaController {
 
-    private final RequestPermissionService requestPermissionService;
+    private final IRequestPermissionService requestPermissionService;
 
     @Operation(summary = "Solicitar acesso como curador")
     @PostMapping(value = "/curator", produces = MediaType.APPLICATION_JSON_VALUE)
