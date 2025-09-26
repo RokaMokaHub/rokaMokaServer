@@ -1,6 +1,10 @@
 package br.edu.ufpel.rokamoka.service.implementation;
 
-import br.edu.ufpel.rokamoka.core.*;
+import br.edu.ufpel.rokamoka.core.PermissionReq;
+import br.edu.ufpel.rokamoka.core.RequestStatus;
+import br.edu.ufpel.rokamoka.core.Role;
+import br.edu.ufpel.rokamoka.core.RoleEnum;
+import br.edu.ufpel.rokamoka.core.User;
 import br.edu.ufpel.rokamoka.dto.permission.output.PermissionRequestStatusDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
@@ -20,16 +24,15 @@ public class RequestPermissionService implements IRequestPermissionService {
     private final RoleRepository roleRepository;
 
     @Override
-    public PermissionRequestStatusDTO createRequest(String userName, RoleEnum role) throws RokaMokaContentNotFoundException, RokaMokaContentDuplicatedException {
-        User requester = userRepository.findByNome(userName)
+    public PermissionRequestStatusDTO createRequest(String userName, RoleEnum role)
+    throws RokaMokaContentNotFoundException, RokaMokaContentDuplicatedException {
+        User requester = this.userRepository.findByNome(userName)
                 .orElseThrow(() -> new RokaMokaContentNotFoundException("Usuário não encontrado"));
 
-        Role targetRole = roleRepository.findByName(role);
+        Role targetRole = this.roleRepository.findByName(role);
 
-        if (permissionReqRepository.existsByRequesterAndStatusAndTargetRole(
-                requester,
-                RequestStatus.PENDING,
-                targetRole)) {
+        if (this.permissionReqRepository.existsByRequesterAndStatusAndTargetRole(
+                requester, RequestStatus.PENDING, targetRole)) {
             throw new RokaMokaContentDuplicatedException("Já existe uma solicitação pendente para este usuário e perfil");
         }
 
@@ -38,24 +41,16 @@ public class RequestPermissionService implements IRequestPermissionService {
                 .status(RequestStatus.PENDING)
                 .targetRole(targetRole)
                 .build();
+        PermissionReq savedRequest = this.permissionReqRepository.save(permissionReq);
 
-        PermissionReq savedRequest = permissionReqRepository.save(permissionReq);
-
-        return new PermissionRequestStatusDTO(
-                savedRequest.getId(),
-                savedRequest.getStatus(),
-                savedRequest.getTargetRole().getName()
-        );
+        return new PermissionRequestStatusDTO(savedRequest);
     }
 
     @Override
-    public PermissionRequestStatusDTO getPermissionRequestStatus(Long permissionID) throws RokaMokaContentNotFoundException {
-        PermissionReq permissionReq = permissionReqRepository.findById(permissionID)
+    public PermissionRequestStatusDTO getPermissionRequestStatus(Long permissionID)
+    throws RokaMokaContentNotFoundException {
+        PermissionReq permissionReq = this.permissionReqRepository.findById(permissionID)
                 .orElseThrow(() -> new RokaMokaContentNotFoundException("Solicitação não encontrada"));
-        return new PermissionRequestStatusDTO(
-                permissionReq.getId(),
-                permissionReq.getStatus(),
-                permissionReq.getTargetRole().getName()
-        );
+        return new PermissionRequestStatusDTO(permissionReq);
     }
 }
