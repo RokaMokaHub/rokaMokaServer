@@ -10,7 +10,7 @@ import jakarta.validation.constraints.NotNull;
  * @author MauricioMucci
  */
 public record LocationInputDTO(
-        @NotNull(groups = GroupValidators.Create.class) Long id,
+        @NotNull(groups = GroupValidators.Update.class) Long id,
         @NotBlank String name,
         @NotNull(groups = GroupValidators.Create.class) @Valid AddressInputDTO endereco
 ) {}
