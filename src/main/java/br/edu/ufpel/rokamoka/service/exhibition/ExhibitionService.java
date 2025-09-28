@@ -43,7 +43,7 @@ public class ExhibitionService implements IExhibitionService {
         Exhibition exhibition = Exhibition.builder()
                 .name(dto.name())
                 .description(dto.description())
-                .address(this.addressRepository.save(new Address(dto.enderecoDTO())))
+                .address(this.addressRepository.save(new Address(dto.addressInputDTO())))
                 .build();
         return this.exhibitionRepository.save(exhibition);
     }
