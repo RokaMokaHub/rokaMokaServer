@@ -6,6 +6,7 @@ import br.edu.ufpel.rokamoka.dto.permission.output.PermissionRequestStatusDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.service.IRequestPermissionService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,62 +35,61 @@ class RequestPermissionControllerTest implements ControllerResponseValidator {
 
     @Mock private IRequestPermissionService requestPermissionService;
 
+    private Authentication authentication;
+    private PermissionRequestStatusDTO request;
+
+    @BeforeEach
+    void setUp() {
+        this.authentication = mock(Authentication.class);
+        this.request = mock(PermissionRequestStatusDTO.class);
+    }
+
     //region createPermissionRequestCurator
     @Test
     void createPermissionRequestCurator_shouldReturnPermissionRequestStatusDTO_whenSuccessful()
     throws RokaMokaContentDuplicatedException, RokaMokaContentNotFoundException {
         // Arrange
-        String username = "username";
-        Authentication authentication = mock(Authentication.class);
-        PermissionRequestStatusDTO request = mock(PermissionRequestStatusDTO.class);
-
-        when(authentication.getName()).thenReturn(username);
-        when(this.requestPermissionService.createRequest(username, RoleEnum.CURATOR)).thenReturn(request);
+        when(this.authentication.getName()).thenReturn("");
+        when(this.requestPermissionService.createRequest("", RoleEnum.CURATOR)).thenReturn(this.request);
 
         // Act
         ResponseEntity<ApiResponseWrapper<PermissionRequestStatusDTO>> response =
-                this.requestPermissionController.createPermissionRequestCurator(authentication);
+                this.requestPermissionController.createPermissionRequestCurator(this.authentication);
 
         // Assert
-        this.assertExpectedResponse(response, request);
+        this.assertExpectedResponse(response, this.request);
 
-        verify(this.requestPermissionService).createRequest(username, RoleEnum.CURATOR);
+        verify(this.requestPermissionService).createRequest("", RoleEnum.CURATOR);
     }
 
     @Test
     void createPermissionRequestCurator_shouldThrowRokaMokaContentNotFoundException_whenAnyEntityIsNotFound()
     throws RokaMokaContentDuplicatedException, RokaMokaContentNotFoundException {
         // Arrange
-        String username = "username";
-        Authentication authentication = mock(Authentication.class);
-
-        when(authentication.getName()).thenReturn(username);
-        when(this.requestPermissionService.createRequest(username, RoleEnum.CURATOR)).thenThrow(
+        when(this.authentication.getName()).thenReturn("");
+        when(this.requestPermissionService.createRequest("", RoleEnum.CURATOR)).thenThrow(
                 RokaMokaContentNotFoundException.class);
 
         // Act & Assert
         assertThrows(RokaMokaContentNotFoundException.class,
-                () -> this.requestPermissionController.createPermissionRequestCurator(authentication));
+                () -> this.requestPermissionController.createPermissionRequestCurator(this.authentication));
 
-        verify(this.requestPermissionService).createRequest(username, RoleEnum.CURATOR);
+        verify(this.requestPermissionService).createRequest("", RoleEnum.CURATOR);
     }
 
     @Test
     void createPermissionRequestCurator_shouldThrowRokaMokaContentNotFoundException_whenRequestAlreadyExists()
     throws RokaMokaContentDuplicatedException, RokaMokaContentNotFoundException {
         // Arrange
-        String username = "username";
-        Authentication authentication = mock(Authentication.class);
-
-        when(authentication.getName()).thenReturn(username);
-        when(this.requestPermissionService.createRequest(username, RoleEnum.CURATOR)).thenThrow(
+        when(this.authentication.getName()).thenReturn("");
+        when(this.requestPermissionService.createRequest("", RoleEnum.CURATOR)).thenThrow(
                 RokaMokaContentDuplicatedException.class);
 
         // Act & Assert
         assertThrows(RokaMokaContentDuplicatedException.class,
-                () -> this.requestPermissionController.createPermissionRequestCurator(authentication));
+                () -> this.requestPermissionController.createPermissionRequestCurator(this.authentication));
 
-        verify(this.requestPermissionService).createRequest(username, RoleEnum.CURATOR);
+        verify(this.requestPermissionService).createRequest("", RoleEnum.CURATOR);
     }
     //endregion
 
@@ -98,57 +98,47 @@ class RequestPermissionControllerTest implements ControllerResponseValidator {
     void createPermissionRequestResearcher_shouldReturnPermissionRequestStatusDTO_whenSuccessful()
     throws RokaMokaContentDuplicatedException, RokaMokaContentNotFoundException {
         // Arrange
-        String username = "username";
-        Authentication authentication = mock(Authentication.class);
-        PermissionRequestStatusDTO request = mock(PermissionRequestStatusDTO.class);
-
-        when(authentication.getName()).thenReturn(username);
-        when(this.requestPermissionService.createRequest(username, RoleEnum.RESEARCHER)).thenReturn(request);
+        when(this.authentication.getName()).thenReturn("");
+        when(this.requestPermissionService.createRequest("", RoleEnum.RESEARCHER)).thenReturn(this.request);
 
         // Act
         ResponseEntity<ApiResponseWrapper<PermissionRequestStatusDTO>> response =
-                this.requestPermissionController.createPermissionRequestResearcher(authentication);
+                this.requestPermissionController.createPermissionRequestResearcher(this.authentication);
 
         // Assert
-        this.assertExpectedResponse(response, request);
+        this.assertExpectedResponse(response, this.request);
 
-        verify(this.requestPermissionService).createRequest(username, RoleEnum.RESEARCHER);
+        verify(this.requestPermissionService).createRequest("", RoleEnum.RESEARCHER);
     }
 
     @Test
     void createPermissionRequestResearcher_shouldThrowRokaMokaContentNotFoundException_whenAnyEntityIsNotFound()
     throws RokaMokaContentDuplicatedException, RokaMokaContentNotFoundException {
         // Arrange
-        String username = "username";
-        Authentication authentication = mock(Authentication.class);
-
-        when(authentication.getName()).thenReturn(username);
-        when(this.requestPermissionService.createRequest(username, RoleEnum.RESEARCHER)).thenThrow(
+        when(this.authentication.getName()).thenReturn("");
+        when(this.requestPermissionService.createRequest("", RoleEnum.RESEARCHER)).thenThrow(
                 RokaMokaContentNotFoundException.class);
 
         // Act & Assert
         assertThrows(RokaMokaContentNotFoundException.class,
-                () -> this.requestPermissionController.createPermissionRequestResearcher(authentication));
+                () -> this.requestPermissionController.createPermissionRequestResearcher(this.authentication));
 
-        verify(this.requestPermissionService).createRequest(username, RoleEnum.RESEARCHER);
+        verify(this.requestPermissionService).createRequest("", RoleEnum.RESEARCHER);
     }
 
     @Test
     void createPermissionRequestResearcher_shouldThrowRokaMokaContentNotFoundException_whenRequestAlreadyExists()
     throws RokaMokaContentDuplicatedException, RokaMokaContentNotFoundException {
         // Arrange
-        String username = "username";
-        Authentication authentication = mock(Authentication.class);
-
-        when(authentication.getName()).thenReturn(username);
-        when(this.requestPermissionService.createRequest(username, RoleEnum.RESEARCHER)).thenThrow(
+        when(this.authentication.getName()).thenReturn("");
+        when(this.requestPermissionService.createRequest("", RoleEnum.RESEARCHER)).thenThrow(
                 RokaMokaContentDuplicatedException.class);
 
         // Act & Assert
         assertThrows(RokaMokaContentDuplicatedException.class,
-                () -> this.requestPermissionController.createPermissionRequestResearcher(authentication));
+                () -> this.requestPermissionController.createPermissionRequestResearcher(this.authentication));
 
-        verify(this.requestPermissionService).createRequest(username, RoleEnum.RESEARCHER);
+        verify(this.requestPermissionService).createRequest("", RoleEnum.RESEARCHER);
     }
     //endregion
 
@@ -157,16 +147,14 @@ class RequestPermissionControllerTest implements ControllerResponseValidator {
     void getPermissionRequestStatus_shouldReturnPermissionRequestStatusDTO_whenSuccessful()
     throws RokaMokaContentNotFoundException {
         // Arrange
-        PermissionRequestStatusDTO request = mock(PermissionRequestStatusDTO.class);
-
-        when(this.requestPermissionService.getPermissionRequestStatus(anyLong())).thenReturn(request);
+        when(this.requestPermissionService.getPermissionRequestStatus(anyLong())).thenReturn(this.request);
 
         // Act
         ResponseEntity<ApiResponseWrapper<PermissionRequestStatusDTO>> response =
                 this.requestPermissionController.getPermissionRequestStatus(anyLong());
 
         // Assert
-        this.assertExpectedResponse(response, request);
+        this.assertExpectedResponse(response, this.request);
 
         verify(this.requestPermissionService).getPermissionRequestStatus(anyLong());
     }

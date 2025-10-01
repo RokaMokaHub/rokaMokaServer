@@ -13,6 +13,7 @@ import br.edu.ufpel.rokamoka.repository.RoleRepository;
 import br.edu.ufpel.rokamoka.service.MockRepository;
 import br.edu.ufpel.rokamoka.service.user.IUserService;
 import org.instancio.Instancio;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -57,19 +58,25 @@ class RequestPermissionServiceTest implements MockRepository<PermissionReq> {
 
     @Captor private ArgumentCaptor<PermissionReq> requestCaptor;
 
+    private User requester;
+    private Role targetRole;
+
+    @BeforeEach
+    void setUp() {
+        this.requester = mock(User.class);
+        this.targetRole = mock(Role.class);
+    }
+
     //region createRequest
     @ParameterizedTest
     @EnumSource(value = RoleEnum.class)
     void createRequest_shouldSaveNewRequest_whenSuccessful(RoleEnum roleName)
     throws RokaMokaContentNotFoundException, RokaMokaContentDuplicatedException {
         // Arrange
-        User requester = mock(User.class);
-        Role targetRole = mock(Role.class);
-
-        when(this.userService.getByNome(anyString())).thenReturn(requester);
-        when(this.roleRepository.findByName(roleName)).thenReturn(targetRole);
-        when(this.permissionReqRepository.existsByRequesterAndStatusAndTargetRole(requester, RequestStatus.PENDING,
-                targetRole)).thenReturn(false);
+        when(this.userService.getByNome(anyString())).thenReturn(this.requester);
+        when(this.roleRepository.findByName(roleName)).thenReturn(this.targetRole);
+        when(this.permissionReqRepository.existsByRequesterAndStatusAndTargetRole(this.requester, RequestStatus.PENDING,
+                this.targetRole)).thenReturn(false);
         when(this.permissionReqRepository.save(any(PermissionReq.class))).thenAnswer(
                 inv -> this.mockRepositorySave(inv.getArgument(0)));
 
@@ -79,8 +86,8 @@ class RequestPermissionServiceTest implements MockRepository<PermissionReq> {
         // Assert
         verify(this.userService).getByNome(anyString());
         verify(this.roleRepository).findByName(roleName);
-        verify(this.permissionReqRepository).existsByRequesterAndStatusAndTargetRole(
-                requester, RequestStatus.PENDING, targetRole);
+        verify(this.permissionReqRepository).existsByRequesterAndStatusAndTargetRole(this.requester,
+                RequestStatus.PENDING, this.targetRole);
         verify(this.permissionReqRepository).save(this.requestCaptor.capture());
 
         PermissionReq newRequest = this.requestCaptor.getValue();
@@ -99,13 +106,10 @@ class RequestPermissionServiceTest implements MockRepository<PermissionReq> {
     void createRequest_shouldThrowRokaMokaContentDuplicatedException_whenRequestAlreadyExists(RoleEnum roleName)
     throws RokaMokaContentNotFoundException {
         // Arrange
-        User requester = mock(User.class);
-        Role targetRole = mock(Role.class);
-
-        when(this.userService.getByNome(anyString())).thenReturn(requester);
-        when(this.roleRepository.findByName(roleName)).thenReturn(targetRole);
-        when(this.permissionReqRepository.existsByRequesterAndStatusAndTargetRole(requester, RequestStatus.PENDING,
-                targetRole)).thenReturn(true);
+        when(this.userService.getByNome(anyString())).thenReturn(this.requester);
+        when(this.roleRepository.findByName(roleName)).thenReturn(this.targetRole);
+        when(this.permissionReqRepository.existsByRequesterAndStatusAndTargetRole(this.requester, RequestStatus.PENDING,
+                this.targetRole)).thenReturn(true);
 
         // Act & Assert
         assertThrows(RokaMokaContentDuplicatedException.class,
@@ -113,8 +117,8 @@ class RequestPermissionServiceTest implements MockRepository<PermissionReq> {
 
         verify(this.userService).getByNome(anyString());
         verify(this.roleRepository).findByName(roleName);
-        verify(this.permissionReqRepository).existsByRequesterAndStatusAndTargetRole(
-                requester, RequestStatus.PENDING, targetRole);
+        verify(this.permissionReqRepository).existsByRequesterAndStatusAndTargetRole(this.requester, RequestStatus.PENDING,
+                this.targetRole);
         verifyNoMoreInteractions(this.permissionReqRepository);
     }
     //endregion
