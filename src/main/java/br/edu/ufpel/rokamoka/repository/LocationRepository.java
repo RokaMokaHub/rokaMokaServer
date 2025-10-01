@@ -8,4 +8,6 @@ import java.util.Optional;
 public interface LocationRepository extends JpaRepository<Location, Long> {
 
     Optional<Location> findByEndereco_Id(Long addressId);
+
+    boolean existsByNome(String nome);
 }
