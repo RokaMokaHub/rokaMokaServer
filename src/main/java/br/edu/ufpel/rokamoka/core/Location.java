@@ -37,7 +37,7 @@ public class Location {
     @Column(nullable = false, unique = true)
     private String nome;
 
-    @OneToOne(cascade = CascadeType.REMOVE, optional = false)
+    @OneToOne(cascade = CascadeType.ALL, optional = false)
     @JoinColumn(name = "endereco_id", nullable = false)
     private Address endereco;
 
