@@ -10,6 +10,7 @@ import br.edu.ufpel.rokamoka.repository.ArtworkRepository;
 import br.edu.ufpel.rokamoka.service.artwork.IArtworkService;
 import org.apache.coyote.BadRequestException;
 import org.instancio.Instancio;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -45,27 +46,34 @@ class ArtworkControllerTest implements ControllerResponseValidator {
     @Mock private IArtworkService artworkService;
     @Mock private ArtworkRepository artworkRepository;
 
+    private ArtworkInputDTO input;
+    private Artwork artwork;
+    private ArtworkOutputDTO expected;
+
+    @BeforeEach
+    void setUp() {
+        this.input = Instancio.create(ArtworkInputDTO.class);
+        this.artwork = mock(Artwork.class);
+        this.expected = new ArtworkOutputDTO(this.artwork);
+    }
+
     //region findById
     @Test
     void findById_shouldReturnArtworkOutputDTO_whenArtworkExistsById() throws RokaMokaContentNotFoundException {
         // Arrange
-        Artwork artwork = mock(Artwork.class);
-        ArtworkOutputDTO expected = Instancio.create(ArtworkOutputDTO.class);
-
-        when(this.artworkService.findById(anyLong())).thenReturn(artwork);
-        when(artwork.getId()).thenReturn(1L);
-        when(this.artworkRepository.createFullArtworkInfo(anyLong())).thenReturn(expected);
+        when(this.artworkService.findById(anyLong())).thenReturn(this.artwork);
+        when(this.artwork.getId()).thenReturn(1L);
+        when(this.artworkRepository.createFullArtworkInfo(anyLong())).thenReturn(this.expected);
 
         // Act
         ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> response = this.artworkController.findById(1L);
 
         // Assert
-        this.assertExpectedResponse(response, expected);
+        this.assertExpectedResponse(response, this.expected);
 
         verify(this.artworkService, times(1)).findById(anyLong());
-        verify(artwork, times(1)).getId();
         verify(this.artworkRepository, times(1)).createFullArtworkInfo(anyLong());
-        verifyNoMoreInteractions(this.artworkService, artwork, this.artworkRepository);
+        verifyNoMoreInteractions(this.artworkService, this.artworkRepository);
     }
 
     @Test
@@ -88,23 +96,19 @@ class ArtworkControllerTest implements ControllerResponseValidator {
     void getArtworkByQrCode_shouldReturnArtworkOutputDTO_whenArtworkExistsByQrCode()
     throws RokaMokaContentNotFoundException {
         // Arrange
-        Artwork artwork = mock(Artwork.class);
-        ArtworkOutputDTO expected = Instancio.create(ArtworkOutputDTO.class);
-
-        when(this.artworkService.getByQrCodeOrThrow(anyString())).thenReturn(artwork);
-        when(artwork.getId()).thenReturn(1L);
-        when(this.artworkRepository.createFullArtworkInfo(anyLong())).thenReturn(expected);
+        when(this.artworkService.getByQrCodeOrThrow(anyString())).thenReturn(this.artwork);
+        when(this.artwork.getId()).thenReturn(1L);
+        when(this.artworkRepository.createFullArtworkInfo(anyLong())).thenReturn(this.expected);
 
         // Act
-        ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> response =
-                this.artworkController.getArtworkByQrCode("qrCode");
+        ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> response = this.artworkController.getArtworkByQrCode("");
 
         // Assert
-        this.assertExpectedResponse(response, expected);
+        this.assertExpectedResponse(response, this.expected);
 
         verify(this.artworkService, times(1)).getByQrCodeOrThrow(anyString());
         verify(this.artworkRepository, times(1)).createFullArtworkInfo(anyLong());
-        verifyNoMoreInteractions(this.artworkService, artwork, this.artworkRepository);
+        verifyNoMoreInteractions(this.artworkService, this.artworkRepository);
     }
 
     @Test
@@ -114,7 +118,7 @@ class ArtworkControllerTest implements ControllerResponseValidator {
         when(this.artworkService.getByQrCodeOrThrow(anyString())).thenThrow(RokaMokaContentNotFoundException.class);
 
         // Act & Assert
-        assertThrows(RokaMokaContentNotFoundException.class, () -> this.artworkController.getArtworkByQrCode("qrCode"));
+        assertThrows(RokaMokaContentNotFoundException.class, () -> this.artworkController.getArtworkByQrCode(""));
 
         verify(this.artworkService, times(1)).getByQrCodeOrThrow(anyString());
         verifyNoMoreInteractions(this.artworkService);
@@ -169,8 +173,7 @@ class ArtworkControllerTest implements ControllerResponseValidator {
         MultipartFile image = mock(MultipartFile.class);
 
         when(image.isEmpty()).thenReturn(false);
-        doThrow(RokaMokaForbiddenException.class)
-                .when(this.artworkService)
+        doThrow(RokaMokaForbiddenException.class).when(this.artworkService)
                 .addImage(anyLong(), any(MultipartFile.class));
 
         // Act & Assert
@@ -186,17 +189,13 @@ class ArtworkControllerTest implements ControllerResponseValidator {
     @Test
     void create_shouldReturnArtworkOutputDTO_whenSuccessful() throws RokaMokaContentNotFoundException {
         // Arrange
-        ArtworkInputDTO input = Instancio.create(ArtworkInputDTO.class);
-        Artwork artwork = mock(Artwork.class);
-        ArtworkOutputDTO expected = new ArtworkOutputDTO(artwork);
-
-        when(this.artworkService.create(anyLong(), any(ArtworkInputDTO.class))).thenReturn(artwork);
+        when(this.artworkService.create(anyLong(), any(ArtworkInputDTO.class))).thenReturn(this.artwork);
 
         // Act
-        ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> response = this.artworkController.create(1L, input);
+        ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> response = this.artworkController.create(1L, this.input);
 
         // Assert
-        this.assertExpectedResponse(response, expected);
+        this.assertExpectedResponse(response, this.expected);
 
         verify(this.artworkService, times(1)).create(anyLong(), any(ArtworkInputDTO.class));
         verifyNoMoreInteractions(this.artworkService);
@@ -207,17 +206,13 @@ class ArtworkControllerTest implements ControllerResponseValidator {
     void create_shouldThrowRokaMokaContentNotFoundException_whenExhibitionDoesNotExistById()
     throws RokaMokaContentNotFoundException {
         // Arrange
-        Long exhibitionId = 1L;
-        ArtworkInputDTO input = Instancio.create(ArtworkInputDTO.class);
-
-        when(this.artworkService.create(exhibitionId, input))
-                .thenThrow(RokaMokaContentNotFoundException.class);
+        when(this.artworkService.create(anyLong(), any(ArtworkInputDTO.class))).thenThrow(
+                RokaMokaContentNotFoundException.class);
 
         // Act & Assert
-        assertThrows(RokaMokaContentNotFoundException.class,
-                () -> this.artworkController.create(exhibitionId, input));
+        assertThrows(RokaMokaContentNotFoundException.class, () -> this.artworkController.create(1L, this.input));
 
-        verify(this.artworkService, times(1)).create(exhibitionId, input);
+        verify(this.artworkService, times(1)).create(anyLong(), any(ArtworkInputDTO.class));
         verifyNoMoreInteractions(this.artworkService);
         verifyNoInteractions(this.artworkRepository);
     }
@@ -227,16 +222,13 @@ class ArtworkControllerTest implements ControllerResponseValidator {
     @Test
     void deletar_shouldReturnArtworkOutputDTO_whenSuccessful() throws RokaMokaContentNotFoundException {
         // Arrange
-        Artwork artwork = mock(Artwork.class);
-        ArtworkOutputDTO expected = new ArtworkOutputDTO(artwork);
-
-        when(this.artworkService.findById(anyLong())).thenReturn(artwork);
+        when(this.artworkService.findById(anyLong())).thenReturn(this.artwork);
 
         // Act
         ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> response = this.artworkController.deletar(1L);
 
         // Assert
-        this.assertExpectedResponse(response, expected);
+        this.assertExpectedResponse(response, this.expected);
 
         verify(this.artworkService, times(1)).findById(anyLong());
         verify(this.artworkService, times(1)).deleteById(anyLong());
