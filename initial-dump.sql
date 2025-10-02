@@ -22,7 +22,7 @@ CREATE TABLE public.local
     nome        VARCHAR(255)                                                                                                             NOT NULL,
     endereco_id INT8                                                                                                                     NOT NULL,
     CONSTRAINT pk_local PRIMARY KEY (id),
-    CONSTRAINT unq_nome UNIQUE (nome),
+    CONSTRAINT unq_nome_local UNIQUE (nome),
     CONSTRAINT fk_endereco FOREIGN KEY (endereco_id) REFERENCES endereco (id) ON DELETE CASCADE
 );
 
@@ -35,7 +35,7 @@ CREATE TABLE public.usuario
     perfil_id INT8                                                                                                                     NOT NULL,
     CONSTRAINT pk_usuario PRIMARY KEY (id),
     CONSTRAINT fk_perfil FOREIGN KEY (perfil_id) REFERENCES perfil (id),
-    CONSTRAINT unq_nome UNIQUE (nome)
+    CONSTRAINT unq_nome_usuario UNIQUE (nome)
 );
 
 CREATE TABLE public.dispositivo
