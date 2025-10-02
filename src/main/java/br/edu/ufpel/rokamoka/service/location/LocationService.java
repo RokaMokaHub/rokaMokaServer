@@ -60,7 +60,7 @@ class LocationService implements ILocationService {
     @Override
     @Transactional
     public LocationOutputDTO create(@NotNull LocationInputDTO input) throws RokaMokaContentDuplicatedException {
-        if (this.locationRepository.existsByNome(input.name())) {
+        if (this.locationRepository.existsByNome(input.nome())) {
             throw new RokaMokaContentDuplicatedException("Localização já existe");
         }
 
@@ -84,7 +84,7 @@ class LocationService implements ILocationService {
             location.setEndereco(updatedAddress);
         }
 
-        location.setNome(input.name());
+        location.setNome(input.nome());
         location = this.locationRepository.save(location);
 
         return this.toOutput(location);
