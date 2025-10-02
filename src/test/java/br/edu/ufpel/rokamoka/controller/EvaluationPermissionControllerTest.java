@@ -7,6 +7,7 @@ import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaForbiddenException;
 import br.edu.ufpel.rokamoka.service.evaluation.IEvaluationPermissionService;
 import org.instancio.Instancio;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -44,19 +45,25 @@ class EvaluationPermissionControllerTest implements ControllerResponseValidator 
 
     @Mock private IEvaluationPermissionService evaluationPermissionService;
 
+    private EvaluationPermissionDTO evaluationDTO;
+    private Authentication authentication;
+
+    @BeforeEach
+    void setUp() {
+        this.evaluationDTO = mock(EvaluationPermissionDTO.class);
+        this.authentication = mock(Authentication.class);
+    }
+
     //region deny
     @Test
     void deny_shouldReturnVoid_whenSuccessful() throws RokaMokaForbiddenException, RokaMokaContentNotFoundException {
         // Arrange
-        EvaluationPermissionDTO evaluationDTO = mock(EvaluationPermissionDTO.class);
-        Authentication authentication = mock(Authentication.class);
-
-        when(evaluationDTO.justificativa()).thenReturn("");
-        when(authentication.getName()).thenReturn("");
+        when(this.evaluationDTO.justificativa()).thenReturn("");
+        when(this.authentication.getName()).thenReturn("");
 
         // Act
         ResponseEntity<ApiResponseWrapper<Void>> response =
-                this.evaluationPermissionController.deny(1L, evaluationDTO, authentication);
+                this.evaluationPermissionController.deny(1L, this.evaluationDTO, this.authentication);
 
         // Assert
         this.assertVoidResponse(response);
@@ -68,17 +75,14 @@ class EvaluationPermissionControllerTest implements ControllerResponseValidator 
     void deny_shouldThrowRokaMokaContentNotFoundException_whenPermissionRequestDoesNotExistById()
     throws RokaMokaForbiddenException, RokaMokaContentNotFoundException {
         // Arrange
-        EvaluationPermissionDTO evaluationDTO = mock(EvaluationPermissionDTO.class);
-        Authentication authentication = mock(Authentication.class);
-
-        when(evaluationDTO.justificativa()).thenReturn("");
-        when(authentication.getName()).thenReturn("");
+        when(this.evaluationDTO.justificativa()).thenReturn("");
+        when(this.authentication.getName()).thenReturn("");
         doThrow(RokaMokaContentNotFoundException.class).when(this.evaluationPermissionService)
                 .deny(anyLong(), anyString(), anyString());
 
         // Act & Assert
         assertThrows(RokaMokaContentNotFoundException.class,
-                () -> this.evaluationPermissionController.deny(1L, evaluationDTO, authentication));
+                () -> this.evaluationPermissionController.deny(1L, this.evaluationDTO, this.authentication));
 
         verify(this.evaluationPermissionService).deny(anyLong(), anyString(), anyString());
     }
@@ -87,17 +91,14 @@ class EvaluationPermissionControllerTest implements ControllerResponseValidator 
     void deny_shouldThrowRokaMokaForbiddenException_whenRequestStatusIsNotPending()
     throws RokaMokaForbiddenException, RokaMokaContentNotFoundException {
         // Arrange
-        EvaluationPermissionDTO evaluationDTO = mock(EvaluationPermissionDTO.class);
-        Authentication authentication = mock(Authentication.class);
-
-        when(evaluationDTO.justificativa()).thenReturn("");
-        when(authentication.getName()).thenReturn("");
+        when(this.evaluationDTO.justificativa()).thenReturn("");
+        when(this.authentication.getName()).thenReturn("");
         doThrow(RokaMokaForbiddenException.class).when(this.evaluationPermissionService)
                 .deny(anyLong(), anyString(), anyString());
 
         // Act & Assert
         assertThrows(RokaMokaForbiddenException.class,
-                () -> this.evaluationPermissionController.deny(1L, evaluationDTO, authentication));
+                () -> this.evaluationPermissionController.deny(1L, this.evaluationDTO, this.authentication));
 
         verify(this.evaluationPermissionService).deny(anyLong(), anyString(), anyString());
     }
@@ -107,13 +108,11 @@ class EvaluationPermissionControllerTest implements ControllerResponseValidator 
     @Test
     void accept_shouldReturnVoid_whenSuccessful() throws RokaMokaForbiddenException, RokaMokaContentNotFoundException {
         // Arrange
-        Authentication authentication = mock(Authentication.class);
-
-        when(authentication.getName()).thenReturn("");
+        when(this.authentication.getName()).thenReturn("");
 
         // Act
         ResponseEntity<ApiResponseWrapper<Void>> response =
-                this.evaluationPermissionController.accept(1L, authentication);
+                this.evaluationPermissionController.accept(1L, this.authentication);
 
         // Assert
         this.assertVoidResponse(response);
@@ -125,15 +124,13 @@ class EvaluationPermissionControllerTest implements ControllerResponseValidator 
     void accept_shouldThrowRokaMokaContentNotFoundException_whenPermissionRequestDoesNotExistById()
     throws RokaMokaForbiddenException, RokaMokaContentNotFoundException {
         // Arrange
-        Authentication authentication = mock(Authentication.class);
-
-        when(authentication.getName()).thenReturn("");
+        when(this.authentication.getName()).thenReturn("");
         doThrow(RokaMokaContentNotFoundException.class).when(this.evaluationPermissionService)
                 .accept(anyLong(), anyString());
 
         // Act & Assert
         assertThrows(RokaMokaContentNotFoundException.class,
-                () -> this.evaluationPermissionController.accept(1L, authentication));
+                () -> this.evaluationPermissionController.accept(1L, this.authentication));
 
         verify(this.evaluationPermissionService).accept(anyLong(), anyString());
     }
@@ -142,14 +139,12 @@ class EvaluationPermissionControllerTest implements ControllerResponseValidator 
     void accept_shouldThrowRokaMokaForbiddenException_whenRequestStatusIsNotPending()
     throws RokaMokaForbiddenException, RokaMokaContentNotFoundException {
         // Arrange
-        Authentication authentication = mock(Authentication.class);
-
-        when(authentication.getName()).thenReturn("");
+        when(this.authentication.getName()).thenReturn("");
         doThrow(RokaMokaForbiddenException.class).when(this.evaluationPermissionService).accept(anyLong(), anyString());
 
         // Act & Assert
         assertThrows(RokaMokaForbiddenException.class,
-                () -> this.evaluationPermissionController.accept(1L, authentication));
+                () -> this.evaluationPermissionController.accept(1L, this.authentication));
 
         verify(this.evaluationPermissionService).accept(anyLong(), anyString());
     }
@@ -157,10 +152,8 @@ class EvaluationPermissionControllerTest implements ControllerResponseValidator 
 
     //region list
     static Stream<Arguments> buildListInput() {
-        return Stream.of(
-                Arguments.of(Collections.emptyList()),
-                Arguments.of(Instancio.ofList(RequestDetailsDTO.class).create())
-        );
+        return Stream.of(Arguments.of(Collections.emptyList()),
+                Arguments.of(Instancio.ofList(RequestDetailsDTO.class).create()));
     }
 
     @ParameterizedTest
@@ -170,7 +163,8 @@ class EvaluationPermissionControllerTest implements ControllerResponseValidator 
         when(this.evaluationPermissionService.findAllPendingRequest()).thenReturn(requests);
 
         // Act
-        ResponseEntity<ApiResponseWrapper<List<RequestDetailsDTO>>> response = this.evaluationPermissionController.list();
+        ResponseEntity<ApiResponseWrapper<List<RequestDetailsDTO>>> response =
+                this.evaluationPermissionController.list();
 
         // Assert
         verify(this.evaluationPermissionService).findAllPendingRequest();

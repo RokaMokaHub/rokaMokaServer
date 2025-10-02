@@ -11,6 +11,7 @@ import br.edu.ufpel.rokamoka.repository.PermissionRegRepository;
 import br.edu.ufpel.rokamoka.repository.PermissionReqRepository;
 import br.edu.ufpel.rokamoka.service.user.IUserService;
 import org.instancio.Instancio;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -59,20 +60,28 @@ class EvaluationPermissionServiceTest {
 
     @Captor private ArgumentCaptor<PermissionReg> registerCaptor;
 
+    private PermissionReq request;
+    private User reviewer;
+    private PermissionReq spyRequest;
+
+    @BeforeEach
+    void setUp() {
+        this.request = mock(PermissionReq.class);
+        this.reviewer = mock(User.class);
+
+        PermissionReq p = new PermissionReq();
+        p.setStatus(RequestStatus.PENDING);
+        this.spyRequest = spy(p);
+    }
+
     //region deny
     @Test
     void deny_shouldFlipStatusToDenyAndSaveNewRegister_whenSuccessful()
     throws RokaMokaForbiddenException, RokaMokaContentNotFoundException {
         // Arrange
-        PermissionReq permissionReq = new PermissionReq();
-        permissionReq.setStatus(RequestStatus.PENDING);
-        PermissionReq spyRequest = spy(permissionReq);
-
-        User reviewer = mock(User.class);
-
-        when(this.requestRepository.findById(anyLong())).thenReturn(Optional.of(spyRequest));
+        when(this.requestRepository.findById(anyLong())).thenReturn(Optional.of(this.spyRequest));
         when(this.requestRepository.save(any(PermissionReq.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(this.userService.getByNome(anyString())).thenReturn(reviewer);
+        when(this.userService.getByNome(anyString())).thenReturn(this.reviewer);
         when(this.registerRepository.save(any(PermissionReg.class))).thenAnswer(
                 invocation -> invocation.getArgument(0));
 
@@ -85,9 +94,9 @@ class EvaluationPermissionServiceTest {
         verify(this.userService).getByNome(anyString());
         verify(this.registerRepository).save(this.registerCaptor.capture());
 
-        this.assertPermissionReq(spyRequest, RequestStatus.DENY);
+        this.assertPermissionReq(this.spyRequest, RequestStatus.DENY);
         PermissionReg register = this.registerCaptor.getValue();
-        this.assertPermissionRegister(register, reviewer, spyRequest);
+        this.assertPermissionRegister(register, this.reviewer, this.spyRequest);
     }
 
     private void assertPermissionReq(PermissionReq request, RequestStatus status) {
@@ -117,10 +126,8 @@ class EvaluationPermissionServiceTest {
     void deny_shouldThrowRokaMokaContentNotFoundException_whenUserDoesNotExistByNome()
     throws RokaMokaContentNotFoundException {
         // Arrange
-        PermissionReq permissionReq = mock(PermissionReq.class);
-
-        when(this.requestRepository.findById(anyLong())).thenReturn(Optional.of(permissionReq));
-        when(permissionReq.isPending()).thenReturn(true);
+        when(this.requestRepository.findById(anyLong())).thenReturn(Optional.of(this.request));
+        when(this.request.isPending()).thenReturn(true);
         when(this.userService.getByNome(anyString())).thenThrow(RokaMokaContentNotFoundException.class);
 
         // Act & Assert
@@ -132,10 +139,8 @@ class EvaluationPermissionServiceTest {
     @Test
     void deny_shouldThrowRokaMokaForbiddenException_whenRequestStatusIsNotPending() {
         // Arrange
-        PermissionReq permissionReq = mock(PermissionReq.class);
-
-        when(this.requestRepository.findById(anyLong())).thenReturn(Optional.of(permissionReq));
-        when(permissionReq.isPending()).thenReturn(false);
+        when(this.requestRepository.findById(anyLong())).thenReturn(Optional.of(this.request));
+        when(this.request.isPending()).thenReturn(false);
 
         // Act & Assert
         assertThrows(RokaMokaForbiddenException.class, () -> this.evaluationPermissionService.deny(1L, "", ""));
@@ -149,15 +154,9 @@ class EvaluationPermissionServiceTest {
     void accept_FlipStatusToConfirmAndSaveNewRegisterAndUpdateUserRole_whenSuccessful()
     throws RokaMokaForbiddenException, RokaMokaContentNotFoundException {
         // Arrange
-        PermissionReq permissionReq = new PermissionReq();
-        permissionReq.setStatus(RequestStatus.PENDING);
-        PermissionReq spyRequest = spy(permissionReq);
-
-        User reviewer = mock(User.class);
-
-        when(this.requestRepository.findById(anyLong())).thenReturn(Optional.of(spyRequest));
+        when(this.requestRepository.findById(anyLong())).thenReturn(Optional.of(this.spyRequest));
         when(this.requestRepository.save(any(PermissionReq.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(this.userService.getByNome(anyString())).thenReturn(reviewer);
+        when(this.userService.getByNome(anyString())).thenReturn(this.reviewer);
         when(this.registerRepository.save(any(PermissionReg.class))).thenAnswer(
                 invocation -> invocation.getArgument(0));
 
@@ -170,9 +169,9 @@ class EvaluationPermissionServiceTest {
         verify(this.userService).getByNome(anyString());
         verify(this.registerRepository).save(this.registerCaptor.capture());
 
-        this.assertPermissionReq(spyRequest, RequestStatus.CONFIRM);
+        this.assertPermissionReq(this.spyRequest, RequestStatus.CONFIRM);
         PermissionReg register = this.registerCaptor.getValue();
-        this.assertPermissionRegister(register, reviewer, spyRequest);
+        this.assertPermissionRegister(register, this.reviewer, this.spyRequest);
     }
 
     @Test
@@ -191,10 +190,8 @@ class EvaluationPermissionServiceTest {
     void accept_shouldThrowRokaMokaContentNotFoundException_whenUserDoesNotExistByNome()
     throws RokaMokaContentNotFoundException {
         // Arrange
-        PermissionReq permissionReq = mock(PermissionReq.class);
-
-        when(this.requestRepository.findById(anyLong())).thenReturn(Optional.of(permissionReq));
-        when(permissionReq.isPending()).thenReturn(true);
+        when(this.requestRepository.findById(anyLong())).thenReturn(Optional.of(this.request));
+        when(this.request.isPending()).thenReturn(true);
         when(this.userService.getByNome(anyString())).thenThrow(RokaMokaContentNotFoundException.class);
 
         // Act & Assert
