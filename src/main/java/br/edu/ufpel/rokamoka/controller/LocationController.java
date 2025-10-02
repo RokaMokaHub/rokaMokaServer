@@ -45,7 +45,7 @@ class LocationController extends RokaMokaController {
 
     @Operation(summary = "Buscar local por id", description = "Retorna um local com base no ID informado")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Local encontrado"),
-            @ApiResponse(responseCode = "400", description = "Local não encontrado")})
+            @ApiResponse(responseCode = "404", description = "Local não encontrado")})
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponseWrapper<LocationOutputDTO>> getLocation(@PathVariable @NotNull Long id)
     throws RokaMokaContentNotFoundException {
@@ -74,7 +74,7 @@ class LocationController extends RokaMokaController {
 
     @Operation(summary = "Cadastrar novo local", description = "Cadastra um novo local com os dados fornecidos")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Local cadastrado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Local duplicado"),
+            @ApiResponse(responseCode = "404", description = "Local duplicado"),
             @ApiResponse(responseCode = "500", description = "Erro inesperado ao cadastrar local")})
     @PostMapping
     public ResponseEntity<ApiResponseWrapper<LocationOutputDTO>> register(
@@ -87,7 +87,7 @@ class LocationController extends RokaMokaController {
     @Operation(summary = "Atualizar local existente",
             description = "Atualiza um local existente com os dados fornecidos")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Local atualizado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Local não encontrado"),
+            @ApiResponse(responseCode = "404", description = "Local não encontrado"),
             @ApiResponse(responseCode = "500", description = "Erro inesperado ao atualizar local")})
     @PatchMapping
     public ResponseEntity<ApiResponseWrapper<LocationOutputDTO>> patch(
@@ -99,7 +99,7 @@ class LocationController extends RokaMokaController {
 
     @Operation(summary = "Remover local existente", description = "Remove um local existente com base no ID fornecido")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Local removido com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Local não encontrado"),
+            @ApiResponse(responseCode = "404", description = "Local não encontrado"),
             @ApiResponse(responseCode = "500", description = "Erro inesperado ao remover local")})
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponseWrapper<LocationOutputDTO>> remove(@PathVariable @NotNull Long id)
