@@ -7,6 +7,7 @@ import br.edu.ufpel.rokamoka.dto.emblem.output.EmblemOutputDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.service.emblem.EmblemService;
 import org.instancio.Instancio;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,19 +34,26 @@ class EmblemControllerTest implements ControllerResponseValidator {
 
     @Mock private EmblemService emblemService;
 
+    private Emblem emblem;
+    private EmblemInputDTO input;
+
+    @BeforeEach
+    void setUp() {
+        this.emblem = Instancio.create(Emblem.class);
+        this.input = mock(EmblemInputDTO.class);
+    }
+
     //region findById
     @Test
     void findById_shouldReturnEmblemOutputDTO_whenEmblemExistsById() throws RokaMokaContentNotFoundException {
         // Arrange
-        Emblem emblem = Instancio.create(Emblem.class);
-
-        when(this.emblemService.findById(anyLong())).thenReturn(emblem);
+        when(this.emblemService.findById(anyLong())).thenReturn(this.emblem);
 
         // Act
         ResponseEntity<ApiResponseWrapper<EmblemOutputDTO>> response = this.emblemController.findById(1L);
 
         // Assert
-        this.assertExpectedResponse(response, new EmblemOutputDTO(emblem));
+        this.assertExpectedResponse(response, new EmblemOutputDTO(this.emblem));
 
         verify(this.emblemService).findById(anyLong());
     }
@@ -68,32 +76,27 @@ class EmblemControllerTest implements ControllerResponseValidator {
     void register_shouldReturnEmblemOutputDTO_whenSuccessful()
     throws RokaMokaContentNotFoundException {
         // Arrange
-        EmblemInputDTO input = mock(EmblemInputDTO.class);
-        Emblem emblem = Instancio.create(Emblem.class);
-
-        when(this.emblemService.create(input)).thenReturn(emblem);
+        when(this.emblemService.create(this.input)).thenReturn(this.emblem);
 
         // Act
-        ResponseEntity<ApiResponseWrapper<EmblemOutputDTO>> response = this.emblemController.register(input);
+        ResponseEntity<ApiResponseWrapper<EmblemOutputDTO>> response = this.emblemController.register(this.input);
 
         // Assert
-        this.assertExpectedResponse(response, new EmblemOutputDTO(emblem));
+        this.assertExpectedResponse(response, new EmblemOutputDTO(this.emblem));
 
-        verify(this.emblemService).create(input);
+        verify(this.emblemService).create(this.input);
     }
 
     @Test
     void register_shouldThrowRokaMokaContentNotFoundException_whenInputContainsInvalidExhibitionId()
     throws RokaMokaContentNotFoundException {
         // Arrange
-        EmblemInputDTO input = mock(EmblemInputDTO.class);
-
-        when(this.emblemService.create(input)).thenThrow(RokaMokaContentNotFoundException.class);
+        when(this.emblemService.create(this.input)).thenThrow(RokaMokaContentNotFoundException.class);
 
         // Act & Assert
-        assertThrows(RokaMokaContentNotFoundException.class, () -> this.emblemController.register(input));
+        assertThrows(RokaMokaContentNotFoundException.class, () -> this.emblemController.register(this.input));
 
-        verify(this.emblemService).create(input);
+        verify(this.emblemService).create(this.input);
     }
     //endregion
 
@@ -102,15 +105,13 @@ class EmblemControllerTest implements ControllerResponseValidator {
     void remove_shouldReturnEmblemOutputDTO_whenSuccessful()
     throws RokaMokaContentNotFoundException {
         // Arrange
-        Emblem emblem = Instancio.create(Emblem.class);
-
-        when(this.emblemService.delete(anyLong())).thenReturn(emblem);
+        when(this.emblemService.delete(anyLong())).thenReturn(this.emblem);
 
         // Act
         ResponseEntity<ApiResponseWrapper<EmblemOutputDTO>> response = this.emblemController.remove(1L);
 
         // Assert
-        this.assertExpectedResponse(response, new EmblemOutputDTO(emblem));
+        this.assertExpectedResponse(response, new EmblemOutputDTO(this.emblem));
 
         verify(this.emblemService).delete(anyLong());
     }
