@@ -24,25 +24,25 @@ import java.util.Optional;
 @AllArgsConstructor
 public class ArtworkService implements IArtworkService {
 
-    private final ArtworkRepository obraRepository;
+    private final ArtworkRepository artworkRepository;
     private final IIMageService imageService;
     private final ExhibitionRepository exhibitionRepository;
 
     @Override
     public List<Artwork> findAll() {
-        return obraRepository.findAll();
+        return this.artworkRepository.findAll();
     }
 
     @Override
     public Artwork findById(Long id) throws RokaMokaContentNotFoundException {
-        return obraRepository.findById(id).orElseThrow(RokaMokaContentNotFoundException::new);
+        return this.artworkRepository.findById(id).orElseThrow(RokaMokaContentNotFoundException::new);
     }
 
     @Override
     public Optional<Artwork> findByQrCode(String qrCode) {
         log.info("Buscando por obra usando qrCode: {}", qrCode);
 
-        Optional<Artwork> maybeArtwork = obraRepository.findByQrCode(qrCode);
+        Optional<Artwork> maybeArtwork = this.artworkRepository.findByQrCode(qrCode);
         maybeArtwork.ifPresentOrElse(
                 a -> log.info("Encontrou {}", a),
                 () -> log.info("Obra não existe!"));
@@ -62,27 +62,28 @@ public class ArtworkService implements IArtworkService {
         Exhibition exhibition = this.exhibitionRepository.findById(exhibitionId).orElseThrow(RokaMokaContentNotFoundException::new);
         Artwork artwork = Artwork.builder()
                 .nome(artworkInputDTO.nome())
+                .descricao(artworkInputDTO.descricao())
                 .nomeArtista(artworkInputDTO.nomeArtista())
                 .link(artworkInputDTO.link())
                 .qrCode(artworkInputDTO.qrCode())
                 .images(this.imageService.upload(artworkInputDTO.image()))
                 .exhibition(exhibition)
                 .build();
-        return obraRepository.save(artwork);
+        return this.artworkRepository.save(artwork);
     }
 
     @Override
     public void deleteById(Long id) {
-        obraRepository.deleteById(id);
+        this.artworkRepository.deleteById(id);
     }
 
     @Override
     public void addImage(Long artworkId, MultipartFile image) throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
-        var obra = this.obraRepository.findByIdWithinImage(artworkId).orElseThrow(RokaMokaContentNotFoundException::new);
+        var obra = this.artworkRepository.findByIdWithinImage(artworkId).orElseThrow(RokaMokaContentNotFoundException::new);
         if (!obra.getImages().isEmpty()) {
             throw new RokaMokaForbiddenException("Já existe uma imagem associada a essa obra");
         }
         obra.setImages(this.imageService.upload(image));
-        this.obraRepository.save(obra);
+        this.artworkRepository.save(obra);
     }
 }
