@@ -34,7 +34,7 @@ public class Address {
 
     @Column(nullable = false) private String numero;
 
-    @Column(nullable = false) private String cep;
+    @Column(nullable = false, length = 8) private String cep;
 
     private String complemento;
 

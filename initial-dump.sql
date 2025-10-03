@@ -12,7 +12,7 @@ CREATE TABLE public.endereco
     rua         VARCHAR(255)                                                                                                             NOT NULL,
     numero      VARCHAR(20)                                                                                                              NOT NULL,
     complemento VARCHAR(255),
-    cep         VARCHAR(10)                                                                                                              NOT NULL,
+    cep         VARCHAR(8)                                                                                                               NOT NULL,
     CONSTRAINT endereco_pkey PRIMARY KEY (id)
 );
 
