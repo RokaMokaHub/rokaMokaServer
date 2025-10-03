@@ -2,10 +2,10 @@ package br.edu.ufpel.rokamoka.service.exhibition;
 
 import br.edu.ufpel.rokamoka.core.Address;
 import br.edu.ufpel.rokamoka.core.Exhibition;
-import br.edu.ufpel.rokamoka.dto.address.input.EnderecoDTO;
 import br.edu.ufpel.rokamoka.dto.artwork.input.ArtworkInputDTO;
 import br.edu.ufpel.rokamoka.dto.exhibition.input.ExhibitionInputDTO;
 import br.edu.ufpel.rokamoka.dto.exhibition.output.ExhibitionWithArtworksDTO;
+import br.edu.ufpel.rokamoka.dto.location.input.AddressInputDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.repository.AddressRepository;
 import br.edu.ufpel.rokamoka.repository.ArtworkRepository;
@@ -115,7 +115,7 @@ class ExhibitionServiceTest implements MockRepository<Exhibition> {
     void save_shouldReturnSavedExhibition_whenInputIsValid() {
         // Arrange
         ExhibitionInputDTO input = Instancio.create(ExhibitionInputDTO.class);
-        Address address = new Address(input.enderecoDTO());
+        Address address = new Address(input.addressInputDTO());
 
         when(this.addressRepository.save(any(Address.class))).thenReturn(address);
         when(this.exhibitionRepository.save(any(Exhibition.class))).thenAnswer(
@@ -136,10 +136,10 @@ class ExhibitionServiceTest implements MockRepository<Exhibition> {
         assertEquals(expected.name(), actual.getName());
         assertEquals(expected.description(), actual.getDescription());
 
-        this.assertAddressByEnderecoDTO(expected.enderecoDTO(), actual.getAddress());
+        this.assertAddressByEnderecoDTO(expected.addressInputDTO(), actual.getAddress());
     }
 
-    private void assertAddressByEnderecoDTO(EnderecoDTO expected, Address actual) {
+    private void assertAddressByEnderecoDTO(AddressInputDTO expected, Address actual) {
         assertNotNull(actual);
         assertEquals(expected.rua(), actual.getRua());
         assertEquals(expected.numero(), actual.getNumero());
