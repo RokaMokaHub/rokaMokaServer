@@ -37,4 +37,6 @@ public interface IUserService {
     void updateRole(@NotNull User requester, Role role);
 
     UserOutputDTO getLoggedUserInformation() throws RokaMokaContentNotFoundException;
+
+    User getByNome(@NotNull String nome) throws RokaMokaContentNotFoundException;
 }
