@@ -4,6 +4,7 @@ import br.edu.ufpel.rokamoka.core.Address;
 import br.edu.ufpel.rokamoka.core.Location;
 import br.edu.ufpel.rokamoka.dto.location.input.AddressInputDTO;
 import br.edu.ufpel.rokamoka.dto.location.input.LocationInputDTO;
+import br.edu.ufpel.rokamoka.dto.location.output.AddressOutputDTO;
 import br.edu.ufpel.rokamoka.dto.location.output.LocationOutputDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
@@ -130,6 +131,29 @@ class LocationServiceTest implements MockRepository<Location> {
         assertEquals(locations.size(), actual.size());
 
         verify(this.locationRepository).findAll();
+    }
+    //endregion
+
+    //region getAllLocations
+    static Stream<Arguments> buildAddressList() {
+        return Stream.of(Arguments.of(Collections.emptyList()),
+                Arguments.of(Instancio.ofList(Address.class).create()));
+    }
+
+    @ParameterizedTest
+    @MethodSource("buildAddressList")
+    void getAllLocations_shouldReturnAddressOutputDTOList_whenCalled(List<Address> addresses) {
+        // Arrange
+        when(this.addressRepository.findAll()).thenReturn(addresses);
+
+        // Act
+        List<AddressOutputDTO> actual = this.locationService.getAllAddresses();
+
+        // Assert
+        assertNotNull(actual);
+        assertEquals(addresses.size(), actual.size());
+
+        verify(this.addressRepository).findAll();
     }
     //endregion
 

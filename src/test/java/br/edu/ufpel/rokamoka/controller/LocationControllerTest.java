@@ -2,6 +2,7 @@ package br.edu.ufpel.rokamoka.controller;
 
 import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
 import br.edu.ufpel.rokamoka.dto.location.input.LocationInputDTO;
+import br.edu.ufpel.rokamoka.dto.location.output.AddressOutputDTO;
 import br.edu.ufpel.rokamoka.dto.location.output.LocationOutputDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
@@ -87,7 +88,7 @@ class LocationControllerTest implements ControllerResponseValidator {
 
     @ParameterizedTest
     @MethodSource("buildLocationOutputDTOList")
-    void getAllLocations(List<LocationOutputDTO> outputList) {
+    void getAllLocations_shouldReturnLocationOutputList_whenCalled(List<LocationOutputDTO> outputList) {
         // Arrange
         when(this.locationService.getAllLocations()).thenReturn(outputList);
 
@@ -97,6 +98,28 @@ class LocationControllerTest implements ControllerResponseValidator {
 
         // Assert
         verify(this.locationService).getAllLocations();
+
+        this.assertListResponse(response, outputList);
+    }
+    //endregion
+
+    //region getAllAddresses
+    static Stream<Arguments> buildAddressOutputDTOList() {
+        return Stream.of(Arguments.of(Collections.emptyList()),
+                Arguments.of(Instancio.ofList(AddressOutputDTO.class).create()));
+    }
+
+    @ParameterizedTest
+    @MethodSource("buildAddressOutputDTOList")
+    void getAllAddresses_shouldReturnAddressOutputList_whenCalled(List<AddressOutputDTO> outputList) {
+        // Arrange
+        when(this.locationService.getAllAddresses()).thenReturn(outputList);
+
+        // Act
+        ResponseEntity<ApiResponseWrapper<List<AddressOutputDTO>>> response = this.locationController.getAllAddresses();
+
+        // Assert
+        verify(this.locationService).getAllAddresses();
 
         this.assertListResponse(response, outputList);
     }
