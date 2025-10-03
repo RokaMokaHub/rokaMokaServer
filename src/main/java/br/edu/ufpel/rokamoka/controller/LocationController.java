@@ -3,6 +3,7 @@ package br.edu.ufpel.rokamoka.controller;
 import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
 import br.edu.ufpel.rokamoka.dto.GroupValidators;
 import br.edu.ufpel.rokamoka.dto.location.input.LocationInputDTO;
+import br.edu.ufpel.rokamoka.dto.location.output.AddressOutputDTO;
 import br.edu.ufpel.rokamoka.dto.location.output.LocationOutputDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
@@ -59,6 +60,15 @@ class LocationController extends RokaMokaController {
     @GetMapping("/all")
     public ResponseEntity<ApiResponseWrapper<List<LocationOutputDTO>>> getAllLocations() {
         List<LocationOutputDTO> locations = this.locationService.getAllLocations();
+        return this.success(locations);
+    }
+
+    @Operation(summary = "Buscar todos os endereços",
+            description = "Retorna uma lista contendo todos os endereços do sistema")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Lista de todos os endereços")})
+    @GetMapping("/address/all")
+    public ResponseEntity<ApiResponseWrapper<List<AddressOutputDTO>>> getAllAddresses() {
+        List<AddressOutputDTO> locations = this.locationService.getAllAddresses();
         return this.success(locations);
     }
 
