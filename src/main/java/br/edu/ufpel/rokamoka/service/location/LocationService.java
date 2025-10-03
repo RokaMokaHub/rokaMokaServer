@@ -49,7 +49,7 @@ class LocationService implements ILocationService {
 
     @Override
     public List<LocationOutputDTO> getAllLocationsByAddress(@NotNull Long addressId) {
-        return this.locationRepository.findByEndereco_Id(addressId).stream().map(LocationOutputDTO::new).toList();
+        return this.locationRepository.findAllByEndereco_Id(addressId).stream().map(LocationOutputDTO::new).toList();
     }
 
     @Override
