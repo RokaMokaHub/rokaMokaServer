@@ -105,7 +105,7 @@ class LocationService implements ILocationService {
     @Transactional
     public LocationOutputDTO delete(@NotNull Long id) throws RokaMokaContentNotFoundException {
         Location location = this.getLocationOrElseThrow(id);
-        this.locationRepository.deleteById(id);
+        this.locationRepository.delete(location);
         return this.toOutput(location);
     }
 }
