@@ -18,7 +18,10 @@ import jakarta.validation.constraints.Null;
  * @see AddressInputDTO
  */
 public record LocationInputDTO(
-        @NotNull(groups = GroupValidators.Update.class) @Null(groups = GroupValidators.Create.class) Long id,
-        @NotBlank String nome,
-        @NotNull(groups = GroupValidators.Create.class) @Valid AddressInputDTO endereco
-) {}
+        @NotNull(groups = GroupValidators.Update.class,
+                message = "O ID da localização é obrigatório durante a atualização")
+        @Null(groups = GroupValidators.Create.class,
+                message = "O ID da localização não pode ser fornecido durante a criação") Long id,
+        @NotBlank(message = "O nome da localização é obrigatório") String nome,
+        @NotNull(groups = GroupValidators.Create.class,
+                message = "O endereço é obrigatório") @Valid AddressInputDTO endereco) {}
