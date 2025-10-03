@@ -7,16 +7,19 @@ import br.edu.ufpel.rokamoka.dto.location.input.LocationInputDTO;
 import br.edu.ufpel.rokamoka.dto.location.output.LocationOutputDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
+import br.edu.ufpel.rokamoka.repository.AddressRepository;
 import br.edu.ufpel.rokamoka.repository.LocationRepository;
 import br.edu.ufpel.rokamoka.utils.location.AddressBuilder;
 import br.edu.ufpel.rokamoka.utils.location.LocationBuilder;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Service implementation of the {@link ILocationService} interface for managing operations on the {@link Location}
@@ -31,6 +34,7 @@ import java.util.List;
 class LocationService implements ILocationService {
 
     private final LocationRepository locationRepository;
+    private final AddressRepository addressRepository;
 
     @Override
     public LocationOutputDTO getLocation(@NotNull Long id) throws RokaMokaContentNotFoundException {
@@ -64,12 +68,19 @@ class LocationService implements ILocationService {
             throw new RokaMokaContentDuplicatedException("Localização já existe");
         }
 
-        Address address = new AddressBuilder(input.endereco()).build();
+        Address address = this.getByAtributesIn(input.endereco())
+                .orElseGet(() -> new AddressBuilder(input.endereco()).build());
 
         Location location = new LocationBuilder(input, address).build();
         location = this.locationRepository.save(location);
 
         return this.toOutput(location);
+    }
+
+    private Optional<Address> getByAtributesIn(AddressInputDTO input) {
+        return StringUtils.isBlank(input.complemento())
+                ? this.addressRepository.findByRuaAndNumeroAndCep(input.rua(), input.numero(), input.cep())
+                : this.addressRepository.findByRuaAndNumeroAndCepAndComplemento(input.rua(), input.numero(), input.cep(), input.complemento());
     }
 
     @Override
