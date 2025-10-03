@@ -24,7 +24,7 @@ public final class LocationBuilder {
 
     public Location build() {
         return Location.builder()
-                .nome(this.input.name())
+                .nome(this.input.nome())
                 .endereco(this.address)
                 .build();
     }
