@@ -48,6 +48,14 @@ public interface ControllerResponseValidator {
         assertNull(actual, "Output atual deve ser null");
     }
 
+    default <T> void assertListResponse(ResponseEntity<ApiResponseWrapper<List<T>>> response, List<T> expected) {
+        if (expected.isEmpty()) {
+            this.assertEmptyListResponse(response);
+        } else {
+            this.assertListResponse(response);
+        }
+    }
+
     default <T> void assertListResponse(ResponseEntity<ApiResponseWrapper<List<T>>> response) {
         assertNotNull(response, "Response não deve ser null");
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Status code deve ser OK");
