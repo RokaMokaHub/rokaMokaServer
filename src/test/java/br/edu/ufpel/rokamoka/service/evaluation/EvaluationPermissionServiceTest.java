@@ -28,6 +28,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static br.edu.ufpel.rokamoka.core.RequestStatus.CONFIRM;
+import static br.edu.ufpel.rokamoka.core.RequestStatus.DENY;
+import static br.edu.ufpel.rokamoka.core.RequestStatus.PENDING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -70,7 +73,7 @@ class EvaluationPermissionServiceTest {
         this.reviewer = mock(User.class);
 
         PermissionReq p = new PermissionReq();
-        p.setStatus(RequestStatus.PENDING);
+        p.setStatus(PENDING);
         this.spyRequest = spy(p);
     }
 
@@ -94,7 +97,7 @@ class EvaluationPermissionServiceTest {
         verify(this.userService).getByNome(anyString());
         verify(this.registerRepository).save(this.registerCaptor.capture());
 
-        this.assertPermissionReq(this.spyRequest, RequestStatus.DENY);
+        this.assertPermissionReq(this.spyRequest, DENY);
         PermissionReg register = this.registerCaptor.getValue();
         this.assertPermissionRegister(register, this.reviewer, this.spyRequest);
     }
@@ -169,7 +172,7 @@ class EvaluationPermissionServiceTest {
         verify(this.userService).getByNome(anyString());
         verify(this.registerRepository).save(this.registerCaptor.capture());
 
-        this.assertPermissionReq(this.spyRequest, RequestStatus.CONFIRM);
+        this.assertPermissionReq(this.spyRequest, CONFIRM);
         PermissionReg register = this.registerCaptor.getValue();
         this.assertPermissionRegister(register, this.reviewer, this.spyRequest);
     }

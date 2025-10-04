@@ -2,7 +2,6 @@ package br.edu.ufpel.rokamoka.service.evaluation;
 
 import br.edu.ufpel.rokamoka.core.PermissionReg;
 import br.edu.ufpel.rokamoka.core.PermissionReq;
-import br.edu.ufpel.rokamoka.core.RequestStatus;
 import br.edu.ufpel.rokamoka.dto.permission.output.RequestDetailsDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaForbiddenException;
@@ -14,6 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
+import static br.edu.ufpel.rokamoka.core.RequestStatus.CONFIRM;
+import static br.edu.ufpel.rokamoka.core.RequestStatus.DENY;
 
 @Service
 @AllArgsConstructor
@@ -28,7 +30,7 @@ public class EvaluationPermissionService implements IEvaluationPermissionService
     public void deny(Long permissionId, String justificativa, String userName) throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
         PermissionReq request = this.getPendingPermissionRequestOrElseThrow(permissionId);
 
-        request.setStatus(RequestStatus.DENY);
+        request.setStatus(DENY);
         request = this.requestRepository.save(request);
 
         this.createPermissionRegistration(justificativa, userName, request);
@@ -39,7 +41,7 @@ public class EvaluationPermissionService implements IEvaluationPermissionService
     public void accept(Long permissionId, String userName) throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
         PermissionReq request = this.getPendingPermissionRequestOrElseThrow(permissionId);
 
-        request.setStatus(RequestStatus.CONFIRM);
+        request.setStatus(CONFIRM);
         request = this.requestRepository.save(request);
 
         this.createPermissionRegistration("", userName, request);
