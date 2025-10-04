@@ -22,6 +22,8 @@ import org.hibernate.proxy.HibernateProxy;
 
 import java.util.Objects;
 
+import static br.edu.ufpel.rokamoka.core.RequestStatus.PENDING;
+
 @Getter
 @Setter
 @Builder
@@ -60,10 +62,10 @@ public class PermissionReq {
     public final int hashCode() {
         return this instanceof HibernateProxy
                 ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode()
-                : getClass().hashCode();
+                : this.getClass().hashCode();
     }
 
     public boolean isPending() {
-        return RequestStatus.PENDING.equals(this.status);
+        return PENDING  == this.status;
     }
 }
