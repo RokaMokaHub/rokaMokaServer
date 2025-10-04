@@ -20,7 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Tag(name = "Solicitação de Permissão", description = "API para aceitar ou rejeitar permissão, precisa ter perfil de curador ou admin")
+@Tag(name = "Solicitação de Permissão",
+        description = "API para aceitar ou rejeitar permissão, precisa ter perfil de curador ou admin")
 @RestController
 @RequestMapping("/evaluation/permission")
 @RequiredArgsConstructor
@@ -29,19 +30,23 @@ public class EvaluationPermissionController extends RokaMokaController {
     private final IEvaluationPermissionService evaluationPermissionService;
 
     @PostMapping("/deny/{permissionId}")
-    public ResponseEntity<ApiResponseWrapper<Void>> deny(@PathVariable Long permissionId, @RequestBody EvaluationPermissionDTO evaluationDTO, Authentication authentication) throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
-        evaluationPermissionService.deny(permissionId, evaluationDTO.justificativa(), authentication.getName());
-        return success();
+    public ResponseEntity<ApiResponseWrapper<Void>> deny(@PathVariable Long permissionId,
+            @RequestBody EvaluationPermissionDTO evaluationDTO, Authentication authentication)
+    throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
+        this.evaluationPermissionService.deny(permissionId, evaluationDTO.justificativa(), authentication.getName());
+        return this.success();
     }
 
     @PostMapping("accept/{permissionId}")
-    public  ResponseEntity<ApiResponseWrapper<Void>> accept(@PathVariable Long permissionId, Authentication authentication) throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
-        evaluationPermissionService.accept(permissionId, authentication.getName());
-        return  success();
+    public ResponseEntity<ApiResponseWrapper<Void>> accept(@PathVariable Long permissionId,
+            Authentication authentication) throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
+        this.evaluationPermissionService.accept(permissionId, authentication.getName());
+        return this.success();
     }
 
     @GetMapping("/list")
     public ResponseEntity<ApiResponseWrapper<List<RequestDetailsDTO>>> list() {
-        return success(this.evaluationPermissionService.findAllPedingRequest());
+        List<RequestDetailsDTO> requests = this.evaluationPermissionService.findAllPendingRequest();
+        return this.success(requests);
     }
 }

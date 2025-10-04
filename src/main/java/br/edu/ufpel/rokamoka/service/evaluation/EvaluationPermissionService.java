@@ -2,18 +2,20 @@ package br.edu.ufpel.rokamoka.service.evaluation;
 
 import br.edu.ufpel.rokamoka.core.PermissionReg;
 import br.edu.ufpel.rokamoka.core.PermissionReq;
-import br.edu.ufpel.rokamoka.core.RequestStatus;
 import br.edu.ufpel.rokamoka.dto.permission.output.RequestDetailsDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaForbiddenException;
 import br.edu.ufpel.rokamoka.repository.PermissionRegRepository;
 import br.edu.ufpel.rokamoka.repository.PermissionReqRepository;
-import br.edu.ufpel.rokamoka.repository.UserRepository;
 import br.edu.ufpel.rokamoka.service.user.IUserService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
+import static br.edu.ufpel.rokamoka.core.RequestStatus.CONFIRM;
+import static br.edu.ufpel.rokamoka.core.RequestStatus.DENY;
 
 @Service
 @AllArgsConstructor
@@ -21,46 +23,57 @@ public class EvaluationPermissionService implements IEvaluationPermissionService
 
     private final PermissionRegRepository registerRepository;
     private final PermissionReqRepository requestRepository;
-    private final UserRepository userRepository;
     private final IUserService userService;
 
     @Override
+    @Transactional(rollbackFor = {RokaMokaContentNotFoundException.class, RokaMokaForbiddenException.class})
     public void deny(Long permissionId, String justificativa, String userName) throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
-        PermissionReq permissionReq = this.requestRepository.findById(permissionId).orElseThrow(RokaMokaContentNotFoundException::new);
-        if (permissionReq.getStatus() != RequestStatus.PENDING) {
-            throw new RokaMokaForbiddenException("Não é possível aceitar pedido que já foi negado");
-        }
-        permissionReq.setStatus(RequestStatus.DENY);
-        permissionReq = this.requestRepository.save(permissionReq);
+        PermissionReq request = this.getPendingPermissionRequestOrElseThrow(permissionId);
 
+        request.setStatus(DENY);
+        request = this.requestRepository.save(request);
+
+        this.createPermissionRegistration(justificativa, userName, request);
+    }
+
+    @Override
+    @Transactional(rollbackFor = {RokaMokaContentNotFoundException.class, RokaMokaForbiddenException.class})
+    public void accept(Long permissionId, String userName) throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
+        PermissionReq request = this.getPendingPermissionRequestOrElseThrow(permissionId);
+
+        request.setStatus(CONFIRM);
+        request = this.requestRepository.save(request);
+
+        this.createPermissionRegistration("", userName, request);
+
+        this.userService.updateRole(request.getRequester(), request.getTargetRole());
+    }
+
+    @Override
+    public List<RequestDetailsDTO> findAllPendingRequest() {
+        return this.requestRepository.findAllPendingRequestDetailed();
+    }
+
+    private PermissionReq getPendingPermissionRequestOrElseThrow(Long permissionId)
+    throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
+        PermissionReq permissionReq = this.getRequestOrElseThrow(permissionId);
+        if (!permissionReq.isPending()) {
+            throw new RokaMokaForbiddenException("Não é possível aceitar/negar pedido que já foi analisado");
+        }
+        return permissionReq;
+    }
+
+    private PermissionReq getRequestOrElseThrow(Long permissionId) throws RokaMokaContentNotFoundException {
+        return this.requestRepository.findById(permissionId).orElseThrow(RokaMokaContentNotFoundException::new);
+    }
+
+    private PermissionReg createPermissionRegistration(String justificativa, String userName, PermissionReq request)
+    throws RokaMokaContentNotFoundException {
         PermissionReg register = PermissionReg.builder()
                 .justification(justificativa)
-                .reviewer(this.userRepository.findByNome(userName).get())
-                .request(permissionReq)
+                .reviewer(this.userService.getByNome(userName))
+                .request(request)
                 .build();
-        this.registerRepository.save(register);
-    }
-
-    @Override
-    public void accept(Long permissionId, String userName) throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
-        PermissionReq permissionReq = this.requestRepository.findById(permissionId).orElseThrow(RokaMokaContentNotFoundException::new);
-        if (permissionReq.getStatus() != RequestStatus.PENDING) {
-            throw new RokaMokaForbiddenException("Não é possível aceitar pedido que já foi analisado");
-        }
-        permissionReq.setStatus(RequestStatus.CONFIRM);
-        permissionReq = this.requestRepository.save(permissionReq);
-        PermissionReg register = PermissionReg.builder()
-                .justification("")
-                .reviewer(this.userRepository.findByNome(userName).get())
-                .request(permissionReq)
-                .build();
-        this.registerRepository.save(register);
-
-        this.userService.updateRole(permissionReq.getRequester(), permissionReq.getTargetRole());
-    }
-
-    @Override
-    public List<RequestDetailsDTO> findAllPedingRequest() {
-        return this.requestRepository.findAllPendingRequestDetailed();
+        return this.registerRepository.save(register);
     }
 }

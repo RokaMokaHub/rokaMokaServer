@@ -12,5 +12,5 @@ public interface IEvaluationPermissionService {
 
     void accept(Long permissionId, String userName) throws RokaMokaContentNotFoundException, RokaMokaForbiddenException;
 
-    List<RequestDetailsDTO> findAllPedingRequest();
+    List<RequestDetailsDTO> findAllPendingRequest();
 }
