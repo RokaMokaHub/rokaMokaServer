@@ -1,12 +1,15 @@
 package br.edu.ufpel.rokamoka.core;
 
-import br.edu.ufpel.rokamoka.dto.location.input.AddressInputDTO;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,27 +26,20 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "endereco")
-public class Address {
+@Table(name = "local")
+public class Location {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false) private String rua;
+    @Size(max = 255)
+    @Column(nullable = false, unique = true)
+    private String nome;
 
-    @Column(nullable = false) private String numero;
-
-    @Column(nullable = false, length = 8) private String cep;
-
-    private String complemento;
-
-    public Address(AddressInputDTO addressInputDTO) {
-        this.cep = addressInputDTO.cep();
-        this.complemento = addressInputDTO.complemento();
-        this.rua = addressInputDTO.rua();
-        this.numero = addressInputDTO.numero();
-    }
+    @OneToOne(cascade = CascadeType.ALL, optional = false)
+    @JoinColumn(name = "endereco_id", nullable = false)
+    private Address endereco;
 
     @Override
     public final boolean equals(Object o) {
@@ -53,20 +49,17 @@ public class Address {
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
             return false;
         }
-        Address other = (Address) o;
+        Location other = (Location) o;
         if (this.id != null && Objects.equals(this.id, other.getId())) {
             return true;
         }
-        return this.rua != null && this.numero != null && this.cep != null &&
-               Objects.equals(this.rua, other.rua) &&
-               Objects.equals(this.numero, other.numero) &&
-               Objects.equals(this.cep, other.cep);
+        return this.nome != null && Objects.equals(this.nome, other.getNome());
     }
 
     @Override
     public final int hashCode() {
-        return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
-                .getPersistentClass()
-                .hashCode() : getClass().hashCode();
+        return this instanceof HibernateProxy
+                ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode()
+                : getClass().hashCode();
     }
 }

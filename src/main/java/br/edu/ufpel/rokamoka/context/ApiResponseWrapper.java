@@ -1,7 +1,10 @@
 package br.edu.ufpel.rokamoka.context;
 
+import br.edu.ufpel.rokamoka.utils.exception.ExceptionDetails;
+import br.edu.ufpel.rokamoka.utils.exception.MethodArgumentNotValidExceptionHelper;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.Optional;
 
@@ -38,19 +41,21 @@ public class ApiResponseWrapper<T> {
                 .map(HttpStatus::value)
                 .orElse(DEFAULT_HTTP_STATUS);
 
-        ExceptionDetails exceptionDetails = extractExceptionDetails(ctx.getException());
-        this.exception = exceptionDetails.exceptionName();
+        ExceptionDetails exceptionDetails = this.extractExceptionDetails(ctx.getException());
+        this.exception = exceptionDetails.name();
         this.exceptionMessage = exceptionDetails.message();
     }
-
-    private record ExceptionDetails(String exceptionName, String message) {}
 
     private ExceptionDetails extractExceptionDetails(Exception exception) {
         if (exception == null) {
             return new ExceptionDetails(EMPTY_STRING, EMPTY_STRING);
         }
 
-        Throwable rootCause = getRootCause(exception);
+        if (exception instanceof MethodArgumentNotValidException validationException) {
+            return new MethodArgumentNotValidExceptionHelper(validationException).buildExceptionDetails();
+        }
+
+        Throwable rootCause = this.getRootCause(exception);
         return new ExceptionDetails(rootCause.getClass().getSimpleName(), rootCause.getMessage());
     }
 

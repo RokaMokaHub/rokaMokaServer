@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.service.spi.ServiceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -24,25 +25,32 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler extends RokaMokaController {
 
     @ExceptionHandler(value = {
+            MethodArgumentNotValidException.class,
             RokaMokaContentDuplicatedException.class,
-            RokaMokaContentNotFoundException.class,
             ConstraintViolationException.class
     })
     public ResponseEntity<ApiResponseWrapper<Void>> handleBadRequest(Exception ex) {
-        return error(ex, HttpStatus.BAD_REQUEST);
+        return this.error(ex, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(value = {
+            RokaMokaContentNotFoundException.class
+    })
+    public ResponseEntity<ApiResponseWrapper<Void>> handleNotFound(Exception ex) {
+        return this.error(ex, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(value = {
             RokaMokaForbiddenException.class
     })
     public ResponseEntity<ApiResponseWrapper<Void>> handleForbidden(Exception ex) {
-        return error(ex, HttpStatus.FORBIDDEN);
+        return this.error(ex, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(value = {
             ServiceException.class
     })
     public ResponseEntity<ApiResponseWrapper<Void>> handleInternalServerError(Exception ex) {
-        return error(ex, HttpStatus.INTERNAL_SERVER_ERROR);
+        return this.error(ex, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
