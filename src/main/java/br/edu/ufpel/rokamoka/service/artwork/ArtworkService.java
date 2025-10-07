@@ -3,6 +3,7 @@ package br.edu.ufpel.rokamoka.service.artwork;
 import br.edu.ufpel.rokamoka.core.Artwork;
 import br.edu.ufpel.rokamoka.core.Exhibition;
 import br.edu.ufpel.rokamoka.dto.artwork.input.ArtworkInputDTO;
+import br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaForbiddenException;
 import br.edu.ufpel.rokamoka.repository.ArtworkRepository;
@@ -85,5 +86,26 @@ public class ArtworkService implements IArtworkService {
         }
         obra.setImages(this.imageService.upload(image));
         this.artworkRepository.save(obra);
+    }
+
+    @Override
+    public List<Artwork> getAllArtworkByExhibitionId(Long exhibitionId) {
+        return this.artworkRepository.findByExhibition_Id(exhibitionId);
+    }
+
+    @Override
+    public List<ArtworkOutputDTO> addArtworksToExhibition(List<ArtworkInputDTO> inputList, Exhibition exhibition) {
+        List<Artwork> artworks = inputList.stream()
+                .map(a -> new Artwork(a, exhibition))
+                .toList();
+        artworks = this.artworkRepository.saveAll(artworks);
+        return artworks.stream().map(ArtworkOutputDTO::new).toList();
+    }
+
+    @Override
+    public List<ArtworkOutputDTO> deleteByExhibitionId(Long exhibitionId) {
+        List<Artwork> artworks = this.getAllArtworkByExhibitionId(exhibitionId);
+        this.artworkRepository.deleteAllById(artworks.stream().map(Artwork::getId).toList());
+        return artworks.stream().map(ArtworkOutputDTO::new).toList();
     }
 }

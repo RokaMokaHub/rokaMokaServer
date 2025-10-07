@@ -1,7 +1,9 @@
 package br.edu.ufpel.rokamoka.service.artwork;
 
 import br.edu.ufpel.rokamoka.core.Artwork;
+import br.edu.ufpel.rokamoka.core.Exhibition;
 import br.edu.ufpel.rokamoka.dto.artwork.input.ArtworkInputDTO;
+import br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaForbiddenException;
 import jakarta.validation.Valid;
@@ -25,4 +27,10 @@ public interface IArtworkService {
     void deleteById(Long id);
 
     void addImage(Long artworkId, MultipartFile image) throws RokaMokaContentNotFoundException, RokaMokaForbiddenException;
+
+    List<Artwork> getAllArtworkByExhibitionId(Long exhibitionId);
+
+    List<ArtworkOutputDTO> addArtworksToExhibition(List<ArtworkInputDTO> inputList, Exhibition exhibition);
+
+    List<ArtworkOutputDTO> deleteByExhibitionId(Long exhibitionId);
 }
