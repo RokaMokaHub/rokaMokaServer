@@ -8,5 +8,5 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:17-jdk-alpine
 WORKDIR /app
 COPY --from=builder /app/target/*.jar rokamoka.jar
-EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "rokamoka.jar"]
+EXPOSE 8080 5005
+ENTRYPOINT ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005", "-jar", "rokamoka.jar"]
