@@ -43,9 +43,10 @@ class LocationService implements ILocationService {
         return this.toOutput(location);
     }
 
-    private Location getLocationOrElseThrow(Long id) throws RokaMokaContentNotFoundException {
+    @Override
+    public Location getLocationOrElseThrow(Long id) throws RokaMokaContentNotFoundException {
         return this.locationRepository.findById(id)
-                .orElseThrow(() -> new RokaMokaContentNotFoundException("Localização não encontrada"));
+                .orElseThrow(() -> new RokaMokaContentNotFoundException("Localização não encontrada: ID=" + id));
     }
 
     private LocationOutputDTO toOutput(Location location) {

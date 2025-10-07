@@ -1,5 +1,6 @@
 package br.edu.ufpel.rokamoka.service.location;
 
+import br.edu.ufpel.rokamoka.core.Location;
 import br.edu.ufpel.rokamoka.dto.location.input.LocationInputDTO;
 import br.edu.ufpel.rokamoka.dto.location.output.AddressOutputDTO;
 import br.edu.ufpel.rokamoka.dto.location.output.LocationOutputDTO;
@@ -32,4 +33,6 @@ public interface ILocationService {
     LocationOutputDTO delete(@NotNull Long id) throws RokaMokaContentNotFoundException;
 
     List<AddressOutputDTO> getAllAddresses();
+
+    Location getLocationOrElseThrow(Long id) throws RokaMokaContentNotFoundException;
 }
