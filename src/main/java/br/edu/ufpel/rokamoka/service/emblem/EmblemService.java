@@ -53,7 +53,7 @@ public class EmblemService implements IEmblemService {
 
         var emblem = new Emblem();
         BeanUtils.copyProperties(emblemInputDTO, emblem);
-        emblem.setExhibition(this.exhibitionService.findById(emblemInputDTO.exhibitionId()));
+        emblem.setExhibition(this.exhibitionService.getExhibitionOrElseThrow(emblemInputDTO.exhibitionId()));
         emblem = this.emblemRepository.save(emblem);
 
         log.info("Novo [{}] criado com sucesso", emblem);

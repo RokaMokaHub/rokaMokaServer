@@ -519,7 +519,7 @@ class MokadexServiceTest implements MockUserSession, MockRepository<Mokadex> {
         ServiceContext mockContext = this.mockServiceContext();
 
         when(this.mokadexRepository.findMokadexByUsername(anyString())).thenReturn(Optional.of(mokadex));
-        when(this.exhibitionService.findById(anyLong())).thenReturn(exhibition);
+        when(this.exhibitionService.getExhibitionOrElseThrow(anyLong())).thenReturn(exhibition);
         when(this.mokadexRepository.findAllMissingStars(mokadex.getId(), exhibition.getId())).thenReturn(expected);
 
         // Act & Assert

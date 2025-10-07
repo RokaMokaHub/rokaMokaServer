@@ -120,7 +120,7 @@ class EmblemServiceTest implements MockRepository<Emblem> {
     void create_shouldReturnEmblem_whenSuccessful()
     throws RokaMokaContentNotFoundException {
         // Arrange
-        when(this.exhibitionService.findById(anyLong())).thenReturn(this.exhibition);
+        when(this.exhibitionService.getExhibitionOrElseThrow(anyLong())).thenReturn(this.exhibition);
         when(this.emblemRepository.save(any(Emblem.class)))
                 .thenAnswer(inv -> this.mockRepositorySave(inv.getArgument(0)));
 
