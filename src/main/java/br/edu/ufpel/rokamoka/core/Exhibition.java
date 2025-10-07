@@ -38,11 +38,13 @@ public class Exhibition {
     @Column(name = "nome", nullable = false) private String name;
     @Column(name = "descricao") private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "local_id")
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "local_id", nullable = false)
     private Location location;
 
-    @Transient private List<Artwork> artworks = new ArrayList<>();
+    @Transient
+    @Builder.Default
+    private List<Artwork> artworks = new ArrayList<>();
 
     @Override
     public final boolean equals(Object o) {
