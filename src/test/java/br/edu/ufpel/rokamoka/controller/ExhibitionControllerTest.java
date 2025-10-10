@@ -1,17 +1,32 @@
 package br.edu.ufpel.rokamoka.controller;
 
-import br.edu.ufpel.rokamoka.core.Exhibition;
+import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
 import br.edu.ufpel.rokamoka.dto.exhibition.input.ExhibitionInputDTO;
+import br.edu.ufpel.rokamoka.dto.exhibition.output.ExhibitionOutputDTO;
+import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.service.exhibition.ExhibitionService;
 import org.instancio.Instancio;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for the {@code ExhibitionController} class, which is responsible for handling exhibition-related
@@ -28,48 +43,183 @@ class ExhibitionControllerTest implements ControllerResponseValidator {
 
     @Mock private ExhibitionService exhibitionService;
 
-    private Exhibition exhibition;
-    private ExhibitionInputDTO input;
+    private static ExhibitionInputDTO input;
+    private static ExhibitionOutputDTO output;
 
-    @BeforeEach
-    void setUp() {
-        this.exhibition = Instancio.create(Exhibition.class);
-        this.input = mock(ExhibitionInputDTO.class);
+    @BeforeAll
+    static void setUp() {
+        input = mock(ExhibitionInputDTO.class);
+        output = mock(ExhibitionOutputDTO.class);
     }
 
     //region getExhibition
     @Test
-    void getExhibition() {
+    void getExhibition_shouldReturnExhibitionOutput_whenExhibitionExistsById()
+    throws RokaMokaContentNotFoundException {
+        // Arrange
+        when(this.exhibitionService.findById(anyLong())).thenReturn(output);
+
+        // Act
+        ResponseEntity<ApiResponseWrapper<ExhibitionOutputDTO>> response = this.exhibitionController.getExhibition(1L);
+
+        // Assert
+        this.assertExpectedResponse(response, output);
+
+        verify(this.exhibitionService).findById(anyLong());
+    }
+
+    @Test
+    void getExhibition_shouldThrowRokaMokaContentNotFoundException_whenExhibitionDoesNotExistById()
+    throws RokaMokaContentNotFoundException {
+        // Arrange
+        when(this.exhibitionService.findById(anyLong())).thenThrow(RokaMokaContentNotFoundException.class);
+
+        // Act & Assert
+        assertThrows(RokaMokaContentNotFoundException.class, () -> this.exhibitionController.getExhibition(1L));
+
+        verify(this.exhibitionService).findById(anyLong());
     }
     //endregion
 
     //region getAllExhibitions
-    @Test
-    void getAllExhibitions() {
+    static Stream<Arguments> buildExhibitionOutputDTOList() {
+        return Stream.of(Arguments.of(Collections.emptyList()),
+                Arguments.of(Instancio.ofList(ExhibitionOutputDTO.class).create()));
+    }
+
+    @ParameterizedTest
+    @MethodSource("buildExhibitionOutputDTOList")
+    void getAllExhibitions_shouldReturnExhibitionOutputDTOList_whenCalled(List<ExhibitionOutputDTO> exhibitions) {
+        // Arrange
+        when(this.exhibitionService.getAllExhibitions()).thenReturn(exhibitions);
+
+        // Act
+        ResponseEntity<ApiResponseWrapper<List<ExhibitionOutputDTO>>> response =
+                this.exhibitionController.getAllExhibitions();
+
+        // Assert
+        this.assertListResponse(response, exhibitions);
+
+        verify(this.exhibitionService).getAllExhibitions();
     }
     //endregion
 
     //region register
     @Test
-    void register() {
+    void register_shouldReturnExhibitionOutput_whenSuccessful()
+    throws RokaMokaContentNotFoundException {
+        // Arrange
+        when(this.exhibitionService.create(input)).thenReturn(output);
+
+        // Act
+        ResponseEntity<ApiResponseWrapper<ExhibitionOutputDTO>> response = this.exhibitionController.register(input);
+
+        // Assert
+        this.assertExpectedResponse(response, output);
+
+        verify(this.exhibitionService).create(input);
+    }
+
+    @Test
+    void register_shouldThrowRokaMokaContentNotFoundException_whenExhibitionDoesNotExistById()
+    throws RokaMokaContentNotFoundException {
+        // Arrange
+        when(this.exhibitionService.create(input)).thenThrow(RokaMokaContentNotFoundException.class);
+
+        // Act & Assert
+        assertThrows(RokaMokaContentNotFoundException.class, () -> this.exhibitionController.register(input));
+
+        verify(this.exhibitionService).create(input);
     }
     //endregion
 
     //region patch
     @Test
-    void patch() {
+    void patch_shouldReturnExhibitionOutput_whenSuccessful()
+    throws RokaMokaContentNotFoundException {
+        // Arrange
+        when(this.exhibitionService.update(input)).thenReturn(output);
+
+        // Act
+        ResponseEntity<ApiResponseWrapper<ExhibitionOutputDTO>> response = this.exhibitionController.patch(input);
+
+        // Assert
+        this.assertExpectedResponse(response, output);
+
+        verify(this.exhibitionService).update(input);
+    }
+
+    @Test
+    void patch_shouldThrowRokaMokaContentNotFoundException_whenExhibitionDoesNotExistById()
+    throws RokaMokaContentNotFoundException {
+        // Arrange
+        when(this.exhibitionService.update(input)).thenThrow(RokaMokaContentNotFoundException.class);
+
+        // Act & Assert
+        assertThrows(RokaMokaContentNotFoundException.class, () -> this.exhibitionController.patch(input));
+
+        verify(this.exhibitionService).update(input);
     }
     //endregion
 
     //region addArtworks
     @Test
-    void addArtworks() {
+    void addArtworks_shouldReturnExhibitionOutput_whenSuccessful()
+    throws RokaMokaContentNotFoundException {
+        // Arrange
+        when(this.exhibitionService.addArtworks(anyLong(), anyList())).thenReturn(output);
+
+        // Act
+        ResponseEntity<ApiResponseWrapper<ExhibitionOutputDTO>> response =
+                this.exhibitionController.addArtworks(1L, Collections.emptyList());
+
+        // Assert
+        this.assertExpectedResponse(response, output);
+
+        verify(this.exhibitionService).addArtworks(anyLong(), anyList());
     }
+
+    @Test
+    void addArtworks_shouldThrowRokaMokaContentNotFoundException_whenExhibitionDoesNotExistById()
+    throws RokaMokaContentNotFoundException {
+        // Arrange
+        when(this.exhibitionService.addArtworks(anyLong(), anyList())).thenThrow(
+                RokaMokaContentNotFoundException.class);
+
+        // Act & Assert
+        assertThrows(RokaMokaContentNotFoundException.class,
+                () -> this.exhibitionController.addArtworks(1L, Collections.emptyList()));
+
+        verify(this.exhibitionService).addArtworks(anyLong(), anyList());
+    }
+
     //endregion
 
     //region remove
     @Test
-    void remove() {
+    void remove_shouldReturnExhibitionOutput_whenSuccessful() throws RokaMokaContentNotFoundException {
+        // Arrange
+        when(this.exhibitionService.delete(anyLong())).thenReturn(output);
+
+        // Act
+        ResponseEntity<ApiResponseWrapper<ExhibitionOutputDTO>> response = this.exhibitionController.remove(1L);
+
+        // Assert
+        this.assertExpectedResponse(response, output);
+
+        verify(this.exhibitionService).delete(anyLong());
+    }
+
+    @Test
+    void remove_shouldThrowRokaMokaContentNotFoundException_whenExhibitionDoesNotExistById()
+    throws RokaMokaContentNotFoundException {
+        // Arrange
+        when(this.exhibitionService.delete(anyLong())).thenThrow(RokaMokaContentNotFoundException.class);
+
+        // Act & Assert
+        assertThrows(RokaMokaContentNotFoundException.class, () -> this.exhibitionController.remove(1L));
+
+        verify(this.exhibitionService).delete(anyLong());
     }
     //endregion
 }
