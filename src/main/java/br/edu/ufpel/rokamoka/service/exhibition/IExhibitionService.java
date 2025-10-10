@@ -21,4 +21,6 @@ public interface IExhibitionService {
     ExhibitionOutputDTO addArtworks(Long id, List<ArtworkInputDTO> inputList) throws RokaMokaContentNotFoundException;
 
     Exhibition getExhibitionOrElseThrow(Long id) throws RokaMokaContentNotFoundException;
+
+    ExhibitionOutputDTO update(ExhibitionInputDTO dto) throws RokaMokaContentNotFoundException;
 }

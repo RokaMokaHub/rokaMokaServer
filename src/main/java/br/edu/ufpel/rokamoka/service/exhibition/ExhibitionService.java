@@ -11,6 +11,7 @@ import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.repository.ExhibitionRepository;
 import br.edu.ufpel.rokamoka.service.artwork.IArtworkService;
 import br.edu.ufpel.rokamoka.service.location.ILocationService;
+import br.edu.ufpel.rokamoka.utils.exhibition.ExhibitionBuilder;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,12 +49,24 @@ public class ExhibitionService implements IExhibitionService {
     @Transactional
     public ExhibitionOutputDTO create(ExhibitionInputDTO dto) throws RokaMokaContentNotFoundException {
         Location location = this.locationService.getLocationOrElseThrow(dto.locationId());
-        Exhibition exhibition = Exhibition.builder()
-                .name(dto.name())
-                .description(dto.description())
-                .location(location)
-                .build();
+        Exhibition exhibition = new ExhibitionBuilder(dto, location).build();
         exhibition = this.exhibitionRepository.save(exhibition);
+        return new ExhibitionOutputDTO(exhibition);
+    }
+
+    @Override
+    @Transactional
+    public ExhibitionOutputDTO update(ExhibitionInputDTO dto) throws RokaMokaContentNotFoundException {
+        Exhibition exhibition = this.getExhibitionOrElseThrow(dto.id());
+
+        Location location = exhibition.getLocation();
+        if (dto.locationId() != null) {
+            location = this.locationService.getLocationOrElseThrow(dto.locationId());
+        }
+
+        exhibition = new ExhibitionBuilder(exhibition.getId(), dto, location).build();
+        exhibition = this.exhibitionRepository.save(exhibition);
+
         return new ExhibitionOutputDTO(exhibition);
     }
 
@@ -61,7 +74,7 @@ public class ExhibitionService implements IExhibitionService {
     public ExhibitionOutputDTO delete(Long id) throws RokaMokaContentNotFoundException {
         Exhibition exhibition = this.getExhibitionOrElseThrow(id);
 
-        List<ArtworkOutputDTO> artworks = this.artworkService.deleteByExhibitionId(exhibition.getId());
+        this.artworkService.deleteByExhibitionId(exhibition.getId());
 
         this.exhibitionRepository.delete(exhibition);
         return new ExhibitionOutputDTO(exhibition);
