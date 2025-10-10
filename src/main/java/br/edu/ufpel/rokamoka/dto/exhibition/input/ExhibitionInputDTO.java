@@ -1,6 +1,7 @@
 package br.edu.ufpel.rokamoka.dto.exhibition.input;
 
-import br.edu.ufpel.rokamoka.dto.GroupValidators;
+import br.edu.ufpel.rokamoka.dto.GroupValidators.Create;
+import br.edu.ufpel.rokamoka.dto.GroupValidators.Update;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
@@ -16,10 +17,9 @@ import jakarta.validation.constraints.Null;
  * @author MauricioMucci
  * @see br.edu.ufpel.rokamoka.core.Exhibition
  */
-public record ExhibitionInputDTO(@NotNull(groups = GroupValidators.Update.class,
-        message = "O ID da exposição é obrigatório durante a atualização") @Null(groups = GroupValidators.Create.class,
-        message = "O ID da exposição não pode ser fornecido durante a criação") Long id,
-                                 @NotBlank(message = "O nome da exposição é obrigatório") String name,
-                                 String description,
-                                 @NotNull(groups = GroupValidators.Create.class,
-                                         message = "O ID do local é obrigatório durante a criação") Long locationId) {}
+public record ExhibitionInputDTO(
+        @NotNull(groups = Update.class, message = "O ID da exposição é obrigatório durante a atualização") @Null(
+                groups = Create.class, message = "O ID da exposição não pode ser fornecido durante a criação") Long id,
+        @NotBlank(message = "O nome da exposição é obrigatório") String name,
+        String description,
+        @NotNull(groups = Create.class, message = "O ID do local é obrigatório durante a criação") Long locationId) {}
