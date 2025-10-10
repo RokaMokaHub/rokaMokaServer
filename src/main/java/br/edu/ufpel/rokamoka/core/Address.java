@@ -1,6 +1,5 @@
 package br.edu.ufpel.rokamoka.core;
 
-import br.edu.ufpel.rokamoka.dto.location.input.AddressInputDTO;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -38,13 +37,6 @@ public class Address {
 
     private String complemento;
 
-    public Address(AddressInputDTO addressInputDTO) {
-        this.cep = addressInputDTO.cep();
-        this.complemento = addressInputDTO.complemento();
-        this.rua = addressInputDTO.rua();
-        this.numero = addressInputDTO.numero();
-    }
-
     @Override
     public final boolean equals(Object o) {
         if (this == o) {
@@ -65,8 +57,7 @@ public class Address {
 
     @Override
     public final int hashCode() {
-        return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
-                .getPersistentClass()
-                .hashCode() : getClass().hashCode();
+        return this instanceof HibernateProxy hf ? hf.getHibernateLazyInitializer().getPersistentClass().hashCode()
+                : this.getClass().hashCode();
     }
 }

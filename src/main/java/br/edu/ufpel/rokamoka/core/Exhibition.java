@@ -12,6 +12,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -43,7 +44,7 @@ public class Exhibition {
     private Location location;
 
     @Transient
-    @Builder.Default
+    @Default
     private List<Artwork> artworks = new ArrayList<>();
 
     @Override
@@ -60,8 +61,7 @@ public class Exhibition {
 
     @Override
     public final int hashCode() {
-        return this instanceof HibernateProxy
-                ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode()
+        return this instanceof HibernateProxy hf ? hf.getHibernateLazyInitializer().getPersistentClass().hashCode()
                 : this.getClass().hashCode();
     }
 }
