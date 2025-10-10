@@ -14,8 +14,15 @@ import br.edu.ufpel.rokamoka.dto.location.input.LocationInputDTO;
  */
 public final class LocationBuilder {
 
+    private Long existingId;
     private final LocationInputDTO input;
     private final Address address;
+
+    public LocationBuilder(Long existingId, LocationInputDTO input, Address address) {
+        this.existingId = existingId;
+        this.input = input;
+        this.address = address;
+    }
 
     public LocationBuilder(LocationInputDTO input, Address address) {
         this.input = input;
@@ -23,9 +30,15 @@ public final class LocationBuilder {
     }
 
     public Location build() {
-        return Location.builder()
+        Location location = Location.builder()
                 .nome(this.input.nome())
                 .endereco(this.address)
                 .build();
+
+        if (this.existingId != null) {
+            location.setId(this.existingId);
+        }
+
+        return location;
     }
 }
