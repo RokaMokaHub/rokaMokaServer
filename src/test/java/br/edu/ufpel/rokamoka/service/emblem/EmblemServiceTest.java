@@ -133,7 +133,7 @@ class EmblemServiceTest implements MockRepository<Emblem> {
         assertEquals(this.input.descricao(), actual.getDescricao());
         assertEquals(this.exhibition, actual.getExhibition());
 
-        verify(this.exhibitionService).findById(anyLong());
+        verify(this.exhibitionService).getExhibitionOrElseThrow(anyLong());
         verify(this.emblemRepository).save(any(Emblem.class));
     }
 
@@ -141,12 +141,12 @@ class EmblemServiceTest implements MockRepository<Emblem> {
     void create_shouldThrowRokaMokaContentNotFoundException_whenEmblemDoesNotExistById()
     throws RokaMokaContentNotFoundException {
         // Arrange
-        when(this.exhibitionService.findById(anyLong())).thenThrow(RokaMokaContentNotFoundException.class);
+        when(this.exhibitionService.getExhibitionOrElseThrow(anyLong())).thenThrow(RokaMokaContentNotFoundException.class);
 
         // Act & Assert
         assertThrows(RokaMokaContentNotFoundException.class, () -> this.emblemService.create(this.input));
 
-        verify(this.exhibitionService).findById(anyLong());
+        verify(this.exhibitionService).getExhibitionOrElseThrow(anyLong());
         verifyNoInteractions(this.emblemRepository);
     }
     //endregion

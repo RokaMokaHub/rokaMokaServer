@@ -462,6 +462,7 @@ class MokadexServiceTest implements MockUserSession, MockRepository<Mokadex> {
     @Test
     void collectEmblem_shouldThrowServiceException_whenMokadexFailsToCollectEmblem() {
         // Arrange
+        Emblem emblem = mock(Emblem.class);
         Mokadex mokadex = mock(Mokadex.class);
 
         when(this.mokadexRepository.findById(anyLong())).thenReturn(Optional.of(mokadex));
@@ -470,7 +471,7 @@ class MokadexServiceTest implements MockUserSession, MockRepository<Mokadex> {
 
         // Act & Assert
         assertThrows(ServiceException.class,
-                () -> this.mokadexService.collectEmblem(1L, new Emblem()));
+                () -> this.mokadexService.collectEmblem(1L, emblem));
 
         verify(this.mokadexRepository, times(1)).findById(anyLong());
         verify(mokadex, times(1)).containsEmblem(any(Emblem.class));
@@ -537,7 +538,7 @@ class MokadexServiceTest implements MockUserSession, MockRepository<Mokadex> {
         }
 
         verify(this.mokadexRepository, times(1)).findMokadexByUsername(anyString());
-        verify(this.exhibitionService, times(1)).findById(anyLong());
+        verify(this.exhibitionService, times(1)).getExhibitionOrElseThrow(anyLong());
         verify(this.mokadexRepository, times(1)).findAllMissingStars(
                 mokadex.getId(), exhibition.getId());
         verifyNoMoreInteractions(this.mokadexRepository, this.exhibitionService);
@@ -573,7 +574,7 @@ class MokadexServiceTest implements MockUserSession, MockRepository<Mokadex> {
         ServiceContext mockContext = this.mockServiceContext();
 
         when(this.mokadexRepository.findMokadexByUsername(anyString())).thenReturn(Optional.of(mokadex));
-        when(this.exhibitionService.findById(anyLong())).thenThrow(RokaMokaContentNotFoundException.class);
+        when(this.exhibitionService.getExhibitionOrElseThrow(anyLong())).thenThrow(RokaMokaContentNotFoundException.class);
 
         // Act & Assert
         try (MockedStatic<ServiceContext> mockedServiceContext = mockStatic(ServiceContext.class)) {
@@ -584,7 +585,7 @@ class MokadexServiceTest implements MockUserSession, MockRepository<Mokadex> {
         }
 
         verify(this.mokadexRepository, times(1)).findMokadexByUsername(anyString());
-        verify(this.exhibitionService, times(1)).findById(anyLong());
+        verify(this.exhibitionService, times(1)).getExhibitionOrElseThrow(anyLong());
         verifyNoMoreInteractions(this.mokadexRepository, this.exhibitionService);
         verifyNoInteractions(this.artworkService, this.emblemService, this.collectEmblemProducer);
     }
