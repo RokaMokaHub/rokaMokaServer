@@ -22,6 +22,8 @@ import org.springframework.validation.annotation.Validated;
 import java.util.List;
 import java.util.Optional;
 
+import static org.springframework.transaction.annotation.Propagation.REQUIRED;
+
 /**
  * Service implementation of the {@link ILocationService} interface for managing operations on the {@link Location}
  * resource.
@@ -58,7 +60,7 @@ class LocationService implements ILocationService {
     }
 
     @Override
-    @Transactional
+    @Transactional(propagation = REQUIRED)
     public LocationOutputDTO create(@NotNull LocationInputDTO input) throws RokaMokaContentDuplicatedException {
         if (this.locationRepository.existsByNome(input.nome())) {
             throw new RokaMokaContentDuplicatedException("Localização já existe");
@@ -80,7 +82,7 @@ class LocationService implements ILocationService {
     }
 
     @Override
-    @Transactional
+    @Transactional(propagation = REQUIRED)
     public LocationOutputDTO update(@NotNull LocationInputDTO input) throws RokaMokaContentNotFoundException {
         Location location = this.getLocationOrElseThrow(input.id());
         Address address = location.getEndereco();
@@ -97,7 +99,7 @@ class LocationService implements ILocationService {
     }
 
     @Override
-    @Transactional
+    @Transactional(propagation = REQUIRED)
     public LocationOutputDTO delete(@NotNull Long id) throws RokaMokaContentNotFoundException {
         Location location = this.getLocationOrElseThrow(id);
         this.locationRepository.delete(location);

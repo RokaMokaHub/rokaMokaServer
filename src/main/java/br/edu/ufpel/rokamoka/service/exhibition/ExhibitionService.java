@@ -18,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static org.springframework.transaction.annotation.Propagation.REQUIRED;
+
 @Service
 @AllArgsConstructor
 public class ExhibitionService implements IExhibitionService {
@@ -48,7 +50,7 @@ public class ExhibitionService implements IExhibitionService {
     }
 
     @Override
-    @Transactional
+    @Transactional(propagation = REQUIRED)
     public ExhibitionOutputDTO create(ExhibitionInputDTO dto) throws RokaMokaContentNotFoundException {
         Location location = this.locationService.getLocationOrElseThrow(dto.locationId());
         Exhibition exhibition = new ExhibitionBuilder(dto, location).build();
@@ -67,7 +69,7 @@ public class ExhibitionService implements IExhibitionService {
     }
 
     @Override
-    @Transactional
+    @Transactional(propagation = REQUIRED)
     public ExhibitionOutputDTO addArtworks(Long id, List<ArtworkInputDTO> inputList)
     throws RokaMokaContentNotFoundException {
         Exhibition exhibition = this.getExhibitionOrElseThrow(id);
@@ -82,7 +84,7 @@ public class ExhibitionService implements IExhibitionService {
     }
 
     @Override
-    @Transactional
+    @Transactional(propagation = REQUIRED)
     public ExhibitionOutputDTO update(ExhibitionInputDTO input) throws RokaMokaContentNotFoundException {
         Exhibition exhibition = this.getExhibitionOrElseThrow(input.id());
 

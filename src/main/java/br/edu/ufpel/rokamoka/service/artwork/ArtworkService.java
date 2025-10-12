@@ -13,12 +13,13 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
+
+import static org.springframework.transaction.annotation.Propagation.REQUIRED;
 
 @Slf4j
 @Service
@@ -58,7 +59,7 @@ public class ArtworkService implements IArtworkService {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = REQUIRED)
     public Artwork create(Long exhibitionId, @Valid ArtworkInputDTO artworkInputDTO) throws RokaMokaContentNotFoundException {
         Exhibition exhibition = this.exhibitionRepository.findById(exhibitionId).orElseThrow(RokaMokaContentNotFoundException::new);
         Artwork artwork = Artwork.builder()
@@ -79,6 +80,7 @@ public class ArtworkService implements IArtworkService {
     }
 
     @Override
+    @Transactional(propagation = REQUIRED)
     public void addImage(Long artworkId, MultipartFile image) throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
         var obra = this.artworkRepository.findByIdWithinImage(artworkId).orElseThrow(RokaMokaContentNotFoundException::new);
         if (!obra.getImages().isEmpty()) {
@@ -94,6 +96,7 @@ public class ArtworkService implements IArtworkService {
     }
 
     @Override
+    @Transactional(propagation = REQUIRED)
     public List<ArtworkOutputDTO> addArtworksToExhibition(List<ArtworkInputDTO> inputList, Exhibition exhibition) {
         List<Artwork> artworks = inputList.stream()
                 .map(a -> new Artwork(a, exhibition))
@@ -103,6 +106,7 @@ public class ArtworkService implements IArtworkService {
     }
 
     @Override
+    @Transactional(propagation = REQUIRED)
     public List<ArtworkOutputDTO> deleteByExhibitionId(Long exhibitionId) {
         List<Artwork> artworks = this.getAllArtworkByExhibitionId(exhibitionId);
         this.artworkRepository.deleteAllById(artworks.stream().map(Artwork::getId).toList());
