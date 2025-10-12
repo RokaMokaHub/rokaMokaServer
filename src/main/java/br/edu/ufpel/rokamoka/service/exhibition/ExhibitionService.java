@@ -83,15 +83,15 @@ public class ExhibitionService implements IExhibitionService {
 
     @Override
     @Transactional
-    public ExhibitionOutputDTO update(ExhibitionInputDTO dto) throws RokaMokaContentNotFoundException {
-        Exhibition exhibition = this.getExhibitionOrElseThrow(dto.id());
+    public ExhibitionOutputDTO update(ExhibitionInputDTO input) throws RokaMokaContentNotFoundException {
+        Exhibition exhibition = this.getExhibitionOrElseThrow(input.id());
 
         Location location = exhibition.getLocation();
-        if (dto.locationId() != null) {
-            location = this.locationService.getLocationOrElseThrow(dto.locationId());
+        if (input.locationId() != null) {
+            location = this.locationService.getLocationOrElseThrow(input.locationId());
         }
 
-        exhibition = new ExhibitionBuilder(exhibition.getId(), dto, location).build();
+        exhibition = new ExhibitionBuilder(exhibition.getId(), input, location).build();
         exhibition = this.exhibitionRepository.save(exhibition);
 
         return toOutput(exhibition);
