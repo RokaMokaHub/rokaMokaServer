@@ -92,14 +92,14 @@ class ExhibitionServiceTest implements MockRepository<Exhibition> {
     }
     //endregion
 
-    //region findById
+    //region getExhibitionWithArtworks
     static Stream<List<Artwork>> provideArtworkList() {
         return Stream.of(Collections.emptyList(), Instancio.ofList(Artwork.class).create());
     }
 
     @ParameterizedTest
     @MethodSource("provideArtworkList")
-    void findById_shouldReturnExhibitionOutputDTO_whenExhibitionExistsById(List<Artwork> artworks)
+    void getExhibitionWithArtworks_shouldReturnExhibitionOutputDTO_whenExhibitionExistsById(List<Artwork> artworks)
     throws RokaMokaContentNotFoundException {
         // Arrange
         Long id = this.exhibition.getId();
@@ -107,7 +107,7 @@ class ExhibitionServiceTest implements MockRepository<Exhibition> {
         when(this.artworkService.getAllArtworkByExhibitionId(anyLong())).thenReturn(artworks);
 
         // Act
-        ExhibitionOutputDTO actual = this.exhibitionService.findById(id);
+        ExhibitionOutputDTO actual = this.exhibitionService.getExhibitionWithArtworks(id);
 
         // Assert
         assertExhibitionOutputByExhibition(this.exhibition, actual);
@@ -130,12 +130,12 @@ class ExhibitionServiceTest implements MockRepository<Exhibition> {
     }
 
     @Test
-    void findById_shouldThrowRokaMokaContentNotFoundException_whenExhibitionDoesNotExistById() {
+    void getExhibitionWithArtworks_shouldThrowRokaMokaContentNotFoundException_whenExhibitionDoesNotExistById() {
         // Arrange
         when(this.exhibitionRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(RokaMokaContentNotFoundException.class, () -> this.exhibitionService.findById(1L));
+        assertThrows(RokaMokaContentNotFoundException.class, () -> this.exhibitionService.getExhibitionWithArtworks(1L));
 
         verify(this.exhibitionRepository).findById(anyLong());
         verifyNoInteractions(this.artworkService);

@@ -43,7 +43,7 @@ public class ExhibitionController extends RokaMokaController {
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponseWrapper<ExhibitionOutputDTO>> getExhibition(@PathVariable Long id)
     throws RokaMokaContentNotFoundException {
-        ExhibitionOutputDTO exhibition = this.exhibitionService.findById(id);
+        ExhibitionOutputDTO exhibition = this.exhibitionService.getExhibitionWithArtworks(id);
         return this.success(exhibition);
     }
 

@@ -12,7 +12,7 @@ public interface IExhibitionService {
 
     List<ExhibitionOutputDTO> getAllExhibitions();
 
-    ExhibitionOutputDTO findById(Long id) throws RokaMokaContentNotFoundException;
+    ExhibitionOutputDTO getExhibitionWithArtworks(Long id) throws RokaMokaContentNotFoundException;
 
     ExhibitionOutputDTO create(ExhibitionInputDTO exhibition) throws RokaMokaContentNotFoundException;
 

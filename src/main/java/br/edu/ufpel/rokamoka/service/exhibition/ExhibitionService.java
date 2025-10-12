@@ -34,7 +34,7 @@ public class ExhibitionService implements IExhibitionService {
     }
 
     @Override
-    public ExhibitionOutputDTO findById(Long id) throws RokaMokaContentNotFoundException {
+    public ExhibitionOutputDTO getExhibitionWithArtworks(Long id) throws RokaMokaContentNotFoundException {
         Exhibition exhibition = this.getExhibitionOrElseThrow(id);
         this.loadArtworks(exhibition);
         return toOutput(exhibition);
