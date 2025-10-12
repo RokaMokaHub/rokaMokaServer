@@ -10,7 +10,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -54,8 +53,7 @@ class ExhibitionControllerTest implements ControllerResponseValidator {
 
     //region getExhibition
     @Test
-    void getExhibition_shouldReturnExhibitionOutput_whenExhibitionExistsById()
-    throws RokaMokaContentNotFoundException {
+    void getExhibition_shouldReturnExhibitionOutput_whenExhibitionExistsById() throws RokaMokaContentNotFoundException {
         // Arrange
         when(this.exhibitionService.findById(anyLong())).thenReturn(output);
 
@@ -82,9 +80,8 @@ class ExhibitionControllerTest implements ControllerResponseValidator {
     //endregion
 
     //region getAllExhibitions
-    static Stream<Arguments> buildExhibitionOutputDTOList() {
-        return Stream.of(Arguments.of(Collections.emptyList()),
-                Arguments.of(Instancio.ofList(ExhibitionOutputDTO.class).create()));
+    static Stream<List<ExhibitionOutputDTO>> buildExhibitionOutputDTOList() {
+        return Stream.of(Collections.emptyList(), Instancio.ofList(ExhibitionOutputDTO.class).create());
     }
 
     @ParameterizedTest
@@ -106,8 +103,7 @@ class ExhibitionControllerTest implements ControllerResponseValidator {
 
     //region register
     @Test
-    void register_shouldReturnExhibitionOutput_whenSuccessful()
-    throws RokaMokaContentNotFoundException {
+    void register_shouldReturnExhibitionOutput_whenSuccessful() throws RokaMokaContentNotFoundException {
         // Arrange
         when(this.exhibitionService.create(input)).thenReturn(output);
 
@@ -135,8 +131,7 @@ class ExhibitionControllerTest implements ControllerResponseValidator {
 
     //region patch
     @Test
-    void patch_shouldReturnExhibitionOutput_whenSuccessful()
-    throws RokaMokaContentNotFoundException {
+    void patch_shouldReturnExhibitionOutput_whenSuccessful() throws RokaMokaContentNotFoundException {
         // Arrange
         when(this.exhibitionService.update(input)).thenReturn(output);
 
@@ -164,8 +159,7 @@ class ExhibitionControllerTest implements ControllerResponseValidator {
 
     //region addArtworks
     @Test
-    void addArtworks_shouldReturnExhibitionOutput_whenSuccessful()
-    throws RokaMokaContentNotFoundException {
+    void addArtworks_shouldReturnExhibitionOutput_whenSuccessful() throws RokaMokaContentNotFoundException {
         // Arrange
         when(this.exhibitionService.addArtworks(anyLong(), anyList())).thenReturn(output);
 
