@@ -14,11 +14,11 @@ import java.util.List;
 public interface PermissionReqRepository extends JpaRepository<PermissionReq, Long> {
 
     @Query("""
-                SELECT new  br.edu.ufpel.rokamoka.dto.permission.output.RequestDetailsDTO(pr.id, user.nome, pr.targetRole)
-                FROM  PermissionReq pr JOIN pr.requester user
-                WHERE pr.status = br.edu.ufpel.rokamoka.core.RequestStatus.PENDING
-                ORDER  BY  user.nome DESC
-            """)
+           SELECT new br.edu.ufpel.rokamoka.dto.permission.output.RequestDetailsDTO(pr.id, user.nome, user.email, pr.targetRole)
+           FROM PermissionReq pr JOIN pr.requester user
+           WHERE pr.status = br.edu.ufpel.rokamoka.core.RequestStatus.PENDING
+           ORDER BY user.nome DESC
+           """)
     List<RequestDetailsDTO> findAllPendingRequestDetailed();
 
     boolean existsByRequesterAndStatusAndTargetRole(User requester, RequestStatus requestStatus, Role targetRole);
