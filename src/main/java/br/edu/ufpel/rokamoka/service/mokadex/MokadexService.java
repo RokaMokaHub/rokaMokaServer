@@ -222,7 +222,7 @@ public class MokadexService implements IMokadexService {
     @Override
     public Set<Artwork> getMissingStarsByExhibition(@NotNull Long exhibitionId) throws RokaMokaContentNotFoundException {
         Mokadex mokadex = this.getMokadexByLoggedUser();
-        Exhibition exhibition = this.exhibitionService.findById(exhibitionId);
+        Exhibition exhibition = this.exhibitionService.getExhibitionOrElseThrow(exhibitionId);
         return this.mokadexRepository.findAllMissingStars(mokadex.getId(), exhibition.getId());
     }
 }

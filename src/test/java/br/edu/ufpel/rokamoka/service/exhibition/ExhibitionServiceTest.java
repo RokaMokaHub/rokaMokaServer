@@ -1,22 +1,24 @@
 package br.edu.ufpel.rokamoka.service.exhibition;
 
-import br.edu.ufpel.rokamoka.core.Address;
+import br.edu.ufpel.rokamoka.core.Artwork;
 import br.edu.ufpel.rokamoka.core.Exhibition;
-import br.edu.ufpel.rokamoka.dto.artwork.input.ArtworkInputDTO;
+import br.edu.ufpel.rokamoka.core.Location;
+import br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO;
 import br.edu.ufpel.rokamoka.dto.exhibition.input.ExhibitionInputDTO;
-import br.edu.ufpel.rokamoka.dto.exhibition.output.ExhibitionWithArtworksDTO;
-import br.edu.ufpel.rokamoka.dto.location.input.AddressInputDTO;
+import br.edu.ufpel.rokamoka.dto.exhibition.output.ExhibitionOutputDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
-import br.edu.ufpel.rokamoka.repository.AddressRepository;
-import br.edu.ufpel.rokamoka.repository.ArtworkRepository;
 import br.edu.ufpel.rokamoka.repository.ExhibitionRepository;
 import br.edu.ufpel.rokamoka.service.MockRepository;
+import br.edu.ufpel.rokamoka.service.artwork.IArtworkService;
+import br.edu.ufpel.rokamoka.service.location.ILocationService;
 import org.instancio.Instancio;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -26,6 +28,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.instancio.Select.field;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -34,17 +37,19 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 /**
- * Unit tests for the {@link ExhibitionService} class, which is responsible for handling
- * exhibition-related API operations.
+ * Unit tests for the {@code ExhibitionService} class, which is responsible for handling exhibition-related API
+ * operations.
  *
  * @author MauricioMucci
+ * @see ExhibitionService
  * @see ExhibitionRepository
- * @see ArtworkRepository
- * @see AddressRepository
+ * @see IArtworkService
+ * @see ILocationService
  */
 @ExtendWith(MockitoExtension.class)
 class ExhibitionServiceTest implements MockRepository<Exhibition> {
@@ -52,130 +57,188 @@ class ExhibitionServiceTest implements MockRepository<Exhibition> {
     @InjectMocks private ExhibitionService exhibitionService;
 
     @Mock private ExhibitionRepository exhibitionRepository;
-    @Mock private ArtworkRepository artworkRepository;
-    @Mock private AddressRepository addressRepository;
 
-    //region findAll
-    static Stream<Arguments> buildFindAllInput() {
-        return Stream.of(
-                Arguments.of(Collections.emptyList()),
-                Arguments.of(Instancio.ofList(Exhibition.class).create())
-        );
+    @Mock private IArtworkService artworkService;
+    @Mock private ILocationService locationService;
+
+    @Captor private ArgumentCaptor<Exhibition> exhibitionCaptor;
+
+    private Exhibition exhibition;
+
+    @BeforeEach
+    void setUp() {
+        this.exhibition = Instancio.create(Exhibition.class);
+    }
+
+    //region getAllExhibitions
+    static Stream<List<ExhibitionOutputDTO>> provideExhibitionOutputDTOList() {
+        return Stream.of(Collections.emptyList(), Instancio.ofList(ExhibitionOutputDTO.class).create());
     }
 
     @ParameterizedTest
-    @MethodSource("buildFindAllInput")
-    void findAll_shouldReturnExhibitionList_whenCalled(List<Exhibition> exhibitions) {
+    @MethodSource("provideExhibitionOutputDTOList")
+    void getAllExhibitions_shouldReturnExhibitionList(List<ExhibitionOutputDTO> exhibitions) {
         // Arrange
-        when(this.exhibitionRepository.findAll()).thenReturn(exhibitions);
+        when(this.exhibitionRepository.findAllExhibitionAndCountArtworks()).thenReturn(exhibitions);
 
         // Act
-        List<Exhibition> actual = this.exhibitionService.findAll();
+        List<ExhibitionOutputDTO> actual = this.exhibitionService.getAllExhibitions();
 
         // Assert
         assertNotNull(actual);
         assertEquals(exhibitions.size(), actual.size());
 
-        verify(this.exhibitionRepository).findAll();
+        verify(this.exhibitionRepository).findAllExhibitionAndCountArtworks();
     }
     //endregion
 
-    //region findById
-    @Test
-    void findById_shouldReturnExhibition_whenExhibitionExistsById()
+    //region getExhibitionWithArtworks
+    static Stream<List<Artwork>> provideArtworkList() {
+        return Stream.of(Collections.emptyList(), Instancio.ofList(Artwork.class).create());
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideArtworkList")
+    void getExhibitionWithArtworks_shouldReturnExhibitionOutputDTO_whenExhibitionExistsById(List<Artwork> artworks)
     throws RokaMokaContentNotFoundException {
         // Arrange
-        Exhibition exhibition = mock(Exhibition.class);
-
-        when(this.exhibitionRepository.findById(anyLong())).thenReturn(Optional.of(exhibition));
+        Long id = this.exhibition.getId();
+        when(this.exhibitionRepository.findById(anyLong())).thenReturn(Optional.of(this.exhibition));
+        when(this.artworkService.getAllArtworkByExhibitionId(anyLong())).thenReturn(artworks);
 
         // Act
-        Exhibition actual = this.exhibitionService.findById(1L);
+        ExhibitionOutputDTO actual = this.exhibitionService.getExhibitionWithArtworks(id);
 
         // Assert
-        assertNotNull(actual);
+        assertExhibitionOutputByExhibition(this.exhibition, actual);
 
         verify(this.exhibitionRepository).findById(anyLong());
+        verify(this.artworkService).getAllArtworkByExhibitionId(anyLong());
+    }
+
+    private static void assertExhibitionOutputByExhibition(Exhibition expected, ExhibitionOutputDTO actual) {
+        assertNotNull(actual);
+        assertEquals(expected.getId(), actual.id());
+        assertEquals(expected.getName(), actual.name());
+        assertEquals(expected.getDescription(), actual.description());
+
+        List<Artwork> artworks = expected.getArtworks();
+        assertEquals(artworks.size(), actual.numberOfArtworks());
+
+        Location location = expected.getLocation();
+        assertEquals(location.getNome(), actual.location());
     }
 
     @Test
-    void findById_shouldThrowRokaMokaContentNotFoundException_whenExhibitionDoesNotExistById() {
+    void getExhibitionWithArtworks_shouldThrowRokaMokaContentNotFoundException_whenExhibitionDoesNotExistById() {
         // Arrange
         when(this.exhibitionRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(RokaMokaContentNotFoundException.class, () -> this.exhibitionService.findById(1L));
+        assertThrows(RokaMokaContentNotFoundException.class, () -> this.exhibitionService.getExhibitionWithArtworks(1L));
 
         verify(this.exhibitionRepository).findById(anyLong());
+        verifyNoInteractions(this.artworkService);
     }
     //endregion
 
-    //region save
+    //region create
     @Test
-    void save_shouldReturnSavedExhibition_whenInputIsValid() {
+    void create_shouldReturnExhibitionOutputDTO_whenSuccessful() throws RokaMokaContentNotFoundException {
         // Arrange
-        ExhibitionInputDTO input = Instancio.create(ExhibitionInputDTO.class);
-        Address address = new Address(input.addressInputDTO());
+        ExhibitionInputDTO input =
+                Instancio.of(ExhibitionInputDTO.class).ignore(field(ExhibitionInputDTO::id)).create();
+        Location location = mock(Location.class);
 
-        when(this.addressRepository.save(any(Address.class))).thenReturn(address);
+        when(this.locationService.getLocationOrElseThrow(anyLong())).thenReturn(location);
         when(this.exhibitionRepository.save(any(Exhibition.class))).thenAnswer(
                 inv -> this.mockRepositorySave(inv.getArgument(0)));
 
         // Act
-        Exhibition actual = this.exhibitionService.save(input);
+        ExhibitionOutputDTO actual = this.exhibitionService.create(input);
 
         // Assert
-        this.assertExhibitionByInput(input, actual);
+        verify(this.locationService).getLocationOrElseThrow(anyLong());
+        verify(this.exhibitionRepository).save(this.exhibitionCaptor.capture());
 
-        verify(this.addressRepository).save(any(Address.class));
-        verify(this.exhibitionRepository).save(any(Exhibition.class));
+        Exhibition newExhibition = this.exhibitionCaptor.getValue();
+        assertExhibitionOutputByExhibition(newExhibition, actual);
     }
 
-    private void assertExhibitionByInput(ExhibitionInputDTO expected, Exhibition actual) {
-        assertNotNull(actual);
-        assertEquals(expected.name(), actual.getName());
-        assertEquals(expected.description(), actual.getDescription());
+    @Test
+    void create_shouldThrowRokaMokaContentNotFoundException_whenLocationDoesNotExist()
+    throws RokaMokaContentNotFoundException {
+        // Arrange
+        ExhibitionInputDTO input = mock(ExhibitionInputDTO.class);
 
-        this.assertAddressByEnderecoDTO(expected.addressInputDTO(), actual.getAddress());
-    }
+        when(this.locationService.getLocationOrElseThrow(anyLong())).thenThrow(RokaMokaContentNotFoundException.class);
 
-    private void assertAddressByEnderecoDTO(AddressInputDTO expected, Address actual) {
-        assertNotNull(actual);
-        assertEquals(expected.rua(), actual.getRua());
-        assertEquals(expected.numero(), actual.getNumero());
-        assertEquals(expected.cep(), actual.getCep());
-        assertEquals(expected.complemento(), actual.getComplemento());
+        // Act & Assert
+        assertThrows(RokaMokaContentNotFoundException.class, () -> this.exhibitionService.create(input));
+
+        verify(this.locationService).getLocationOrElseThrow(anyLong());
+        verifyNoInteractions(this.exhibitionRepository);
     }
     //endregion
 
-    //region deleteById
+    //region delete
     @Test
-    void deleteById_shouldInvokeRepository_whenCalled() {
-        this.exhibitionService.deleteById(1L);
-        verify(this.exhibitionRepository).deleteById(1L);
+    void delete_shouldDeleteExhibitionAndRelatedArtworksAndReturnExhibitionOutputDTO_whenSuccessful()
+    throws RokaMokaContentNotFoundException {
+        // Arrange
+        Long id = this.exhibition.getId();
+
+        when(this.exhibitionRepository.findById(anyLong())).thenReturn(Optional.of(this.exhibition));
+
+        // Act
+        ExhibitionOutputDTO actual = this.exhibitionService.delete(id);
+
+        // Assert
+        assertExhibitionOutputByExhibition(this.exhibition, actual);
+
+        verify(this.exhibitionRepository).findById(anyLong());
+        verify(this.artworkService).deleteByExhibitionId(anyLong());
+        verify(this.exhibitionRepository).delete(any(Exhibition.class));
+    }
+
+    @Test
+    void delete_shouldThrowRokaMokaContentNotFoundException_whenLocationDoesNotExist() {
+        // Arrange
+        when(this.exhibitionRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(RokaMokaContentNotFoundException.class, () -> this.exhibitionService.delete(1L));
+
+        verify(this.exhibitionRepository).findById(anyLong());
+        verifyNoMoreInteractions(this.exhibitionRepository);
+        verifyNoInteractions(this.artworkService);
     }
     //endregion
 
     //region addArtworks
-    @Test
-    void addArtworks_shouldAddArtworksToExhibition_whenInputIsValid() throws RokaMokaContentNotFoundException {
-        // Arrange
-        List<ArtworkInputDTO> inputList = Instancio.ofList(ArtworkInputDTO.class).create();
-        Exhibition foundById = Instancio.create(Exhibition.class);
+    static Stream<List<ArtworkOutputDTO>> provideArtworkOutputDTOList() {
+        return Stream.of(Collections.emptyList(), Instancio.ofList(ArtworkOutputDTO.class).create());
+    }
 
-        when(this.exhibitionRepository.findById(anyLong())).thenReturn(Optional.of(foundById));
-        when(this.artworkRepository.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
+    @ParameterizedTest
+    @MethodSource("provideArtworkOutputDTOList")
+    void addArtworks_shouldReturnExhibitionOutputDTO_whenSuccessful(List<ArtworkOutputDTO> artworks)
+    throws RokaMokaContentNotFoundException {
+        // Arrange
+        Long id = this.exhibition.getId();
+
+        when(this.exhibitionRepository.findById(anyLong())).thenReturn(Optional.of(this.exhibition));
+        when(this.artworkService.addArtworksToExhibition(anyList(), any(Exhibition.class))).thenReturn(artworks);
 
         // Act
-        ExhibitionWithArtworksDTO actual = this.exhibitionService.addArtworks(1L, inputList);
+        ExhibitionOutputDTO actual = this.exhibitionService.addArtworks(id, Collections.emptyList());
 
         // Assert
         assertNotNull(actual);
-        assertEquals(foundById.getName(), actual.exhibitionName());
-        assertEquals(inputList.size(), actual.artworkOutputDTOS().size());
+        assertEquals(artworks.size(), actual.numberOfArtworks());
 
         verify(this.exhibitionRepository).findById(anyLong());
-        verify(this.artworkRepository).saveAll(anyList());
+        verify(this.artworkService).addArtworksToExhibition(anyList(), any(Exhibition.class));
     }
 
     @Test
@@ -188,7 +251,99 @@ class ExhibitionServiceTest implements MockRepository<Exhibition> {
                 () -> this.exhibitionService.addArtworks(1L, Collections.emptyList()));
 
         verify(this.exhibitionRepository).findById(anyLong());
-        verifyNoMoreInteractions(this.artworkRepository);
+        verifyNoInteractions(this.artworkService);
+    }
+    //endregion
+
+    //region getExhibitionOrElseThrow
+    @Test
+    void getExhibitionOrElseThrow_shouldReturnExhibition_whenExhibitionExistsById()
+    throws RokaMokaContentNotFoundException {
+        // Arrange
+        Long id = this.exhibition.getId();
+
+        when(this.exhibitionRepository.findById(anyLong())).thenReturn(Optional.of(this.exhibition));
+
+        // Act
+        Exhibition actual = this.exhibitionService.getExhibitionOrElseThrow(id);
+
+        // Assert
+        assertNotNull(actual);
+        assertEquals(this.exhibition, actual);
+
+        verify(this.exhibitionRepository).findById(anyLong());
+    }
+
+    @Test
+    void getExhibitionOrElseThrow_shouldThrowRokaMokaContentNotFoundException_whenExhibitionDoesNotExistById() {
+        // Arrange
+        when(this.exhibitionRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(RokaMokaContentNotFoundException.class, () -> this.exhibitionService.getExhibitionOrElseThrow(1L));
+
+        verify(this.exhibitionRepository).findById(anyLong());
+    }
+    //endregion
+
+    //region update
+    @Test
+    void update_shouldDoCompleteUpdateAndReturnExhibitionOutputDTO_whenLocationIsProvided()
+    throws RokaMokaContentNotFoundException {
+        // Arrange
+        ExhibitionInputDTO input = mock(ExhibitionInputDTO.class);
+        Location location = mock(Location.class);
+
+        when(this.exhibitionRepository.findById(anyLong())).thenReturn(Optional.of(this.exhibition));
+        when(input.locationId()).thenReturn(1L);
+        when(this.locationService.getLocationOrElseThrow(anyLong())).thenReturn(location);
+        when(this.exhibitionRepository.save(any(Exhibition.class))).thenAnswer(
+                inv -> this.mockRepositorySave(inv.getArgument(0)));
+
+        // Act
+        ExhibitionOutputDTO actual = this.exhibitionService.update(input);
+
+        // Assert
+        verify(this.locationService).getLocationOrElseThrow(anyLong());
+        verify(this.exhibitionRepository).save(this.exhibitionCaptor.capture());
+
+        Exhibition updatedExhibition = this.exhibitionCaptor.getValue();
+        assertExhibitionOutputByExhibition(updatedExhibition, actual);
+    }
+
+    @Test
+    void update_shouldDoParcialUpdateAndReturnExhibitionOutputDTO_whenNoLocationIsProvided()
+    throws RokaMokaContentNotFoundException {
+        // Arrange
+        ExhibitionInputDTO input = mock(ExhibitionInputDTO.class);
+
+        when(this.exhibitionRepository.findById(anyLong())).thenReturn(Optional.of(this.exhibition));
+        when(input.locationId()).thenReturn(null);
+        when(this.exhibitionRepository.save(any(Exhibition.class))).thenAnswer(
+                inv -> this.mockRepositorySave(inv.getArgument(0)));
+
+        // Act
+        ExhibitionOutputDTO actual = this.exhibitionService.update(input);
+
+        // Assert
+        verifyNoInteractions(this.locationService);
+        verify(this.exhibitionRepository).save(this.exhibitionCaptor.capture());
+
+        Exhibition updatedExhibition = this.exhibitionCaptor.getValue();
+        assertExhibitionOutputByExhibition(updatedExhibition, actual);
+    }
+
+    @Test
+    void update_shouldThrowRokaMokaContentNotFoundException_whenExhibitionDoesNotExistById() {
+        // Arrange
+        when(this.exhibitionRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(RokaMokaContentNotFoundException.class, () -> this.exhibitionService.getExhibitionOrElseThrow(1L));
+
+        verify(this.exhibitionRepository).findById(anyLong());
+        verifyNoMoreInteractions(this.exhibitionRepository);
+        verifyNoInteractions(this.locationService);
     }
     //endregion
 }

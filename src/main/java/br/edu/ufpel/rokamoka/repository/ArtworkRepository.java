@@ -5,6 +5,7 @@ import br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
@@ -24,4 +25,6 @@ public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
     Optional<Artwork> findByIdWithinImage(Long id);
 
     Optional<Artwork> findByQrCode(String qrCode);
+
+    List<Artwork> findByExhibition_Id(Long exhibitionId);
 }

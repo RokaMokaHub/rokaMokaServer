@@ -22,6 +22,8 @@ import org.springframework.validation.annotation.Validated;
 import java.util.List;
 import java.util.Optional;
 
+import static org.springframework.transaction.annotation.Propagation.REQUIRED;
+
 /**
  * Service implementation of the {@link ILocationService} interface for managing operations on the {@link Location}
  * resource.
@@ -40,15 +42,10 @@ class LocationService implements ILocationService {
     @Override
     public LocationOutputDTO getLocation(@NotNull Long id) throws RokaMokaContentNotFoundException {
         Location location = this.getLocationOrElseThrow(id);
-        return this.toOutput(location);
+        return toOutput(location);
     }
 
-    private Location getLocationOrElseThrow(Long id) throws RokaMokaContentNotFoundException {
-        return this.locationRepository.findById(id)
-                .orElseThrow(() -> new RokaMokaContentNotFoundException("Localização não encontrada"));
-    }
-
-    private LocationOutputDTO toOutput(Location location) {
+    private static LocationOutputDTO toOutput(Location location) {
         return new LocationOutputDTO(location);
     }
 
@@ -63,7 +60,7 @@ class LocationService implements ILocationService {
     }
 
     @Override
-    @Transactional
+    @Transactional(propagation = REQUIRED)
     public LocationOutputDTO create(@NotNull LocationInputDTO input) throws RokaMokaContentDuplicatedException {
         if (this.locationRepository.existsByNome(input.nome())) {
             throw new RokaMokaContentDuplicatedException("Localização já existe");
@@ -75,7 +72,7 @@ class LocationService implements ILocationService {
         Location location = new LocationBuilder(input, address).build();
         location = this.locationRepository.save(location);
 
-        return this.toOutput(location);
+        return toOutput(location);
     }
 
     private Optional<Address> getByAtributesIn(AddressInputDTO input) {
@@ -85,33 +82,38 @@ class LocationService implements ILocationService {
     }
 
     @Override
-    @Transactional
+    @Transactional(propagation = REQUIRED)
     public LocationOutputDTO update(@NotNull LocationInputDTO input) throws RokaMokaContentNotFoundException {
         Location location = this.getLocationOrElseThrow(input.id());
+        Address address = location.getEndereco();
 
-        AddressInputDTO address = input.endereco();
-        if (address != null) {
-            Address oldAddress = location.getEndereco();
-            Address updatedAddress = new AddressBuilder(oldAddress.getId(), address).build();
-            location.setEndereco(updatedAddress);
+        AddressInputDTO addressDTO = input.endereco();
+        if (addressDTO != null) {
+            address = new AddressBuilder(address.getId(), addressDTO).build();
         }
 
-        location.setNome(input.nome());
+        location = new LocationBuilder(location.getId(), input, address).build();
         location = this.locationRepository.save(location);
 
-        return this.toOutput(location);
+        return toOutput(location);
     }
 
     @Override
-    @Transactional
+    @Transactional(propagation = REQUIRED)
     public LocationOutputDTO delete(@NotNull Long id) throws RokaMokaContentNotFoundException {
         Location location = this.getLocationOrElseThrow(id);
         this.locationRepository.delete(location);
-        return this.toOutput(location);
+        return toOutput(location);
     }
 
     @Override
     public List<AddressOutputDTO> getAllAddresses() {
         return this.addressRepository.findAll().stream().map(AddressOutputDTO::new).toList();
+    }
+
+    @Override
+    public Location getLocationOrElseThrow(Long id) throws RokaMokaContentNotFoundException {
+        return this.locationRepository.findById(id)
+                .orElseThrow(() -> new RokaMokaContentNotFoundException("Localização não encontrada: ID=" + id));
     }
 }
