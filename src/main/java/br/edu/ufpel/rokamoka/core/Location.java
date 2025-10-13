@@ -1,5 +1,6 @@
 package br.edu.ufpel.rokamoka.core;
 
+import br.edu.ufpel.rokamoka.core.audit.Auditable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -27,7 +28,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @Entity
 @Table(name = "local")
-public class Location {
+public class Location extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -58,7 +59,7 @@ public class Location {
 
     @Override
     public final int hashCode() {
-        return this instanceof HibernateProxy hf ? hf.getHibernateLazyInitializer().getPersistentClass().hashCode()
+        return this instanceof HibernateProxy hp ? hp.getHibernateLazyInitializer().getPersistentClass().hashCode()
                 : this.getClass().hashCode();
     }
 }

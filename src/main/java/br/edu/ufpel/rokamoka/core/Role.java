@@ -1,7 +1,19 @@
 package br.edu.ufpel.rokamoka.core;
 
-import jakarta.persistence.*;
-import lombok.*;
+import br.edu.ufpel.rokamoka.core.audit.Auditable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.Hibernate;
 import org.hibernate.proxy.HibernateProxy;
 
@@ -19,7 +31,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @Entity
 @Table(name = "perfil")
-public class Role {
+public class Role extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,9 +55,8 @@ public class Role {
 
     @Override
     public final int hashCode() {
-        return this instanceof HibernateProxy
-                ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode()
-                : getClass().hashCode();
+        return this instanceof HibernateProxy hp ? hp.getHibernateLazyInitializer().getPersistentClass().hashCode()
+                : this.getClass().hashCode();
     }
 
     @Override
