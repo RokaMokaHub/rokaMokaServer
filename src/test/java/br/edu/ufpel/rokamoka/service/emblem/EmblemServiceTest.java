@@ -55,7 +55,7 @@ class EmblemServiceTest implements MockRepository<Emblem> {
         this.exhibition = mock(Exhibition.class);
     }
 
-    //region getArtworkOrElseThrow
+    //region findById
     @Test
     void findById_shouldReturnEmblem_whenEmblemExistsById() throws RokaMokaContentNotFoundException {
         // Arrange
