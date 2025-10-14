@@ -75,11 +75,6 @@ public class ArtworkService implements IArtworkService {
     }
 
     @Override
-    public void deleteById(Long id) {
-        this.artworkRepository.deleteById(id);
-    }
-
-    @Override
     @Transactional(propagation = REQUIRED)
     public void addImage(Long artworkId, MultipartFile image) throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
         var obra = this.artworkRepository.findByIdWithinImage(artworkId).orElseThrow(RokaMokaContentNotFoundException::new);

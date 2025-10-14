@@ -24,8 +24,6 @@ public interface IArtworkService {
 
     Artwork create(Long exhibitionId, @Valid ArtworkInputDTO artworkInputDTO) throws RokaMokaContentNotFoundException;
 
-    void deleteById(Long id);
-
     void addImage(Long artworkId, MultipartFile image)
     throws RokaMokaContentNotFoundException, RokaMokaForbiddenException;
 
