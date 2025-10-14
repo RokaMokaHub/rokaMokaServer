@@ -59,7 +59,7 @@ public class ExhibitionController extends RokaMokaController {
     @Operation(summary = "Cadastrar uma nova exposição",
             description = "Cria o registro de uma nova exposição a partir dos dados fornecidos.")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Exposição cadastrada com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Exposição duplicada"),
+            @ApiResponse(responseCode = "400", description = "Exposição duplicada"),
             @ApiResponse(responseCode = "500", description = "Erro inesperado ao cadastrar exposição")})
     @PostMapping
     public ResponseEntity<ApiResponseWrapper<ExhibitionOutputDTO>> register(
