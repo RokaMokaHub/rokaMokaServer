@@ -26,11 +26,16 @@ public interface IArtworkService {
 
     void deleteById(Long id);
 
-    void addImage(Long artworkId, MultipartFile image) throws RokaMokaContentNotFoundException, RokaMokaForbiddenException;
+    void addImage(Long artworkId, MultipartFile image)
+    throws RokaMokaContentNotFoundException, RokaMokaForbiddenException;
 
     List<Artwork> getAllArtworkByExhibitionId(Long exhibitionId);
 
     List<ArtworkOutputDTO> addArtworksToExhibition(List<ArtworkInputDTO> inputList, Exhibition exhibition);
 
     List<ArtworkOutputDTO> deleteByExhibitionId(Long exhibitionId);
+
+    ArtworkOutputDTO update(ArtworkInputDTO input) throws RokaMokaContentNotFoundException;
+
+    ArtworkOutputDTO delete(Long id) throws RokaMokaContentNotFoundException;
 }

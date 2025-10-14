@@ -2,6 +2,7 @@ package br.edu.ufpel.rokamoka.controller;
 
 import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
 import br.edu.ufpel.rokamoka.core.Artwork;
+import br.edu.ufpel.rokamoka.dto.GroupValidators;
 import br.edu.ufpel.rokamoka.dto.GroupValidators.Create;
 import br.edu.ufpel.rokamoka.dto.artwork.input.ArtworkInputDTO;
 import br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO;
@@ -19,8 +20,10 @@ import org.apache.coyote.BadRequestException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -82,5 +85,24 @@ public class ArtworkController extends RokaMokaController {
             @ModelAttribute @Validated(value = Create.class) ArtworkInputDTO artworkDTO) throws RokaMokaContentNotFoundException {
         Artwork artwork = this.artworkService.create(exhibitionId, artworkDTO);
         return this.success(new ArtworkOutputDTO(artwork));
+    }
+
+    @Operation(summary = "Atualizar uma obra",
+            description = "Atualiza o registro de uma obra a partir dos dados fornecidos.")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Obra atualizada com sucesso"),
+            @ApiResponse(responseCode = "500", description = "Erro inesperado ao atualizar obra")})
+    @PatchMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> patch(
+            @ModelAttribute @Validated(value = GroupValidators.Update.class) ArtworkInputDTO input) throws RokaMokaContentNotFoundException {
+        ArtworkOutputDTO artwork = this.artworkService.update(input);
+        return this.success(artwork);
+    }
+
+    @Operation(summary = "Remover uma obra", description = "Remove o registro de uma obra com base no ID informado.")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> remove(@PathVariable Long id)
+    throws RokaMokaContentNotFoundException {
+        ArtworkOutputDTO artwork = this.artworkService.delete(id);
+        return this.success(artwork);
     }
 }
