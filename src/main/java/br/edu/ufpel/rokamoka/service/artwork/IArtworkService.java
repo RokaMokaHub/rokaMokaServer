@@ -16,7 +16,7 @@ public interface IArtworkService {
 
     List<Artwork> findAll();
 
-    Artwork findById(Long id) throws RokaMokaContentNotFoundException;
+    Artwork getArtworkOrElseThrow(Long id) throws RokaMokaContentNotFoundException;
 
     Optional<Artwork> findByQrCode(String qrCode);
 

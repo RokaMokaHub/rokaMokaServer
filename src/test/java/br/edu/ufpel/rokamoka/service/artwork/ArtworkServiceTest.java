@@ -96,14 +96,14 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
     }
     //endregion
 
-    //region findById
+    //region getArtworkOrElseThrow
     @Test
-    void findById_shouldReturnArtwork_whenArtworkExistsById() throws RokaMokaContentNotFoundException {
+    void getArtworkOrElseThrow() throws RokaMokaContentNotFoundException {
         // Arrange
         when(this.artworkRepository.findById(anyLong())).thenReturn(Optional.of(this.artwork));
 
         // Act
-        Artwork actual = this.artworkService.findById(1L);
+        Artwork actual = this.artworkService.getArtworkOrElseThrow(1L);
 
         // Assert
         assertEquals(this.artwork, actual);
@@ -113,12 +113,12 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
     }
 
     @Test
-    void findById_shouldThrowRokaMokaContentNotFoundException_whenArtworkDoesNotExistById() {
+    void getArtworkOrElseThrow() {
         // Arrange
         when(this.artworkRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(RokaMokaContentNotFoundException.class, () -> this.artworkService.findById(1L));
+        assertThrows(RokaMokaContentNotFoundException.class, () -> this.artworkService.getArtworkOrElseThrow(1L));
 
         verify(this.artworkRepository).findById(anyLong());
         verifyNoInteractions(this.exhibitionRepository, this.imageService);

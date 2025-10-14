@@ -76,7 +76,7 @@ class MokadexServiceTest implements MockUserSession, MockRepository<Mokadex> {
     @Mock private ExhibitionService exhibitionService;
     @Mock private CollectEmblemProducer collectEmblemProducer;
 
-    //region findById
+    //region getArtworkOrElseThrow
     @ParameterizedTest
     @ValueSource(longs = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10})
     void findById_shouldReturnMokadex_whenMokadexExistsById(Long id) throws RokaMokaContentNotFoundException {

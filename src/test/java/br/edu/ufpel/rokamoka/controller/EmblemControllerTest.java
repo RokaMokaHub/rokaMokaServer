@@ -43,7 +43,7 @@ class EmblemControllerTest implements ControllerResponseValidator {
         this.input = mock(EmblemInputDTO.class);
     }
 
-    //region findById
+    //region getArtworkOrElseThrow
     @Test
     void findById_shouldReturnEmblemOutputDTO_whenEmblemExistsById() throws RokaMokaContentNotFoundException {
         // Arrange

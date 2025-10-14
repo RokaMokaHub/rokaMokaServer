@@ -36,7 +36,7 @@ public class ArtworkService implements IArtworkService {
     }
 
     @Override
-    public Artwork findById(Long id) throws RokaMokaContentNotFoundException {
+    public Artwork getArtworkOrElseThrow(Long id) throws RokaMokaContentNotFoundException {
         return this.artworkRepository.findById(id).orElseThrow(RokaMokaContentNotFoundException::new);
     }
 
