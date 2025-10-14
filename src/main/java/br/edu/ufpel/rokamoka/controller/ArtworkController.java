@@ -2,8 +2,8 @@ package br.edu.ufpel.rokamoka.controller;
 
 import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
 import br.edu.ufpel.rokamoka.core.Artwork;
-import br.edu.ufpel.rokamoka.dto.GroupValidators;
 import br.edu.ufpel.rokamoka.dto.GroupValidators.Create;
+import br.edu.ufpel.rokamoka.dto.GroupValidators.Update;
 import br.edu.ufpel.rokamoka.dto.artwork.input.ArtworkInputDTO;
 import br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
@@ -31,6 +31,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @Tag(name = "Obra", description = "API para operações de CRUD em obras")
 @RestController
 @RequestMapping("/artwork")
@@ -50,6 +52,15 @@ public class ArtworkController extends RokaMokaController {
         Artwork artwork = this.artworkService.getArtworkOrElseThrow(id);
         ArtworkOutputDTO dto = this.artworkRepository.createFullArtworkInfo(artwork.getId());
         return this.success(dto);
+    }
+
+    @Operation(summary = "Buscar obras por ID da exposição",
+            description = "Retorna todas as obras de uma determinada exposição.")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Obras encontrada")})
+    @GetMapping("/exposicao/{exhibitionId}")
+    public ResponseEntity<ApiResponseWrapper<List<ArtworkOutputDTO>>> getAllByExhibitionId(@PathVariable Long exhibitionId) {
+        List<Artwork> artworks = this.artworkService.getAllArtworkByExhibitionId(exhibitionId);
+        return this.success(artworks.stream().map(ArtworkOutputDTO::new).toList());
     }
 
     @Operation(summary = "Buscar obra por QR Code",
@@ -93,7 +104,7 @@ public class ArtworkController extends RokaMokaController {
             @ApiResponse(responseCode = "500", description = "Erro inesperado ao atualizar obra")})
     @PatchMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> patch(
-            @ModelAttribute @Validated(value = GroupValidators.Update.class) ArtworkInputDTO input) throws RokaMokaContentNotFoundException {
+            @ModelAttribute @Validated(value = Update.class) ArtworkInputDTO input) throws RokaMokaContentNotFoundException {
         ArtworkOutputDTO artwork = this.artworkService.update(input);
         return this.success(artwork);
     }
