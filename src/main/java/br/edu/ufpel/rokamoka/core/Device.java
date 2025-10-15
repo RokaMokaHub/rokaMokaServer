@@ -1,5 +1,6 @@
 package br.edu.ufpel.rokamoka.core;
 
+import br.edu.ufpel.rokamoka.core.audit.Auditable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -26,7 +27,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @Entity
 @Table(name = "dispositivo")
-public class Device {
+public class Device extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,8 +53,7 @@ public class Device {
 
     @Override
     public final int hashCode() {
-        return this instanceof HibernateProxy
-                ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode()
-                : getClass().hashCode();
+        return this instanceof HibernateProxy hp ? hp.getHibernateLazyInitializer().getPersistentClass().hashCode()
+                : this.getClass().hashCode();
     }
 }

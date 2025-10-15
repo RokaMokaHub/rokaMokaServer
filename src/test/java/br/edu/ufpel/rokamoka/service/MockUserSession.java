@@ -21,4 +21,12 @@ public interface MockUserSession {
         when(mockUserAuthenticated.getUsername()).thenReturn(LOGGED_USER_NAME);
         return mockContext;
     }
+
+    default ServiceContext mockBlankServiceContext() {
+        ServiceContext mockContext = mock(ServiceContext.class);
+        UserAuthenticated mockUserAuthenticated = mock(UserAuthenticated.class);
+        when(mockContext.getUser()).thenReturn(mockUserAuthenticated);
+        when(mockUserAuthenticated.getUsername()).thenReturn("");
+        return mockContext;
+    }
 }

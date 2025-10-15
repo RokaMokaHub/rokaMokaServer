@@ -1,5 +1,6 @@
 package br.edu.ufpel.rokamoka.core;
 
+import br.edu.ufpel.rokamoka.core.audit.Auditable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -32,7 +33,7 @@ import static br.edu.ufpel.rokamoka.core.RequestStatus.PENDING;
 @AllArgsConstructor
 @Table(name = "solicitacao")
 @Entity
-public class PermissionReq {
+public class PermissionReq extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -60,8 +61,7 @@ public class PermissionReq {
 
     @Override
     public final int hashCode() {
-        return this instanceof HibernateProxy
-                ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode()
+        return this instanceof HibernateProxy hp ? hp.getHibernateLazyInitializer().getPersistentClass().hashCode()
                 : this.getClass().hashCode();
     }
 

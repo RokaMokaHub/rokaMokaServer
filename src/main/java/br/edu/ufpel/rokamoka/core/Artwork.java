@@ -1,5 +1,6 @@
 package br.edu.ufpel.rokamoka.core;
 
+import br.edu.ufpel.rokamoka.core.audit.Auditable;
 import br.edu.ufpel.rokamoka.dto.artwork.input.ArtworkInputDTO;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -31,7 +32,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Entity
 @Table(name = "obra")
-public class Artwork {
+public class Artwork extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -69,8 +70,7 @@ public class Artwork {
 
     @Override
     public final int hashCode() {
-        return this instanceof HibernateProxy
-                ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode()
-                : getClass().hashCode();
+        return this instanceof HibernateProxy hp ? hp.getHibernateLazyInitializer().getPersistentClass().hashCode()
+                : this.getClass().hashCode();
     }
 }
