@@ -38,11 +38,13 @@ public class PermissionReq extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @OneToOne
     @JoinColumn(name = "solicitante_id")
     private User requester;
-    @Enumerated(EnumType.STRING)
-    private RequestStatus status;
+
+    @Enumerated(EnumType.STRING) private RequestStatus status;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "perfil_objetivo_id")
     private Role targetRole;
@@ -66,6 +68,6 @@ public class PermissionReq extends Auditable {
     }
 
     public boolean isPending() {
-        return PENDING  == this.status;
+        return PENDING == this.status;
     }
 }

@@ -1,17 +1,12 @@
 package br.edu.ufpel.rokamoka.dto.permission.output;
 
 import br.edu.ufpel.rokamoka.core.Role;
-import lombok.Getter;
 
-@Getter
-public class RequestDetailsDTO {
-    private Long requestId;
-    private String userName;
-    private String targetRole;
+import java.time.LocalDateTime;
 
-    public RequestDetailsDTO(Long requstId, String username, Role targetRole) {
-        this.requestId = requstId;
-        this.userName = username;
-        this.targetRole = targetRole.getName().getDescription();
+public record RequestDetailsDTO(Long requestId, String userName, String email, LocalDateTime createdAt, String targetRole) {
+
+    public RequestDetailsDTO(Long requestId, String username, String email, LocalDateTime createdAt, Role targetRole) {
+        this(requestId, username, email, createdAt, targetRole.getName().getDescription());
     }
 }
