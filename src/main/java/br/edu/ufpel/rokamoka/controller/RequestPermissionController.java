@@ -13,16 +13,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Validated
+@RequiredArgsConstructor
 @Tag(name = "Solicitação de Acesso", description = "API para o usuário soliciar acesso como Curador ou Pesquisador")
 @RestController
 @RequestMapping("/request/permission")
-@RequiredArgsConstructor
 public class RequestPermissionController extends RokaMokaController {
 
     private final IRequestPermissionService requestPermissionService;
@@ -45,11 +46,10 @@ public class RequestPermissionController extends RokaMokaController {
         return this.success(request);
     }
 
-    @Operation(summary = "Adquirir status atual da solicitação")
-    @GetMapping(value = "/status/{permissionId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponseWrapper<PermissionRequestStatusDTO>> getPermissionRequestStatus(
-            @PathVariable Long permissionId) throws RokaMokaContentNotFoundException {
-        PermissionRequestStatusDTO dto = this.requestPermissionService.getPermissionRequestStatus(permissionId);
+    @Operation(summary = "Adquirir solicitação do usuário logado")
+    @GetMapping(value = "/me/status", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ApiResponseWrapper<PermissionRequestStatusDTO>> getPermissionRequestStatus() throws RokaMokaContentNotFoundException {
+        PermissionRequestStatusDTO dto = this.requestPermissionService.getPermissionRequestStatus();
         return this.success(dto);
     }
 }

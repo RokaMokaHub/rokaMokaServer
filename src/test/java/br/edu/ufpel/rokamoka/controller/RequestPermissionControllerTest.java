@@ -16,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -147,30 +146,30 @@ class RequestPermissionControllerTest implements ControllerResponseValidator {
     void getPermissionRequestStatus_shouldReturnPermissionRequestStatusDTO_whenSuccessful()
     throws RokaMokaContentNotFoundException {
         // Arrange
-        when(this.requestPermissionService.getPermissionRequestStatus(anyLong())).thenReturn(this.request);
+        when(this.requestPermissionService.getPermissionRequestStatus()).thenReturn(this.request);
 
         // Act
         ResponseEntity<ApiResponseWrapper<PermissionRequestStatusDTO>> response =
-                this.requestPermissionController.getPermissionRequestStatus(anyLong());
+                this.requestPermissionController.getPermissionRequestStatus();
 
         // Assert
         this.assertExpectedResponse(response, this.request);
 
-        verify(this.requestPermissionService).getPermissionRequestStatus(anyLong());
+        verify(this.requestPermissionService).getPermissionRequestStatus();
     }
 
     @Test
     void getPermissionRequestStatus_shouldThrowRokaMokaContentNotFoundException_whenAnyEntityIsNotFound()
     throws RokaMokaContentNotFoundException {
         // Arrange
-        when(this.requestPermissionService.getPermissionRequestStatus(anyLong())).thenThrow(
+        when(this.requestPermissionService.getPermissionRequestStatus()).thenThrow(
                 RokaMokaContentNotFoundException.class);
 
         // Act & Assert
         assertThrows(RokaMokaContentNotFoundException.class,
-                () -> this.requestPermissionController.getPermissionRequestStatus(1L));
+                () -> this.requestPermissionController.getPermissionRequestStatus());
 
-        verify(this.requestPermissionService).getPermissionRequestStatus(anyLong());
+        verify(this.requestPermissionService).getPermissionRequestStatus();
     }
     //endregion
 }

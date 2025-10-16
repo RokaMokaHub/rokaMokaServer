@@ -9,5 +9,5 @@ public interface IRequestPermissionService {
 
     PermissionRequestStatusDTO createRequest(String userName, RoleEnum role) throws RokaMokaContentNotFoundException, RokaMokaContentDuplicatedException;
 
-    PermissionRequestStatusDTO getPermissionRequestStatus(Long permissionID) throws RokaMokaContentNotFoundException;
+    PermissionRequestStatusDTO getPermissionRequestStatus() throws RokaMokaContentNotFoundException;
 }

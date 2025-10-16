@@ -12,7 +12,6 @@ import br.edu.ufpel.rokamoka.repository.PermissionReqRepository;
 import br.edu.ufpel.rokamoka.repository.RoleRepository;
 import br.edu.ufpel.rokamoka.service.MockRepository;
 import br.edu.ufpel.rokamoka.service.user.IUserService;
-import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -91,10 +90,10 @@ class RequestPermissionServiceTest implements MockRepository<PermissionReq> {
         verify(this.permissionReqRepository).save(this.requestCaptor.capture());
 
         PermissionReq newRequest = this.requestCaptor.getValue();
-        this.assertOutputByPermissionReq(newRequest, actual);
+        assertOutputByPermissionReq(newRequest, actual);
     }
 
-    private void assertOutputByPermissionReq(PermissionReq expected, PermissionRequestStatusDTO actual) {
+    private static void assertOutputByPermissionReq(PermissionReq expected, PermissionRequestStatusDTO actual) {
         assertNotNull(actual);
         assertEquals(expected.getId(), actual.id());
         assertEquals(expected.getStatus(), actual.status());
@@ -128,15 +127,15 @@ class RequestPermissionServiceTest implements MockRepository<PermissionReq> {
     void getPermissionRequestStatus_shouldReturnPermissionRequestStatusDTO_whenRequestExistsById()
     throws RokaMokaContentNotFoundException {
         // Arrange
-        PermissionReq foundById = Instancio.create(PermissionReq.class);
+        PermissionReq request = mock(PermissionReq.class);
 
-        when(this.permissionReqRepository.findById(anyLong())).thenReturn(Optional.of(foundById));
+        when(this.permissionReqRepository.findById(anyLong())).thenReturn(Optional.of(request));
 
         // Act
-        PermissionRequestStatusDTO actual = this.requestPermissionService.getPermissionRequestStatus(foundById.getId());
+        PermissionRequestStatusDTO actual = this.requestPermissionService.getPermissionRequestStatus();
 
         // Assert
-        this.assertOutputByPermissionReq(foundById, actual);
+        assertOutputByPermissionReq(request, actual);
 
         verify(this.permissionReqRepository).findById(anyLong());
     }
@@ -148,7 +147,7 @@ class RequestPermissionServiceTest implements MockRepository<PermissionReq> {
 
         // Act & Assert
         assertThrows(RokaMokaContentNotFoundException.class,
-                () -> this.requestPermissionService.getPermissionRequestStatus(1L));
+                () -> this.requestPermissionService.getPermissionRequestStatus());
 
         verify(this.permissionReqRepository).findById(anyLong());
     }
