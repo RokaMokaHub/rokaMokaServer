@@ -1,10 +1,9 @@
 package br.edu.ufpel.rokamoka.core.audit;
 
 import br.edu.ufpel.rokamoka.context.ServiceContext;
-import br.edu.ufpel.rokamoka.security.UserAuthenticated;
+import br.edu.ufpel.rokamoka.exceptions.RokaMokaNoUserInContextException;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
-import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
 
@@ -43,9 +42,12 @@ public class AuditableListener {
     }
 
     private static String getUsernameOrDefault() {
-        ServiceContext context = ServiceContext.getContext();
-        UserAuthenticated loggedInUser = context.getUser();
-        String username = loggedInUser.getUsername();
-        return StringUtils.isNotBlank(username) ? username : "system";
+        String auditor;
+        try {
+            auditor = ServiceContext.getContext().getUsernameOrThrow();
+        } catch (RokaMokaNoUserInContextException e) {
+            auditor = "system";
+        }
+        return auditor;
     }
 }

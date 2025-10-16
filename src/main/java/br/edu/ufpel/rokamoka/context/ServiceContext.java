@@ -1,5 +1,6 @@
 package br.edu.ufpel.rokamoka.context;
 
+import br.edu.ufpel.rokamoka.exceptions.RokaMokaNoUserInContextException;
 import br.edu.ufpel.rokamoka.security.UserAuthenticated;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -79,5 +80,12 @@ public class ServiceContext {
     public void setEndTime(long endTime) {
         this.endTime = endTime;
         this.elapsedTime = this.endTime - startTime;
+    }
+
+    public String getUsernameOrThrow() throws RokaMokaNoUserInContextException {
+        if (this.user == null) {
+            throw new RokaMokaNoUserInContextException();
+        }
+        return this.user.getUsername();
     }
 }
