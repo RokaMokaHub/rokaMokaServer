@@ -1,5 +1,6 @@
 package br.edu.ufpel.rokamoka.service.implementation;
 
+import br.edu.ufpel.rokamoka.context.ServiceContext;
 import br.edu.ufpel.rokamoka.core.PermissionReq;
 import br.edu.ufpel.rokamoka.core.RequestStatus;
 import br.edu.ufpel.rokamoka.core.Role;
@@ -10,6 +11,7 @@ import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.repository.PermissionReqRepository;
 import br.edu.ufpel.rokamoka.repository.RoleRepository;
+import br.edu.ufpel.rokamoka.security.UserAuthenticated;
 import br.edu.ufpel.rokamoka.service.IRequestPermissionService;
 import br.edu.ufpel.rokamoka.service.user.IUserService;
 import lombok.RequiredArgsConstructor;
@@ -47,10 +49,12 @@ public class RequestPermissionService implements IRequestPermissionService {
     }
 
     @Override
-    public PermissionRequestStatusDTO getPermissionRequestStatus(Long permissionID)
+    public PermissionRequestStatusDTO getPermissionRequestStatus()
     throws RokaMokaContentNotFoundException {
-        PermissionReq permissionReq = this.permissionReqRepository.findById(permissionID)
+        UserAuthenticated user = ServiceContext.getContext().getUser();
+        User requester = this.userService.getByNome(user.getUsername());
+        PermissionReq request = this.permissionReqRepository.findByRequester(requester)
                 .orElseThrow(() -> new RokaMokaContentNotFoundException("Solicitação não encontrada"));
-        return new PermissionRequestStatusDTO(permissionReq);
+        return new PermissionRequestStatusDTO(request);
     }
 }
