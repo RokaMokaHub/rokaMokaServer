@@ -26,11 +26,17 @@ public class GlobalExceptionHandler extends RokaMokaController {
 
     @ExceptionHandler(value = {
             MethodArgumentNotValidException.class,
-            RokaMokaContentDuplicatedException.class,
             ConstraintViolationException.class
     })
     public ResponseEntity<ApiResponseWrapper<Void>> handleBadRequest(Exception ex) {
         return this.error(ex, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(value = {
+            RokaMokaContentDuplicatedException.class,
+    })
+    public ResponseEntity<ApiResponseWrapper<Void>> handleConflict(Exception ex) {
+        return this.error(ex, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(value = {
