@@ -13,7 +13,7 @@ import br.edu.ufpel.rokamoka.service.MockRepository;
 import br.edu.ufpel.rokamoka.service.MockUserSession;
 import br.edu.ufpel.rokamoka.service.image.IIMageService;
 import org.instancio.Instancio;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -68,11 +68,11 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
 
     @Captor private ArgumentCaptor<Artwork> artworkCaptor;
 
-    private static Artwork artwork;
+    private Artwork artwork;
 
-    @BeforeAll
-    static void setUp() {
-        artwork = mock(Artwork.class);
+    @BeforeEach
+    void setUp() {
+        this.artwork = mock(Artwork.class);
     }
 
     //region findAll
@@ -102,14 +102,14 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
     @Test
     void getArtworkOrElseThrow_shouldReturnArtwork_whenArtworkExistsById() throws RokaMokaContentNotFoundException {
         // Arrange
-        when(this.artworkRepository.findById(anyLong())).thenReturn(Optional.of(artwork));
+        when(this.artworkRepository.findById(anyLong())).thenReturn(Optional.of(this.artwork));
 
         // Act
         Artwork actual = this.artworkService.getArtworkOrElseThrow(1L);
 
         // Assert
         assertNotNull(actual);
-        assertEquals(artwork, actual);
+        assertEquals(this.artwork, actual);
 
         verify(this.artworkRepository).findById(anyLong());
     }
@@ -130,7 +130,7 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
     @Test
     void findByQrCode_shouldReturnArtwork_whenArtworkExistByQrCode() {
         // Arrange
-        when(this.artworkRepository.findByQrCode(anyString())).thenReturn(Optional.of(artwork));
+        when(this.artworkRepository.findByQrCode(anyString())).thenReturn(Optional.of(this.artwork));
 
         // Act
         Optional<Artwork> actual = this.artworkService.findByQrCode("");
@@ -166,13 +166,13 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
     @Test
     void getByQrCodeOrThrow_shouldReturnArtwork_whenArtworkExistsByQrCode() throws RokaMokaContentNotFoundException {
         // Arrange
-        when(this.artworkRepository.findByQrCode(anyString())).thenReturn(Optional.of(artwork));
+        when(this.artworkRepository.findByQrCode(anyString())).thenReturn(Optional.of(this.artwork));
 
         // Act
         Artwork actual = this.artworkService.getByQrCodeOrThrow("");
 
         // Assert
-        assertEquals(artwork, actual);
+        assertEquals(this.artwork, actual);
 
         verify(this.artworkRepository).findByQrCode(anyString());
         verifyNoMoreInteractions(this.artworkRepository);
@@ -287,8 +287,8 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
     @Test
     void addImage_shouldThrowRokaMokaForbiddenException_whenArtworkAlreadyContainsImage() {
         // Arrange
-        when(this.artworkRepository.findByIdWithinImage(anyLong())).thenReturn(Optional.of(artwork));
-        when(artwork.getImages()).thenReturn(Set.of(new Image()));
+        when(this.artworkRepository.findByIdWithinImage(anyLong())).thenReturn(Optional.of(this.artwork));
+        when(this.artwork.getImages()).thenReturn(Set.of(new Image()));
 
         // Act & Assert
         assertThrows(RokaMokaForbiddenException.class,
@@ -409,13 +409,13 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
     @Test
     void delete_shouldReturnArtworkOutput_whenSuccessful() throws RokaMokaContentNotFoundException {
         // Arrange
-        when(this.artworkRepository.findById(anyLong())).thenReturn(Optional.of(artwork));
+        when(this.artworkRepository.findById(anyLong())).thenReturn(Optional.of(this.artwork));
 
         // Act
         ArtworkOutputDTO actual = this.artworkService.delete(1L);
 
         // Assert
-        assertArtworkOutputByArtwork(artwork, actual);
+        assertArtworkOutputByArtwork(this.artwork, actual);
 
         verify(this.artworkRepository).findById(anyLong());
         verify(this.artworkRepository).delete(any(Artwork.class));
