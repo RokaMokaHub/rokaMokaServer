@@ -16,7 +16,7 @@ public interface IArtworkService {
 
     List<Artwork> findAll();
 
-    Artwork findById(Long id) throws RokaMokaContentNotFoundException;
+    Artwork getArtworkOrElseThrow(Long id) throws RokaMokaContentNotFoundException;
 
     Optional<Artwork> findByQrCode(String qrCode);
 
@@ -24,13 +24,16 @@ public interface IArtworkService {
 
     Artwork create(Long exhibitionId, @Valid ArtworkInputDTO artworkInputDTO) throws RokaMokaContentNotFoundException;
 
-    void deleteById(Long id);
-
-    void addImage(Long artworkId, MultipartFile image) throws RokaMokaContentNotFoundException, RokaMokaForbiddenException;
+    void addImage(Long artworkId, MultipartFile image)
+    throws RokaMokaContentNotFoundException, RokaMokaForbiddenException;
 
     List<Artwork> getAllArtworkByExhibitionId(Long exhibitionId);
 
     List<ArtworkOutputDTO> addArtworksToExhibition(List<ArtworkInputDTO> inputList, Exhibition exhibition);
 
     List<ArtworkOutputDTO> deleteByExhibitionId(Long exhibitionId);
+
+    ArtworkOutputDTO update(ArtworkInputDTO input) throws RokaMokaContentNotFoundException;
+
+    ArtworkOutputDTO delete(Long id) throws RokaMokaContentNotFoundException;
 }

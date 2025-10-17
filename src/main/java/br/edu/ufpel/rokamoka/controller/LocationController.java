@@ -1,7 +1,8 @@
 package br.edu.ufpel.rokamoka.controller;
 
 import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
-import br.edu.ufpel.rokamoka.dto.GroupValidators;
+import br.edu.ufpel.rokamoka.dto.GroupValidators.Create;
+import br.edu.ufpel.rokamoka.dto.GroupValidators.Update;
 import br.edu.ufpel.rokamoka.dto.location.input.LocationInputDTO;
 import br.edu.ufpel.rokamoka.dto.location.output.AddressOutputDTO;
 import br.edu.ufpel.rokamoka.dto.location.output.LocationOutputDTO;
@@ -84,11 +85,11 @@ class LocationController extends RokaMokaController {
 
     @Operation(summary = "Cadastrar novo local", description = "Cadastra um novo local com os dados fornecidos")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Local cadastrado com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Local duplicado"),
+            @ApiResponse(responseCode = "409", description = "Local duplicado"),
             @ApiResponse(responseCode = "500", description = "Erro inesperado ao cadastrar local")})
     @PostMapping
     public ResponseEntity<ApiResponseWrapper<LocationOutputDTO>> register(
-            @RequestBody @Validated(value = GroupValidators.Create.class) @NotNull LocationInputDTO input)
+            @RequestBody @Validated(value = Create.class) @NotNull LocationInputDTO input)
     throws RokaMokaContentDuplicatedException {
         LocationOutputDTO location = this.locationService.create(input);
         return this.success(location);
@@ -101,7 +102,7 @@ class LocationController extends RokaMokaController {
             @ApiResponse(responseCode = "500", description = "Erro inesperado ao atualizar local")})
     @PatchMapping
     public ResponseEntity<ApiResponseWrapper<LocationOutputDTO>> patch(
-            @RequestBody @Validated(value = GroupValidators.Update.class) @NotNull LocationInputDTO input)
+            @RequestBody @Validated(value = Update.class) @NotNull LocationInputDTO input)
     throws RokaMokaContentNotFoundException {
         LocationOutputDTO location = this.locationService.update(input);
         return this.success(location);
