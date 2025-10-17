@@ -56,7 +56,7 @@ public class ArtworkController extends RokaMokaController {
 
     @Operation(summary = "Buscar obras por ID da exposição",
             description = "Retorna todas as obras de uma determinada exposição.")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Obras encontrada")})
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Obras encontradas")})
     @GetMapping("/exposicao/{exhibitionId}")
     public ResponseEntity<ApiResponseWrapper<List<ArtworkOutputDTO>>> getAllByExhibitionId(@PathVariable Long exhibitionId) {
         List<Artwork> artworks = this.artworkService.getAllArtworkByExhibitionId(exhibitionId);
@@ -87,9 +87,12 @@ public class ArtworkController extends RokaMokaController {
 
     @Operation(summary = "Cadastrar uma nova obra",
             description = "Cria o registro de uma nova obra a partir dos dados fornecidos.")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Obra cadastrada com sucesso"),
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Obra cadastrada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Erro de validação nos dados enviados"),
             @ApiResponse(responseCode = "404", description = "Exposição não encontrada"),
-            @ApiResponse(responseCode = "500", description = "Erro inesperado ao cadastrar obra")})
+            @ApiResponse(responseCode = "500", description = "Erro inesperado ao cadastrar obra")
+    })
     @PostMapping(path = "/{exhibitionId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> register(
             @PathVariable Long exhibitionId,
@@ -100,8 +103,12 @@ public class ArtworkController extends RokaMokaController {
 
     @Operation(summary = "Atualizar uma obra",
             description = "Atualiza o registro de uma obra a partir dos dados fornecidos.")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Obra atualizada com sucesso"),
-            @ApiResponse(responseCode = "500", description = "Erro inesperado ao atualizar obra")})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Obra atualizada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Erro de validação nos dados enviados"),
+            @ApiResponse(responseCode = "404", description = "Obra não encontrada"),
+            @ApiResponse(responseCode = "500", description = "Erro inesperado ao atualizar obra")
+    })
     @PatchMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> patch(
             @ModelAttribute @Validated(value = Update.class) ArtworkInputDTO input) throws RokaMokaContentNotFoundException {
