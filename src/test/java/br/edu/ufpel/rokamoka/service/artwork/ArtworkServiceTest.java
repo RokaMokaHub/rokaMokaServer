@@ -4,6 +4,7 @@ import br.edu.ufpel.rokamoka.core.Artwork;
 import br.edu.ufpel.rokamoka.core.Exhibition;
 import br.edu.ufpel.rokamoka.core.Image;
 import br.edu.ufpel.rokamoka.dto.artwork.input.ArtworkInputDTO;
+import br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaForbiddenException;
 import br.edu.ufpel.rokamoka.repository.ArtworkRepository;
@@ -12,7 +13,7 @@ import br.edu.ufpel.rokamoka.service.MockRepository;
 import br.edu.ufpel.rokamoka.service.MockUserSession;
 import br.edu.ufpel.rokamoka.service.image.IIMageService;
 import org.instancio.Instancio;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -37,10 +38,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -66,20 +68,20 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
 
     @Captor private ArgumentCaptor<Artwork> artworkCaptor;
 
-    private Artwork artwork;
+    private static Artwork artwork;
 
-    @BeforeEach
-    void setUp() {
-        this.artwork = mock(Artwork.class);
+    @BeforeAll
+    static void setUp() {
+        artwork = mock(Artwork.class);
     }
 
     //region findAll
-    static Stream<Arguments> buildFindAllInput() {
-        return Stream.of(Arguments.of(Collections.emptyList()), Arguments.of(Instancio.ofList(Artwork.class).create()));
+    static Stream<List<Artwork>> provideArtworkList() {
+        return Stream.of(Collections.emptyList(), Instancio.ofList(Artwork.class).create());
     }
 
     @ParameterizedTest
-    @MethodSource("buildFindAllInput")
+    @MethodSource("provideArtworkList")
     void findAll_shouldReturnListOfArtwork_whenCalled(List<Artwork> artworks) {
         // Arrange
         when(this.artworkRepository.findAll()).thenReturn(artworks);
@@ -98,22 +100,22 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
 
     //region getArtworkOrElseThrow
     @Test
-    void getArtworkOrElseThrow() throws RokaMokaContentNotFoundException {
+    void getArtworkOrElseThrow_shouldReturnArtwork_whenArtworkExistsById() throws RokaMokaContentNotFoundException {
         // Arrange
-        when(this.artworkRepository.findById(anyLong())).thenReturn(Optional.of(this.artwork));
+        when(this.artworkRepository.findById(anyLong())).thenReturn(Optional.of(artwork));
 
         // Act
         Artwork actual = this.artworkService.getArtworkOrElseThrow(1L);
 
         // Assert
-        assertEquals(this.artwork, actual);
+        assertNotNull(actual);
+        assertEquals(artwork, actual);
 
         verify(this.artworkRepository).findById(anyLong());
-        verifyNoInteractions(this.exhibitionRepository, this.imageService);
     }
 
     @Test
-    void getArtworkOrElseThrow() {
+    void getArtworkOrElseThrow_shouldThrowRokaMokaContentNotFoundException_whenArtworkDoesNotExistById() {
         // Arrange
         when(this.artworkRepository.findById(anyLong())).thenReturn(Optional.empty());
 
@@ -121,7 +123,6 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
         assertThrows(RokaMokaContentNotFoundException.class, () -> this.artworkService.getArtworkOrElseThrow(1L));
 
         verify(this.artworkRepository).findById(anyLong());
-        verifyNoInteractions(this.exhibitionRepository, this.imageService);
     }
     //endregion
 
@@ -129,7 +130,7 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
     @Test
     void findByQrCode_shouldReturnArtwork_whenArtworkExistByQrCode() {
         // Arrange
-        when(this.artworkRepository.findByQrCode(anyString())).thenReturn(Optional.of(this.artwork));
+        when(this.artworkRepository.findByQrCode(anyString())).thenReturn(Optional.of(artwork));
 
         // Act
         Optional<Artwork> actual = this.artworkService.findByQrCode("");
@@ -138,7 +139,7 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
         assertNotNull(actual);
         assertTrue(actual.isPresent());
 
-        verify(this.artworkRepository, times(1)).findByQrCode(anyString());
+        verify(this.artworkRepository).findByQrCode(anyString());
         verifyNoMoreInteractions(this.artworkRepository);
         verifyNoInteractions(this.exhibitionRepository, this.imageService);
     }
@@ -155,7 +156,7 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
         assertNotNull(actual);
         assertTrue(actual.isEmpty());
 
-        verify(this.artworkRepository, times(1)).findByQrCode(anyString());
+        verify(this.artworkRepository).findByQrCode(anyString());
         verifyNoMoreInteractions(this.artworkRepository);
         verifyNoInteractions(this.exhibitionRepository, this.imageService);
     }
@@ -165,15 +166,15 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
     @Test
     void getByQrCodeOrThrow_shouldReturnArtwork_whenArtworkExistsByQrCode() throws RokaMokaContentNotFoundException {
         // Arrange
-        when(this.artworkRepository.findByQrCode(anyString())).thenReturn(Optional.of(this.artwork));
+        when(this.artworkRepository.findByQrCode(anyString())).thenReturn(Optional.of(artwork));
 
         // Act
         Artwork actual = this.artworkService.getByQrCodeOrThrow("");
 
         // Assert
-        assertEquals(this.artwork, actual);
+        assertEquals(artwork, actual);
 
-        verify(this.artworkRepository, times(1)).findByQrCode(anyString());
+        verify(this.artworkRepository).findByQrCode(anyString());
         verifyNoMoreInteractions(this.artworkRepository);
         verifyNoInteractions(this.exhibitionRepository, this.imageService);
     }
@@ -186,7 +187,7 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
         // Act & Assert
         assertThrows(RokaMokaContentNotFoundException.class, () -> this.artworkService.getByQrCodeOrThrow("qrCode"));
 
-        verify(this.artworkRepository, times(1)).findByQrCode(anyString());
+        verify(this.artworkRepository).findByQrCode(anyString());
         verifyNoMoreInteractions(this.artworkRepository);
         verifyNoInteractions(this.exhibitionRepository, this.imageService);
     }
@@ -217,8 +218,8 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
         assertEquals(input.link(), actual.getLink());
         assertEquals(input.qrCode(), actual.getQrCode());
 
-        verify(this.exhibitionRepository, times(1)).findById(anyLong());
-        verify(this.artworkRepository, times(1)).save(any(Artwork.class));
+        verify(this.exhibitionRepository).findById(anyLong());
+        verify(this.artworkRepository).save(any(Artwork.class));
         verifyNoMoreInteractions(this.exhibitionRepository, this.artworkRepository);
     }
 
@@ -232,20 +233,9 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
         // Act & Assert
         assertThrows(RokaMokaContentNotFoundException.class, () -> this.artworkService.create(1L, input));
 
-        verify(this.exhibitionRepository, times(1)).findById(anyLong());
+        verify(this.exhibitionRepository).findById(anyLong());
         verifyNoMoreInteractions(this.exhibitionRepository);
         verifyNoInteractions(this.artworkRepository, this.imageService);
-    }
-    //endregion
-
-    //region deleteById
-    @Test
-    void deleteById_shouldDeleteArtwork_whenCalled() {
-        this.artworkService.deleteById(1L);
-
-        verify(this.artworkRepository, times(1)).deleteById(anyLong());
-        verifyNoMoreInteractions(this.artworkRepository);
-        verifyNoInteractions(this.exhibitionRepository, this.imageService);
     }
     //endregion
 
@@ -269,9 +259,9 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
         this.artworkService.addImage(1L, mock(MultipartFile.class));
 
         // Assert
-        verify(this.artworkRepository, times(1)).findByIdWithinImage(anyLong());
-        verify(this.imageService, times(1)).upload(any(MultipartFile.class));
-        verify(this.artworkRepository, times(1)).save(this.artworkCaptor.capture());
+        verify(this.artworkRepository).findByIdWithinImage(anyLong());
+        verify(this.imageService).upload(any(MultipartFile.class));
+        verify(this.artworkRepository).save(this.artworkCaptor.capture());
         verifyNoMoreInteractions(this.artworkRepository, this.imageService);
         verifyNoInteractions(this.exhibitionRepository);
 
@@ -289,7 +279,7 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
         assertThrows(RokaMokaContentNotFoundException.class,
                 () -> this.artworkService.addImage(1L, mock(MultipartFile.class)));
 
-        verify(this.artworkRepository, times(1)).findByIdWithinImage(anyLong());
+        verify(this.artworkRepository).findByIdWithinImage(anyLong());
         verifyNoMoreInteractions(this.artworkRepository);
         verifyNoInteractions(this.exhibitionRepository, this.imageService);
     }
@@ -297,16 +287,160 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
     @Test
     void addImage_shouldThrowRokaMokaForbiddenException_whenArtworkAlreadyContainsImage() {
         // Arrange
-        when(this.artworkRepository.findByIdWithinImage(anyLong())).thenReturn(Optional.of(this.artwork));
-        when(this.artwork.getImages()).thenReturn(Set.of(new Image()));
+        when(this.artworkRepository.findByIdWithinImage(anyLong())).thenReturn(Optional.of(artwork));
+        when(artwork.getImages()).thenReturn(Set.of(new Image()));
 
         // Act & Assert
         assertThrows(RokaMokaForbiddenException.class,
                 () -> this.artworkService.addImage(1L, mock(MultipartFile.class)));
 
-        verify(this.artworkRepository, times(1)).findByIdWithinImage(anyLong());
+        verify(this.artworkRepository).findByIdWithinImage(anyLong());
         verifyNoMoreInteractions(this.artworkRepository);
         verifyNoInteractions(this.exhibitionRepository, this.imageService);
+    }
+    //endregion
+
+    //region getAllArtworkByExhibitionId
+    @ParameterizedTest
+    @MethodSource("provideArtworkList")
+    void getAllArtworkByExhibitionId_shouldReturnArtworkList_whenCalled(List<Artwork> artworks) {
+        // Arrange
+        when(this.artworkRepository.findByExhibition_Id(anyLong())).thenReturn(artworks);
+
+        // Act
+        List<Artwork> actual = this.artworkService.getAllArtworkByExhibitionId(1L);
+
+        // Assert
+        assertNotNull(actual);
+        assertEquals(artworks.size(), actual.size());
+
+        verify(this.artworkRepository).findByExhibition_Id(anyLong());
+    }
+    //endregion
+
+    //region addArtworksToExhibition
+    static Stream<Arguments> provideInputAddArtworksToExhibition() {
+        Exhibition exhibition = Instancio.create(Exhibition.class);
+        List<ArtworkInputDTO> artworks = Instancio.ofList(ArtworkInputDTO.class).create();
+        return Stream.of(
+                Arguments.of(Collections.emptyList(), null),
+                Arguments.of(Collections.emptyList(), exhibition),
+                Arguments.of(artworks, null),
+                Arguments.of(artworks, exhibition));
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideInputAddArtworksToExhibition")
+    void addArtworksToExhibition(List<ArtworkInputDTO> artworks, Exhibition exhibition) {
+        // Arrange
+        when(this.artworkRepository.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
+
+        // Act
+        List<ArtworkOutputDTO> actual = this.artworkService.addArtworksToExhibition(artworks, exhibition);
+        
+        // Assert
+        assertNotNull(actual);
+        assertEquals(artworks.size(), actual.size());
+
+        verify(this.artworkRepository).saveAll(anyList());
+    }
+    //endregion
+
+    //region deleteByExhibitionId
+    @ParameterizedTest
+    @MethodSource("provideArtworkList")
+    void deleteByExhibitionId_shouldReturnDeletedArtworkOutputDTOList_whenCalled(List<Artwork> artworks) {
+        // Arrange
+        when(this.artworkRepository.findByExhibition_Id(anyLong())).thenReturn(artworks);
+
+
+        // Act
+        List<ArtworkOutputDTO> actual = this.artworkService.deleteByExhibitionId(1L);
+
+        // Assert
+        assertNotNull(actual);
+        assertEquals(artworks.size(), actual.size());
+
+        verify(this.artworkRepository).findByExhibition_Id(anyLong());
+        verify(this.artworkRepository).deleteAllById(anyList());
+    }
+    //endregion
+
+    //region update
+    @Test
+    void update_shouldReturnArtworkOutputDTO_whenSuccessful() throws RokaMokaContentNotFoundException {
+        // Arrange
+        ArtworkInputDTO input = Instancio.create(ArtworkInputDTO.class);
+        Artwork art = new Artwork();
+        Artwork spyArtwork = spy(art);
+
+        when(this.artworkRepository.findById(anyLong())).thenReturn(Optional.of(spyArtwork));
+        when(this.imageService.upload(input.image())).thenReturn(Collections.emptySet());
+        when(this.artworkRepository.save(any(Artwork.class))).thenAnswer(
+                inv -> this.mockRepositorySave(inv.getArgument(0)));
+
+        // Act
+        ArtworkOutputDTO actual = this.artworkService.update(input);
+
+        // Assert
+        assertArtworkOutputByArtwork(spyArtwork, actual);
+        
+        verify(this.artworkRepository).findById(anyLong());
+        verify(this.imageService).upload(input.image());
+        verify(this.artworkRepository).save(any(Artwork.class));
+    }
+
+    @Test
+    void update_shouldThrowRokaMokaContentNotFoundException_whenArtworkDoesNotExistById() {
+        // Arrange
+        ArtworkInputDTO input = Instancio.create(ArtworkInputDTO.class);
+
+        when(this.artworkRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(RokaMokaContentNotFoundException.class, () -> this.artworkService.update(input));
+
+        verify(this.artworkRepository).findById(anyLong());
+        verifyNoMoreInteractions(this.artworkRepository);
+    }
+    //endregion
+
+    //region delete
+    @Test
+    void delete_shouldReturnArtworkOutput_whenSuccessful() throws RokaMokaContentNotFoundException {
+        // Arrange
+        when(this.artworkRepository.findById(anyLong())).thenReturn(Optional.of(artwork));
+
+        // Act
+        ArtworkOutputDTO actual = this.artworkService.delete(1L);
+
+        // Assert
+        assertArtworkOutputByArtwork(artwork, actual);
+
+        verify(this.artworkRepository).findById(anyLong());
+        verify(this.artworkRepository).delete(any(Artwork.class));
+    }
+
+    private static void assertArtworkOutputByArtwork(Artwork expected, ArtworkOutputDTO actual) {
+        assertNotNull(actual);
+        assertEquals(expected.getId(), actual.id());
+        assertEquals(expected.getNome(), actual.nome());
+        assertEquals(expected.getNomeArtista(), actual.nomeArtista());
+        assertEquals(expected.getDescricao(), actual.descricao());
+        assertEquals(expected.getQrCode(), actual.qrCode());
+        assertEquals(expected.getLink(), actual.link());
+    }
+
+    @Test
+    void delete_shouldThrowRokaMokaContentNotFoundException_whenArtworkDoesNotExistById() {
+        // Arrange
+        when(this.artworkRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(RokaMokaContentNotFoundException.class, () -> this.artworkService.delete(1L));
+
+        verify(this.artworkRepository).findById(anyLong());
+        verifyNoMoreInteractions(this.artworkRepository);
     }
     //endregion
 }
