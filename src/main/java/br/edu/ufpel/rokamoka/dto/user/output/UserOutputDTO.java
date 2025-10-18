@@ -22,23 +22,18 @@ import br.edu.ufpel.rokamoka.dto.mokadex.output.MokadexOutputDTO;
  */
 public record UserOutputDTO(
         String name,
+        String firstName,
+        String lastName,
         String email,
         String role,
         MokadexOutputDTO mokaDex
 ) {
 
-    public UserOutputDTO(User loggedUser) {
-        this(
-                loggedUser.getNome(),
-                loggedUser.getEmail(),
-                loggedUser.getRole().getName().getDescription(),
-                null
-        );
-    }
-
     public UserOutputDTO(User loggedUser, MokadexOutputDTO mokadex) {
         this(
                 loggedUser.getNome(),
+                loggedUser.getFirstName(),
+                loggedUser.getLastName(),
                 loggedUser.getEmail(),
                 loggedUser.getRole().getName().getDescription(),
                 mokadex
