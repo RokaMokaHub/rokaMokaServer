@@ -19,6 +19,7 @@ import br.edu.ufpel.rokamoka.exceptions.RokaMokaForbiddenException;
 import br.edu.ufpel.rokamoka.repository.RoleRepository;
 import br.edu.ufpel.rokamoka.repository.UserRepository;
 import br.edu.ufpel.rokamoka.security.AuthenticationService;
+import br.edu.ufpel.rokamoka.service.MockRepository;
 import br.edu.ufpel.rokamoka.service.MockUserSession;
 import br.edu.ufpel.rokamoka.service.device.DeviceService;
 import br.edu.ufpel.rokamoka.service.mokadex.MokadexService;
@@ -67,7 +68,7 @@ import static org.mockito.Mockito.when;
  * @see PasswordEncoder
  */
 @ExtendWith(MockitoExtension.class)
-class UserServiceTest implements MockUserSession {
+class UserServiceTest implements MockUserSession, MockRepository<User> {
 
     @InjectMocks private UserService userService;
 
@@ -113,20 +114,21 @@ class UserServiceTest implements MockUserSession {
         verifyNoInteractions(this.mokadexService, this.deviceService, this.authenticationService);
     }
 
-    static Stream<Arguments> buildCreateNormalUserInput() {
+    static Stream<Arguments> provideCreateNormalUserInput() {
         UserBasicDTO withDeviceId = Instancio.create(UserBasicDTO.class);
-        UserBasicDTO ignoreDeviceId = Instancio.of(UserBasicDTO.class).ignore(field(UserBasicDTO::deviceId)).create();
+        UserBasicDTO ignoreDeviceId = Instancio.of(UserBasicDTO.class)
+                .ignore(field(UserBasicDTO::deviceId))
+                .create();
         Role userRole = Instancio.of(Role.class).set(field(Role::getName), RoleEnum.USER).create();
-        Role notFoundByName = null;
-        return Stream.of(Arguments.of(withDeviceId, userRole),
+        return Stream.of(
+                Arguments.of(withDeviceId, userRole),
                 Arguments.of(ignoreDeviceId, userRole),
-                Arguments.of(withDeviceId, notFoundByName),
-                Arguments.of(ignoreDeviceId, notFoundByName)
-        );
+                Arguments.of(withDeviceId, null),
+                Arguments.of(ignoreDeviceId, null));
     }
 
     @ParameterizedTest
-    @MethodSource("buildCreateNormalUserInput")
+    @MethodSource("provideCreateNormalUserInput")
     void createNormalUser_shouldSaveNewUser_whenInputIsValid(UserBasicDTO userDTO, Role userRole)
     throws RokaMokaContentDuplicatedException {
         // Arrange
@@ -134,7 +136,7 @@ class UserServiceTest implements MockUserSession {
         when(this.roleRepository.findByName(RoleEnum.USER)).thenReturn(userRole);
 
         when(this.userRepository.save(any(User.class))).thenAnswer(
-                inv -> this.mockUserRepositorySave(inv.getArgument(0)));
+                inv -> this.mockRepositorySave(inv.getArgument(0)));
         doAnswer(inv -> null).when(this.mokadexService).getOrCreateMokadexByUser(any(User.class));
 
         if (StringUtils.isNotBlank(userDTO.deviceId())) {
@@ -163,11 +165,6 @@ class UserServiceTest implements MockUserSession {
 
         verify(this.authenticationService, times(1)).basicAuthenticationAndGenerateJWT(anyString(), anyString());
     }
-
-    private User mockUserRepositorySave(User newUser) {
-        newUser.setId(1L);
-        return newUser;
-    }
     //endregion
 
     //region createAnonymousUser
@@ -187,18 +184,23 @@ class UserServiceTest implements MockUserSession {
         verifyNoInteractions(this.mokadexService, this.deviceService, this.authenticationService);
     }
 
-    static Stream<Arguments> buildAnonymousUserInput() {
+    static Stream<Arguments> provideAnonymousUserInput() {
         UserAnonymousRequestDTO withDeviceId = Instancio.create(UserAnonymousRequestDTO.class);
-        UserAnonymousRequestDTO ignoreDeviceId =
-                Instancio.of(UserAnonymousRequestDTO.class).ignore(field(UserAnonymousRequestDTO::deviceId)).create();
-        Role userRole = Instancio.of(Role.class).set(field(Role::getName), RoleEnum.USER).create();
-        Role notFoundByName = null;
-        return Stream.of(Arguments.of(withDeviceId, userRole), Arguments.of(ignoreDeviceId, userRole),
-                Arguments.of(withDeviceId, notFoundByName), Arguments.of(ignoreDeviceId, notFoundByName));
+        UserAnonymousRequestDTO ignoreDeviceId = Instancio.of(UserAnonymousRequestDTO.class)
+                .ignore(field(UserAnonymousRequestDTO::deviceId))
+                .create();
+        Role userRole = Instancio.of(Role.class)
+                .set(field(Role::getName), RoleEnum.USER)
+                .create();
+        return Stream.of(
+                Arguments.of(withDeviceId, userRole),
+                Arguments.of(ignoreDeviceId, userRole),
+                Arguments.of(withDeviceId, null),
+                Arguments.of(ignoreDeviceId, null));
     }
 
     @ParameterizedTest
-    @MethodSource("buildAnonymousUserInput")
+    @MethodSource("provideAnonymousUserInput")
     void createAnonymousUser_shouldSaveNewAnonymousUser_whenInputIsValid(UserAnonymousRequestDTO userDTO, Role userRole)
     throws RokaMokaContentDuplicatedException {
         // Arrange
@@ -206,7 +208,7 @@ class UserServiceTest implements MockUserSession {
         when(this.roleRepository.findByName(RoleEnum.USER)).thenReturn(userRole);
 
         when(this.userRepository.save(any(User.class))).thenAnswer(
-                inv -> this.mockUserRepositorySave(inv.getArgument(0)));
+                inv -> this.mockRepositorySave(inv.getArgument(0)));
         doAnswer(inv -> null).when(this.mokadexService).getOrCreateMokadexByUser(any(User.class));
 
         if (StringUtils.isNotBlank(userDTO.deviceId())) {
@@ -466,20 +468,23 @@ class UserServiceTest implements MockUserSession {
         verifyNoInteractions(this.mokadexService, this.deviceService, this.authenticationService);
     }
 
-    static Stream<Arguments> buildCreateResearcherUserInput() {
+    static Stream<Arguments> provideCreateResearcherUserInput() {
         UserBasicDTO withDeviceId = Instancio.create(UserBasicDTO.class);
-        UserBasicDTO ignoreDeviceId = Instancio.of(UserBasicDTO.class).ignore(field(UserBasicDTO::deviceId)).create();
-        Role researcherRole = Instancio.of(Role.class).set(field(Role::getName), RoleEnum.RESEARCHER).create();
-        Role notFoundByName = null;
-        return Stream.of(Arguments.of(withDeviceId, researcherRole),
+        UserBasicDTO ignoreDeviceId = Instancio.of(UserBasicDTO.class)
+                .ignore(field(UserBasicDTO::deviceId))
+                .create();
+        Role researcherRole = Instancio.of(Role.class)
+                .set(field(Role::getName), RoleEnum.RESEARCHER)
+                .create();
+        return Stream.of(
+                Arguments.of(withDeviceId, researcherRole),
                 Arguments.of(ignoreDeviceId, researcherRole),
-                Arguments.of(withDeviceId, notFoundByName),
-                Arguments.of(ignoreDeviceId, notFoundByName)
-        );
+                Arguments.of(withDeviceId, null),
+                Arguments.of(ignoreDeviceId, null));
     }
 
     @ParameterizedTest
-    @MethodSource("buildCreateResearcherUserInput")
+    @MethodSource("provideCreateResearcherUserInput")
     void createResearcher_shouldSaveNewUser_whenInputIsValid(UserBasicDTO userDTO, Role researcherRole)
     throws RokaMokaContentDuplicatedException {
         // Arrange
@@ -487,7 +492,7 @@ class UserServiceTest implements MockUserSession {
         when(this.roleRepository.findByName(RoleEnum.RESEARCHER)).thenReturn(researcherRole);
 
         when(this.userRepository.save(any(User.class))).thenAnswer(
-                inv -> this.mockUserRepositorySave(inv.getArgument(0)));
+                inv -> this.mockRepositorySave(inv.getArgument(0)));
         doAnswer(inv -> null).when(this.mokadexService).getOrCreateMokadexByUser(any(User.class));
 
         if (StringUtils.isNotBlank(userDTO.deviceId())) {

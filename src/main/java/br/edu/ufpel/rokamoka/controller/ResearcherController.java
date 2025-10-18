@@ -10,18 +10,21 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Validated
+@RequiredArgsConstructor
 @Tag(name = "Pesquisador", description = "API para cadastros de pesquisadores")
 @RestController
 @RequestMapping("/researcher")
-@RequiredArgsConstructor
 public class ResearcherController extends RokaMokaController {
 
     private final IUserService userService;
@@ -36,7 +39,7 @@ public class ResearcherController extends RokaMokaController {
     @Operation(summary = "Criação de pesquisador", description = "Cria um pesquisador")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Usuário criado")})
     @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponseWrapper<UserAuthDTO>> register(@RequestBody UserBasicDTO userDTO)
+    public ResponseEntity<ApiResponseWrapper<UserAuthDTO>> register(@RequestBody @Valid UserBasicDTO userDTO)
             throws RokaMokaContentDuplicatedException {
         UserAuthDTO researcher = this.userService.createResearcher(userDTO);
         return this.success(researcher);

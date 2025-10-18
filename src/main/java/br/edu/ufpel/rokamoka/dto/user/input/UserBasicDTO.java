@@ -1,6 +1,7 @@
 package br.edu.ufpel.rokamoka.dto.user.input;
 
 import br.edu.ufpel.rokamoka.utils.user.EmailConstraint;
+import br.edu.ufpel.rokamoka.utils.user.FamilyNameConstraint;
 import br.edu.ufpel.rokamoka.utils.user.PasswordConstraint;
 import br.edu.ufpel.rokamoka.utils.user.UserNameConstraint;
 
@@ -24,5 +25,7 @@ public record UserBasicDTO(
         @EmailConstraint String email,
         @PasswordConstraint String password,
         @UserNameConstraint String name,
+        @FamilyNameConstraint String firstName,
+        @FamilyNameConstraint String lastName,
         String deviceId
 ) {}

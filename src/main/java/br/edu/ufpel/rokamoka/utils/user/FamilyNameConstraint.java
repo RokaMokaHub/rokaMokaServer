@@ -11,11 +11,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation to enforce specific constraints on a username.
+ * Annotation to enforce specific constraints on a family name.
  *
- * <p>This annotation ensures that the username:
+ * <p>This annotation ensures that the family name:
  * <ul>
- *     <li>Contains only letters, numbers, hyphens, and underscores.</li>
+ *     <li>Starts with a capital letter.</li>
+ *     <li>Contains only letters.</li>
  *     <li>Adheres to the pattern defined by the {@link Pattern} annotation.</li>
  * </ul>
  *
@@ -27,15 +28,15 @@ import java.lang.annotation.Target;
  * @see Retention
  * @see Target
  */
-@NotNull(message = "Nome de usuário não pode ser nulo")
-@Pattern(regexp = "^[a-zA-Z0-9_-]+$",
-        message = "Nome de usuário inválido - apenas letras, números, hífen e underline são permitidos")
+@NotNull(message = "Nome de familia não pode ser nulo")
+@Pattern(regexp = "^[A-Z][a-zA-Z]*$",
+        message = "Nome de família inválido - deve começar com letra maiúscula e conter apenas letras.")
 @Constraint(validatedBy = {})
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.RECORD_COMPONENT})
-public @interface UserNameConstraint {
+public @interface FamilyNameConstraint {
 
-    String message() default "Nome de usuário inválido";
+    String message() default "Nome de família inválido";
 
     Class<?>[] groups() default {};
 
