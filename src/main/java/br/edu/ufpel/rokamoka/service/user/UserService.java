@@ -72,6 +72,8 @@ public class UserService implements IUserService {
         var user = User.builder()
                 .nome(userDTO.name())
                 .email(userDTO.email())
+                .firstName(userDTO.firstName())
+                .lastName(userDTO.lastName())
                 .senha(this.passwordEncoder.encode(undecodedPasswd))
                 .role(this.roleRepository.findByName(RoleEnum.USER))
                 .build();
@@ -196,6 +198,8 @@ public class UserService implements IUserService {
         var user = User.builder()
                 .nome(userDTO.name())
                 .email(userDTO.email())
+                .firstName(userDTO.firstName())
+                .lastName(userDTO.lastName())
                 .senha(this.passwordEncoder.encode(undecodedPasswd))
                 .role(this.roleRepository.findByName(RoleEnum.RESEARCHER))
                 .build();
