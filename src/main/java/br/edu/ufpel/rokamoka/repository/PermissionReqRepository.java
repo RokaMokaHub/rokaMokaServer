@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface PermissionReqRepository extends JpaRepository<PermissionReq, Long> {
 
@@ -21,7 +20,7 @@ public interface PermissionReqRepository extends JpaRepository<PermissionReq, Lo
            """)
     List<RequestDetailsDTO> findAllPendingRequestDetailed();
 
-    Optional<PermissionReq> findByRequester(User requester);
+    List<PermissionReq> findByRequester(User requester);
 
     boolean existsByRequesterAndStatusAndTargetRole(User requester, RequestStatus requestStatus, Role targetRole);
 }

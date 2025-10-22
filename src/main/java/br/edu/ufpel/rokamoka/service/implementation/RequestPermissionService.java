@@ -1,6 +1,5 @@
 package br.edu.ufpel.rokamoka.service.implementation;
 
-import br.edu.ufpel.rokamoka.context.ServiceContext;
 import br.edu.ufpel.rokamoka.core.PermissionReq;
 import br.edu.ufpel.rokamoka.core.RequestStatus;
 import br.edu.ufpel.rokamoka.core.Role;
@@ -11,11 +10,12 @@ import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.repository.PermissionReqRepository;
 import br.edu.ufpel.rokamoka.repository.RoleRepository;
-import br.edu.ufpel.rokamoka.security.UserAuthenticated;
 import br.edu.ufpel.rokamoka.service.IRequestPermissionService;
 import br.edu.ufpel.rokamoka.service.user.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -43,18 +43,20 @@ public class RequestPermissionService implements IRequestPermissionService {
                 .status(RequestStatus.PENDING)
                 .targetRole(targetRole)
                 .build();
-        PermissionReq savedRequest = this.permissionReqRepository.save(permissionReq);
+        PermissionReq newRequest = this.permissionReqRepository.save(permissionReq);
 
+        return toOutput(newRequest);
+    }
+
+    private static PermissionRequestStatusDTO toOutput(PermissionReq savedRequest) {
         return new PermissionRequestStatusDTO(savedRequest);
     }
 
     @Override
-    public PermissionRequestStatusDTO getPermissionRequestStatus()
+    public List<PermissionRequestStatusDTO> getAllPermissionRequestStatusByLoggedUser()
     throws RokaMokaContentNotFoundException {
-        UserAuthenticated user = ServiceContext.getContext().getUser();
-        User requester = this.userService.getByNome(user.getUsername());
-        PermissionReq request = this.permissionReqRepository.findByRequester(requester)
-                .orElseThrow(() -> new RokaMokaContentNotFoundException("Solicitação não encontrada"));
-        return new PermissionRequestStatusDTO(request);
+        User requester = this.userService.getLoggedUser();
+        List<PermissionReq> requests = this.permissionReqRepository.findByRequester(requester);
+        return requests.stream().map(RequestPermissionService::toOutput).toList();
     }
 }
