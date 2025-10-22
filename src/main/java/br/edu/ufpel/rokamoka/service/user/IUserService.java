@@ -39,4 +39,6 @@ public interface IUserService {
     UserOutputDTO getLoggedUserInformation() throws RokaMokaContentNotFoundException;
 
     User getByNome(@NotNull String nome) throws RokaMokaContentNotFoundException;
+
+    User getLoggedUser() throws RokaMokaContentNotFoundException;
 }
