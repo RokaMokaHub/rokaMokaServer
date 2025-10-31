@@ -25,12 +25,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.service.spi.ServiceException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.Optional;
 import java.util.Set;
+
+import static org.springframework.transaction.annotation.Propagation.REQUIRED;
 
 /**
  * Service implementation of the {@link IMokadexService} interface for managing operations on the {@link Mokadex}
@@ -53,7 +54,7 @@ public class MokadexService implements IMokadexService {
     private final CollectEmblemProducer collectEmblemProducer;
 
     @Override
-    public Mokadex findById(@NotNull Long mokadexId) throws RokaMokaContentNotFoundException {
+    public Mokadex findById(@NotNull Long mokadexId) {
         return this.mokadexRepository.findById(mokadexId).orElseThrow(RokaMokaContentNotFoundException::new);
     }
 
@@ -69,7 +70,7 @@ public class MokadexService implements IMokadexService {
      * @see MokadexService#createMokadexByUser(User)
      */
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = REQUIRED)
     public Mokadex getOrCreateMokadexByUser(@NotNull User user) {
         return this.getMokadexByUser(user).orElseGet(() -> this.createMokadexByUser(user));
     }
@@ -87,11 +88,9 @@ public class MokadexService implements IMokadexService {
         log.info("Buscando pelo [{}] do [{}]", Mokadex.class.getSimpleName(), usuario);
 
         Optional<Mokadex> maybeMokadex = this.mokadexRepository.findMokadexByUsername(usuario.getNome());
-        maybeMokadex.ifPresentOrElse(
-                mokadex -> log.info("[{}] foi encontrado", mokadex),
-                () -> log.info("Não foi encontrado nenhum [{}] para o [{}] informado",
-                        Mokadex.class.getSimpleName(), usuario)
-        );
+        maybeMokadex.ifPresentOrElse(mokadex -> log.info("[{}] foi encontrado", mokadex),
+                () -> log.info("Não foi encontrado nenhum [{}] para o [{}] informado", Mokadex.class.getSimpleName(),
+                        usuario));
 
         return maybeMokadex;
     }
@@ -118,6 +117,7 @@ public class MokadexService implements IMokadexService {
      * Returns a {@link MokadexOutputDTO} based on the given {@link Mokadex}.
      *
      * @param mokadex The {@link Mokadex} object from which collections and emblems are derived.
+     *
      * @return A {@link MokadexOutputDTO} containing the processed collections and emblems.
      * @see MokadexCollectionsBuilder
      * @see MokadexEmblemsBuilder
@@ -144,9 +144,8 @@ public class MokadexService implements IMokadexService {
      * @throws ServiceException If there is an internal error while adding the artwork to the Mokadex.
      */
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public Mokadex collectStar(@NotBlank String qrCode)
-            throws RokaMokaContentNotFoundException, RokaMokaContentDuplicatedException {
+    @Transactional(propagation = REQUIRED)
+    public Mokadex collectStar(@NotBlank String qrCode) {
         Mokadex mokadex = this.getMokadexByLoggedUser();
         Artwork artwork = this.artworkService.getByQrCodeOrThrow(qrCode);
 
@@ -167,8 +166,7 @@ public class MokadexService implements IMokadexService {
 
     private Mokadex getMokadexByLoggedUser() {
         UserAuthenticated loggedInUser = ServiceContext.getContext().getUser();
-        return this.mokadexRepository
-                .findMokadexByUsername(loggedInUser.getUsername())
+        return this.mokadexRepository.findMokadexByUsername(loggedInUser.getUsername())
                 .orElseThrow(() -> new ServiceException("Mokadex não encontrado para usuário logado"));
     }
 
@@ -193,9 +191,8 @@ public class MokadexService implements IMokadexService {
      * @throws ServiceException If there is an error while adding the emblem to the Mokadex.
      */
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public Mokadex collectEmblem(Long mokadexId, Emblem emblem)
-            throws RokaMokaContentNotFoundException, RokaMokaContentDuplicatedException {
+    @Transactional(propagation = REQUIRED)
+    public Mokadex collectEmblem(Long mokadexId, Emblem emblem) {
         Mokadex mokadex = this.findById(mokadexId);
 
         if (mokadex.containsEmblem(emblem)) {
@@ -220,7 +217,7 @@ public class MokadexService implements IMokadexService {
      * found.
      */
     @Override
-    public Set<Artwork> getMissingStarsByExhibition(@NotNull Long exhibitionId) throws RokaMokaContentNotFoundException {
+    public Set<Artwork> getMissingStarsByExhibition(@NotNull Long exhibitionId) {
         Mokadex mokadex = this.getMokadexByLoggedUser();
         Exhibition exhibition = this.exhibitionService.getExhibitionOrElseThrow(exhibitionId);
         return this.mokadexRepository.findAllMissingStars(mokadex.getId(), exhibition.getId());
