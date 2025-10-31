@@ -4,8 +4,6 @@ import br.edu.ufpel.rokamoka.core.Location;
 import br.edu.ufpel.rokamoka.dto.location.input.LocationInputDTO;
 import br.edu.ufpel.rokamoka.dto.location.output.AddressOutputDTO;
 import br.edu.ufpel.rokamoka.dto.location.output.LocationOutputDTO;
-import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
-import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.validation.annotation.Validated;
 
@@ -20,19 +18,19 @@ import java.util.List;
 @Validated
 public interface ILocationService {
 
-    LocationOutputDTO getLocation(@NotNull Long id) throws RokaMokaContentNotFoundException;
+    LocationOutputDTO getLocation(@NotNull Long id);
 
     List<LocationOutputDTO> getAllLocationsByAddress(@NotNull Long addressId);
 
     List<LocationOutputDTO> getAllLocations();
 
-    LocationOutputDTO create(@NotNull LocationInputDTO input) throws RokaMokaContentDuplicatedException;
+    LocationOutputDTO create(@NotNull LocationInputDTO input);
 
-    LocationOutputDTO update(@NotNull LocationInputDTO input) throws RokaMokaContentNotFoundException;
+    LocationOutputDTO update(@NotNull LocationInputDTO input);
 
-    LocationOutputDTO delete(@NotNull Long id) throws RokaMokaContentNotFoundException;
+    LocationOutputDTO delete(@NotNull Long id);
 
     List<AddressOutputDTO> getAllAddresses();
 
-    Location getLocationOrElseThrow(Long id) throws RokaMokaContentNotFoundException;
+    Location getLocationOrElseThrow(Long id);
 }
