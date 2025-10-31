@@ -7,9 +7,6 @@ import br.edu.ufpel.rokamoka.dto.user.input.UserResetPasswordDTO;
 import br.edu.ufpel.rokamoka.dto.user.output.UserAnonymousResponseDTO;
 import br.edu.ufpel.rokamoka.dto.user.output.UserAuthDTO;
 import br.edu.ufpel.rokamoka.dto.user.output.UserOutputDTO;
-import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
-import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
-import br.edu.ufpel.rokamoka.exceptions.RokaMokaForbiddenException;
 import br.edu.ufpel.rokamoka.security.AuthenticationService;
 import br.edu.ufpel.rokamoka.service.user.IUserService;
 import br.edu.ufpel.rokamoka.wrapper.RokaMokaController;
@@ -30,10 +27,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-
 /**
- * This class is a controller for user operations. It provides endpoints
- * for creating users and logging in.
+ * This class is a controller for user operations. It provides endpoints for creating users and logging in.
  *
  * @author iyisakuma
  */
@@ -51,24 +46,25 @@ public class UserRestController extends RokaMokaController {
      * Creates a new user using the provided data.
      *
      * @param userDTO A {@link UserBasicDTO} containing the user's name, email and password.
+     *
      * @return A {@link ResponseEntity} containing the created user's JWT
-     * @throws RokaMokaContentDuplicatedException if the email or name are already in use.
      */
-    @Operation(summary = "Criação de usuário \"normal\"", description = "Cria usuário normal, isto é, aqueles com email e senha.")
-    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Usuário criado") })
-    @PostMapping(value = "/normal/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponseWrapper<UserAuthDTO>> register(@RequestBody @Valid UserBasicDTO userDTO)
-            throws RokaMokaContentDuplicatedException {
+    @Operation(summary = "Criação de usuário \"normal\"",
+            description = "Cria usuário normal, isto é, aqueles com email e senha.")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Usuário criado")})
+    @PostMapping(value = "/normal/create", consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ApiResponseWrapper<UserAuthDTO>> register(@RequestBody @Valid UserBasicDTO userDTO) {
         UserAuthDTO normalUser = this.userService.createNormalUser(userDTO);
         return this.success(normalUser);
     }
 
     @Operation(summary = "Criação de usuário anônimo", description = "Cria usuário anônimo")
-    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Usuário criado") })
-    @PostMapping(value = "/anonymous/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Usuário criado")})
+    @PostMapping(value = "/anonymous/create", consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseWrapper<UserAnonymousResponseDTO>> anonymousRegister(
-            @RequestBody @Valid UserAnonymousRequestDTO userDTO)
-            throws RokaMokaContentDuplicatedException {
+            @RequestBody @Valid UserAnonymousRequestDTO userDTO) {
         UserAnonymousResponseDTO anonymousUser = this.userService.createAnonymousUser(userDTO);
         return this.success(anonymousUser);
     }
@@ -77,10 +73,12 @@ public class UserRestController extends RokaMokaController {
      * Authenticates a user and generates a JWT.
      *
      * @param authentication An {@link Authentication} object containing the user's credentials.
+     *
      * @return A {@link ResponseEntity} containing the user's JWT.
      */
-    @Operation(security = @SecurityRequirement(name = "basic"), summary = "Login de um determinado usuário", description = "Login de um determinado usuário")
-    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Login de usuário") })
+    @Operation(security = @SecurityRequirement(name = "basic"), summary = "Login de um determinado usuário",
+            description = "Login de um determinado usuário")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Login de usuário")})
     @GetMapping(value = "/login", consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseWrapper<UserAuthDTO>> login(Authentication authentication) {
         String jwt = this.authenticationService.authenticate(authentication);
@@ -98,20 +96,12 @@ public class UserRestController extends RokaMokaController {
      * @param userDTO A {@link UserResetPasswordDTO} containing the user's credentials.
      *
      * @return A {@link ResponseEntity} wrapping an {@code ApiResponseWrapper<Void>} indicating this.success or failure.
-     * @throws RokaMokaContentNotFoundException if the user specified in the request is not found.
-     * @throws RokaMokaForbiddenException if the user does not have permission to perform this action.
      */
-    @Operation(
-            summary = "Redefinição de senha do usuário",
-            description = "Permite que um usuário redefina sua senha fornecendo suas credenciais"
-    )
-    @PostMapping(
-            value = "/reset-password",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
-    public ResponseEntity<ApiResponseWrapper<Void>> resetPassword(@RequestBody @Valid UserResetPasswordDTO userDTO)
-            throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
+    @Operation(summary = "Redefinição de senha do usuário",
+            description = "Permite que um usuário redefina sua senha fornecendo suas credenciais")
+    @PostMapping(value = "/reset-password", consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ApiResponseWrapper<Void>> resetPassword(@RequestBody @Valid UserResetPasswordDTO userDTO) {
         this.userService.resetUserPassword(userDTO);
         return this.success();
     }
@@ -120,15 +110,11 @@ public class UserRestController extends RokaMokaController {
      * Retrieves information about the currently logged-in user.
      *
      * @return A {@link ResponseEntity} wrapping an {@link ApiResponseWrapper}<{@link UserOutputDTO}>
-     * @throws RokaMokaContentNotFoundException if the logged-in user's data cannot be found in the system.
      */
-    @Operation(
-            summary = "Visualizar dados do usuário",
-            description = "Retorna alguns dados do usuário logado como: nome, email, perfil e mokadex"
-    )
+    @Operation(summary = "Visualizar dados do usuário",
+            description = "Retorna alguns dados do usuário logado como: nome, email, perfil e mokadex")
     @GetMapping(value = "/me", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponseWrapper<UserOutputDTO>> getLoggedUserInformation()
-            throws RokaMokaContentNotFoundException {
+    public ResponseEntity<ApiResponseWrapper<UserOutputDTO>> getLoggedUserInformation() {
         UserOutputDTO loggedUserInformation = this.userService.getLoggedUserInformation();
         return this.success(loggedUserInformation);
     }
