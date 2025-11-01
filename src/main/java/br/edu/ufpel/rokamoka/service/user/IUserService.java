@@ -35,5 +35,5 @@ public interface IUserService {
 
     User getByNome(@NotNull String nome);
 
-    User getLoggedUser();
+    User getLoggedUserOrElseThrow();
 }

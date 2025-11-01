@@ -16,6 +16,7 @@ import br.edu.ufpel.rokamoka.dto.user.output.UserOutputDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaForbiddenException;
+import br.edu.ufpel.rokamoka.exceptions.RokaMokaNoUserInContextException;
 import br.edu.ufpel.rokamoka.repository.RoleRepository;
 import br.edu.ufpel.rokamoka.repository.UserRepository;
 import br.edu.ufpel.rokamoka.security.AuthenticationService;
@@ -179,8 +180,13 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public User getLoggedUser() throws RokaMokaContentNotFoundException {
-        return this.findLoggedUser();
+    public User getLoggedUserOrElseThrow() {
+        try {
+            return this.userRepository.findByNome(ServiceContext.getContext().getUsernameOrThrow())
+                    .orElseThrow(() -> new RokaMokaContentNotFoundException("Usuário logado não encontrado"));
+        } catch (RokaMokaNoUserInContextException e) {
+            throw new RokaMokaForbiddenException("Usuário deve existir no contexto");
+        }
     }
 
     private User findLoggedUser() {
