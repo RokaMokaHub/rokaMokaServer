@@ -79,8 +79,7 @@ class EvaluationPermissionServiceTest {
 
     //region deny
     @Test
-    void deny_shouldFlipStatusToDenyAndSaveNewRegister_whenSuccessful()
-    throws RokaMokaForbiddenException, RokaMokaContentNotFoundException {
+    void deny_shouldFlipStatusToDenyAndSaveNewRegister_whenSuccessful() {
         // Arrange
         when(this.requestRepository.findById(anyLong())).thenReturn(Optional.of(this.spyRequest));
         when(this.requestRepository.save(any(PermissionReq.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -97,17 +96,17 @@ class EvaluationPermissionServiceTest {
         verify(this.userService).getByNome(anyString());
         verify(this.registerRepository).save(this.registerCaptor.capture());
 
-        this.assertPermissionReq(this.spyRequest, DENY);
+        assertPermissionReq(this.spyRequest, DENY);
         PermissionReg register = this.registerCaptor.getValue();
-        this.assertPermissionRegister(register, this.reviewer, this.spyRequest);
+        assertPermissionRegister(register, this.reviewer, this.spyRequest);
     }
 
-    private void assertPermissionReq(PermissionReq request, RequestStatus status) {
+    private static void assertPermissionReq(PermissionReq request, RequestStatus status) {
         assertNotNull(request);
         assertEquals(status, request.getStatus());
     }
 
-    private void assertPermissionRegister(PermissionReg register, User reviewer, PermissionReq request) {
+    private static void assertPermissionRegister(PermissionReg register, User reviewer, PermissionReq request) {
         assertNotNull(register);
         assertEquals("", register.getJustification());
         assertEquals(reviewer, register.getReviewer());
@@ -126,8 +125,7 @@ class EvaluationPermissionServiceTest {
     }
 
     @Test
-    void deny_shouldThrowRokaMokaContentNotFoundException_whenUserDoesNotExistByNome()
-    throws RokaMokaContentNotFoundException {
+    void deny_shouldThrowRokaMokaContentNotFoundException_whenUserDoesNotExistByNome() {
         // Arrange
         when(this.requestRepository.findById(anyLong())).thenReturn(Optional.of(this.request));
         when(this.request.isPending()).thenReturn(true);
@@ -154,8 +152,7 @@ class EvaluationPermissionServiceTest {
 
     //region accept
     @Test
-    void accept_FlipStatusToConfirmAndSaveNewRegisterAndUpdateUserRole_whenSuccessful()
-    throws RokaMokaForbiddenException, RokaMokaContentNotFoundException {
+    void accept_FlipStatusToConfirmAndSaveNewRegisterAndUpdateUserRole_whenSuccessful() {
         // Arrange
         when(this.requestRepository.findById(anyLong())).thenReturn(Optional.of(this.spyRequest));
         when(this.requestRepository.save(any(PermissionReq.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -172,9 +169,9 @@ class EvaluationPermissionServiceTest {
         verify(this.userService).getByNome(anyString());
         verify(this.registerRepository).save(this.registerCaptor.capture());
 
-        this.assertPermissionReq(this.spyRequest, CONFIRM);
+        assertPermissionReq(this.spyRequest, CONFIRM);
         PermissionReg register = this.registerCaptor.getValue();
-        this.assertPermissionRegister(register, this.reviewer, this.spyRequest);
+        assertPermissionRegister(register, this.reviewer, this.spyRequest);
     }
 
     @Test
@@ -190,8 +187,7 @@ class EvaluationPermissionServiceTest {
     }
 
     @Test
-    void accept_shouldThrowRokaMokaContentNotFoundException_whenUserDoesNotExistByNome()
-    throws RokaMokaContentNotFoundException {
+    void accept_shouldThrowRokaMokaContentNotFoundException_whenUserDoesNotExistByNome() {
         // Arrange
         when(this.requestRepository.findById(anyLong())).thenReturn(Optional.of(this.request));
         when(this.request.isPending()).thenReturn(true);
