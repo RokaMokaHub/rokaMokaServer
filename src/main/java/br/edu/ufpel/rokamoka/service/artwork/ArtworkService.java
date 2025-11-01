@@ -36,7 +36,7 @@ public class ArtworkService implements IArtworkService {
     }
 
     @Override
-    public Artwork getArtworkOrElseThrow(Long id) throws RokaMokaContentNotFoundException {
+    public Artwork getArtworkOrElseThrow(Long id) {
         return this.artworkRepository.findById(id).orElseThrow(RokaMokaContentNotFoundException::new);
     }
 
@@ -45,23 +45,22 @@ public class ArtworkService implements IArtworkService {
         log.info("Buscando por obra usando qrCode: {}", qrCode);
 
         Optional<Artwork> maybeArtwork = this.artworkRepository.findByQrCode(qrCode);
-        maybeArtwork.ifPresentOrElse(
-                a -> log.info("Encontrou {}", a),
-                () -> log.info("Obra não existe!"));
+        maybeArtwork.ifPresentOrElse(a -> log.info("Encontrou {}", a), () -> log.info("Obra não existe!"));
 
         return maybeArtwork;
     }
 
     @Override
-    public Artwork getByQrCodeOrThrow(String qrCode) throws RokaMokaContentNotFoundException {
+    public Artwork getByQrCodeOrThrow(String qrCode) {
         return this.findByQrCode(qrCode)
                 .orElseThrow(() -> new RokaMokaContentNotFoundException("Obra não encontrada por qrcode"));
     }
 
     @Override
     @Transactional(propagation = REQUIRED)
-    public Artwork create(Long exhibitionId, @Valid ArtworkInputDTO artworkInputDTO) throws RokaMokaContentNotFoundException {
-        Exhibition exhibition = this.exhibitionRepository.findById(exhibitionId).orElseThrow(RokaMokaContentNotFoundException::new);
+    public Artwork create(Long exhibitionId, @Valid ArtworkInputDTO artworkInputDTO) {
+        Exhibition exhibition = this.exhibitionRepository.findById(exhibitionId)
+                .orElseThrow(RokaMokaContentNotFoundException::new);
         Artwork artwork = Artwork.builder()
                 .nome(artworkInputDTO.nome())
                 .descricao(artworkInputDTO.descricao())
@@ -76,8 +75,9 @@ public class ArtworkService implements IArtworkService {
 
     @Override
     @Transactional(propagation = REQUIRED)
-    public void addImage(Long artworkId, MultipartFile image) throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
-        var obra = this.artworkRepository.findByIdWithinImage(artworkId).orElseThrow(RokaMokaContentNotFoundException::new);
+    public void addImage(Long artworkId, MultipartFile image) {
+        var obra = this.artworkRepository.findByIdWithinImage(artworkId)
+                .orElseThrow(RokaMokaContentNotFoundException::new);
         if (!obra.getImages().isEmpty()) {
             throw new RokaMokaForbiddenException("Já existe uma imagem associada a essa obra");
         }
@@ -93,9 +93,7 @@ public class ArtworkService implements IArtworkService {
     @Override
     @Transactional(propagation = REQUIRED)
     public List<ArtworkOutputDTO> addArtworksToExhibition(List<ArtworkInputDTO> inputList, Exhibition exhibition) {
-        List<Artwork> artworks = inputList.stream()
-                .map(a -> new Artwork(a, exhibition))
-                .toList();
+        List<Artwork> artworks = inputList.stream().map(a -> new Artwork(a, exhibition)).toList();
         artworks = this.artworkRepository.saveAll(artworks);
         return artworks.stream().map(ArtworkOutputDTO::new).toList();
     }
@@ -110,7 +108,7 @@ public class ArtworkService implements IArtworkService {
 
     @Override
     @Transactional(propagation = REQUIRED)
-    public ArtworkOutputDTO update(ArtworkInputDTO input) throws RokaMokaContentNotFoundException {
+    public ArtworkOutputDTO update(ArtworkInputDTO input) {
         Artwork artwork = this.getArtworkOrElseThrow(input.id());
         artwork.setNome(input.nome());
         artwork.setDescricao(input.descricao());
@@ -125,7 +123,7 @@ public class ArtworkService implements IArtworkService {
 
     @Override
     @Transactional(propagation = REQUIRED)
-    public ArtworkOutputDTO delete(Long id) throws RokaMokaContentNotFoundException {
+    public ArtworkOutputDTO delete(Long id) {
         Artwork artwork = this.getArtworkOrElseThrow(id);
         this.artworkRepository.delete(artwork);
         return new ArtworkOutputDTO(artwork);
