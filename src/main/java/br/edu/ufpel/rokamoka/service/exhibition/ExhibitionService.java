@@ -34,7 +34,7 @@ public class ExhibitionService implements IExhibitionService {
     }
 
     @Override
-    public ExhibitionOutputDTO getExhibitionWithArtworks(Long id) throws RokaMokaContentNotFoundException {
+    public ExhibitionOutputDTO getExhibitionWithArtworks(Long id) {
         Exhibition exhibition = this.getExhibitionOrElseThrow(id);
         this.loadArtworks(exhibition);
         return toOutput(exhibition);
@@ -51,7 +51,7 @@ public class ExhibitionService implements IExhibitionService {
 
     @Override
     @Transactional(propagation = REQUIRED)
-    public ExhibitionOutputDTO create(ExhibitionInputDTO dto) throws RokaMokaContentNotFoundException {
+    public ExhibitionOutputDTO create(ExhibitionInputDTO dto) {
         Location location = this.locationService.getLocationOrElseThrow(dto.locationId());
         Exhibition exhibition = new ExhibitionBuilder(dto, location).build();
         exhibition = this.exhibitionRepository.save(exhibition);
@@ -59,7 +59,7 @@ public class ExhibitionService implements IExhibitionService {
     }
 
     @Override
-    public ExhibitionOutputDTO delete(Long id) throws RokaMokaContentNotFoundException {
+    public ExhibitionOutputDTO delete(Long id) {
         Exhibition exhibition = this.getExhibitionOrElseThrow(id);
 
         this.artworkService.deleteByExhibitionId(exhibition.getId());
@@ -70,22 +70,21 @@ public class ExhibitionService implements IExhibitionService {
 
     @Override
     @Transactional(propagation = REQUIRED)
-    public ExhibitionOutputDTO addArtworks(Long id, List<ArtworkInputDTO> inputList)
-    throws RokaMokaContentNotFoundException {
+    public ExhibitionOutputDTO addArtworks(Long id, List<ArtworkInputDTO> inputList) {
         Exhibition exhibition = this.getExhibitionOrElseThrow(id);
         List<ArtworkOutputDTO> artworks = this.artworkService.addArtworksToExhibition(inputList, exhibition);
         return new ExhibitionOutputDTO(exhibition, (long) artworks.size());
     }
 
     @Override
-    public Exhibition getExhibitionOrElseThrow(Long id) throws RokaMokaContentNotFoundException {
+    public Exhibition getExhibitionOrElseThrow(Long id) {
         return this.exhibitionRepository.findById(id)
                 .orElseThrow(() -> new RokaMokaContentNotFoundException("Exposição não encontrada"));
     }
 
     @Override
     @Transactional(propagation = REQUIRED)
-    public ExhibitionOutputDTO update(ExhibitionInputDTO input) throws RokaMokaContentNotFoundException {
+    public ExhibitionOutputDTO update(ExhibitionInputDTO input) {
         Exhibition exhibition = this.getExhibitionOrElseThrow(input.id());
 
         Location location = exhibition.getLocation();
