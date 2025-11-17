@@ -146,7 +146,7 @@ class RequestPermissionServiceTest implements MockRepository<PermissionReq> {
         assertNotNull(actual);
         assertEquals(requests.size(), actual.size());
 
-        verify(this.userService).getLoggedUser();
+        verify(this.userService).getLoggedUserOrElseThrow();
         verify(this.permissionReqRepository).findByRequester(requester);
     }
 

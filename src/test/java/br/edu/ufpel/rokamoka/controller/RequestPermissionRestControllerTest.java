@@ -4,14 +4,21 @@ import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
 import br.edu.ufpel.rokamoka.core.RoleEnum;
 import br.edu.ufpel.rokamoka.dto.permission.output.PermissionRequestStatusDTO;
 import br.edu.ufpel.rokamoka.service.IRequestPermissionService;
+import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -38,6 +45,10 @@ class RequestPermissionRestControllerTest implements ControllerResponseValidator
     void setUp() {
         this.authentication = mock(Authentication.class);
         this.request = mock(PermissionRequestStatusDTO.class);
+    }
+
+    private static Stream<List<PermissionRequestStatusDTO>> providePermissionRequestStatusDTOList() {
+        return Stream.of(Collections.emptyList(), Instancio.ofList(PermissionRequestStatusDTO.class).create());
     }
 
     //region createPermissionRequestCurator
@@ -78,20 +89,20 @@ class RequestPermissionRestControllerTest implements ControllerResponseValidator
     }
     //endregion
 
-    //region getPermissionRequestStatus
-    @Test
-    void getPermissionRequestStatus_shouldReturnPermissionRequestStatusDTO_whenSuccessful() {
+    //region listAllPermissionRequestStatusByLoggedUser
+    @ParameterizedTest
+    @MethodSource("providePermissionRequestStatusDTOList")
+    void listAllPermissionRequestStatusByLoggedUser_shouldReturnPermissionRequestStatusDTOList_whenCalled(List<PermissionRequestStatusDTO> requests) {
         // Arrange
-        when(this.requestPermissionService.getPermissionRequestStatus()).thenReturn(this.request);
+        when(this.requestPermissionService.getAllPermissionRequestStatusByLoggedUser()).thenReturn(requests);
 
         // Act
-        ResponseEntity<ApiResponseWrapper<PermissionRequestStatusDTO>> response =
-                this.requestPermissionController.getPermissionRequestStatus();
+        ResponseEntity<ApiResponseWrapper<List<PermissionRequestStatusDTO>>> response =
+                this.requestPermissionController.listAllPermissionRequestStatusByLoggedUser();
 
         // Assert
-        this.assertExpectedResponse(response, this.request);
-
-        verify(this.requestPermissionService).getPermissionRequestStatus();
+        this.assertListResponse(response, requests);
+        verify(this.requestPermissionService).getAllPermissionRequestStatusByLoggedUser();
     }
     //endregion
 }
