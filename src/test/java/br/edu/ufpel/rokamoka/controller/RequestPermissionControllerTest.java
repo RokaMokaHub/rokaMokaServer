@@ -6,14 +6,21 @@ import br.edu.ufpel.rokamoka.dto.permission.output.PermissionRequestStatusDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.service.IRequestPermissionService;
+import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -53,7 +60,8 @@ class RequestPermissionControllerTest implements ControllerResponseValidator {
 
         // Act
         ResponseEntity<ApiResponseWrapper<PermissionRequestStatusDTO>> response =
-                this.requestPermissionController.createPermissionRequestCurator(this.authentication);
+                this.requestPermissionController.createPermissionRequestCurator(
+                this.authentication);
 
         // Assert
         this.assertExpectedResponse(response, this.request);
@@ -102,7 +110,8 @@ class RequestPermissionControllerTest implements ControllerResponseValidator {
 
         // Act
         ResponseEntity<ApiResponseWrapper<PermissionRequestStatusDTO>> response =
-                this.requestPermissionController.createPermissionRequestResearcher(this.authentication);
+                this.requestPermissionController.createPermissionRequestResearcher(
+                this.authentication);
 
         // Assert
         this.assertExpectedResponse(response, this.request);
@@ -141,35 +150,25 @@ class RequestPermissionControllerTest implements ControllerResponseValidator {
     }
     //endregion
 
-    //region getPermissionRequestStatus
-    @Test
-    void getPermissionRequestStatus_shouldReturnPermissionRequestStatusDTO_whenSuccessful()
-    throws RokaMokaContentNotFoundException {
-        // Arrange
-        when(this.requestPermissionService.getPermissionRequestStatus()).thenReturn(this.request);
-
-        // Act
-        ResponseEntity<ApiResponseWrapper<PermissionRequestStatusDTO>> response =
-                this.requestPermissionController.getPermissionRequestStatus();
-
-        // Assert
-        this.assertExpectedResponse(response, this.request);
-
-        verify(this.requestPermissionService).getPermissionRequestStatus();
+    //region listAllPermissionRequestStatusByLoggedUser
+    static Stream<List<PermissionRequestStatusDTO>> providePermissionRequestStatusDTOList() {
+        return Stream.of(Collections.emptyList(), Instancio.ofList(PermissionRequestStatusDTO.class).create());
     }
 
-    @Test
-    void getPermissionRequestStatus_shouldThrowRokaMokaContentNotFoundException_whenAnyEntityIsNotFound()
+    @ParameterizedTest
+    @MethodSource("providePermissionRequestStatusDTOList")
+    void listAllPermissionRequestStatusByLoggedUser_shouldReturnPermissionRequestStatusDTOList_whenCalled(List<PermissionRequestStatusDTO> requests)
     throws RokaMokaContentNotFoundException {
         // Arrange
-        when(this.requestPermissionService.getPermissionRequestStatus()).thenThrow(
-                RokaMokaContentNotFoundException.class);
+        when(this.requestPermissionService.getAllPermissionRequestStatusByLoggedUser()).thenReturn(requests);
 
-        // Act & Assert
-        assertThrows(RokaMokaContentNotFoundException.class,
-                () -> this.requestPermissionController.getPermissionRequestStatus());
+        // Act
+        ResponseEntity<ApiResponseWrapper<List<PermissionRequestStatusDTO>>> response =
+                this.requestPermissionController.listAllPermissionRequestStatusByLoggedUser();
 
-        verify(this.requestPermissionService).getPermissionRequestStatus();
+        // Assert
+        this.assertListResponse(response, requests);
+        verify(this.requestPermissionService).getAllPermissionRequestStatusByLoggedUser();
     }
     //endregion
 }

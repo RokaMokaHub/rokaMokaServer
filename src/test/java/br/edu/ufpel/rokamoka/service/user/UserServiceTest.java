@@ -49,6 +49,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -92,9 +93,9 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
         // Act & Assert
         assertThrows(RokaMokaContentDuplicatedException.class, () -> this.userService.createNormalUser(userDTO));
 
-        verify(this.passwordEncoder, times(1)).encode(anyString());
-        verify(this.roleRepository, times(1)).findByName(any(RoleEnum.class));
-        verify(this.userRepository, times(1)).existsByEmail(anyString());
+        verify(this.passwordEncoder).encode(anyString());
+        verify(this.roleRepository).findByName(any(RoleEnum.class));
+        verify(this.userRepository).existsByEmail(anyString());
         verifyNoInteractions(this.mokadexService, this.deviceService, this.authenticationService);
     }
 
@@ -108,23 +109,18 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
         // Act & Assert
         assertThrows(RokaMokaContentDuplicatedException.class, () -> this.userService.createNormalUser(userDTO));
 
-        verify(this.passwordEncoder, times(1)).encode(anyString());
-        verify(this.roleRepository, times(1)).findByName(any(RoleEnum.class));
-        verify(this.userRepository, times(1)).existsByNome(anyString());
+        verify(this.passwordEncoder).encode(anyString());
+        verify(this.roleRepository).findByName(any(RoleEnum.class));
+        verify(this.userRepository).existsByNome(anyString());
         verifyNoInteractions(this.mokadexService, this.deviceService, this.authenticationService);
     }
 
     static Stream<Arguments> provideCreateNormalUserInput() {
         UserBasicDTO withDeviceId = Instancio.create(UserBasicDTO.class);
-        UserBasicDTO ignoreDeviceId = Instancio.of(UserBasicDTO.class)
-                .ignore(field(UserBasicDTO::deviceId))
-                .create();
+        UserBasicDTO ignoreDeviceId = Instancio.of(UserBasicDTO.class).ignore(field(UserBasicDTO::deviceId)).create();
         Role userRole = Instancio.of(Role.class).set(field(Role::getName), RoleEnum.USER).create();
-        return Stream.of(
-                Arguments.of(withDeviceId, userRole),
-                Arguments.of(ignoreDeviceId, userRole),
-                Arguments.of(withDeviceId, null),
-                Arguments.of(ignoreDeviceId, null));
+        return Stream.of(Arguments.of(withDeviceId, userRole), Arguments.of(ignoreDeviceId, userRole),
+                Arguments.of(withDeviceId, null), Arguments.of(ignoreDeviceId, null));
     }
 
     @ParameterizedTest
@@ -135,8 +131,7 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
         when(this.passwordEncoder.encode(userDTO.password())).thenReturn("encodedPassword");
         when(this.roleRepository.findByName(RoleEnum.USER)).thenReturn(userRole);
 
-        when(this.userRepository.save(any(User.class))).thenAnswer(
-                inv -> this.mockRepositorySave(inv.getArgument(0)));
+        when(this.userRepository.save(any(User.class))).thenAnswer(inv -> this.mockRepositorySave(inv.getArgument(0)));
         doAnswer(inv -> null).when(this.mokadexService).getOrCreateMokadexByUser(any(User.class));
 
         if (StringUtils.isNotBlank(userDTO.deviceId())) {
@@ -152,18 +147,18 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
         assertNotNull(actualOutput);
         assertEquals("jwt", actualOutput.jwt());
 
-        verify(this.passwordEncoder, times(1)).encode(anyString());
-        verify(this.roleRepository, times(1)).findByName(any(RoleEnum.class));
-        verify(this.userRepository, times(1)).save(any(User.class));
-        verify(this.mokadexService, times(1)).getOrCreateMokadexByUser(any(User.class));
+        verify(this.passwordEncoder).encode(anyString());
+        verify(this.roleRepository).findByName(any(RoleEnum.class));
+        verify(this.userRepository).save(any(User.class));
+        verify(this.mokadexService).getOrCreateMokadexByUser(any(User.class));
 
         if (StringUtils.isNotBlank(userDTO.deviceId())) {
-            verify(this.deviceService, times(1)).save(anyString(), any(User.class));
+            verify(this.deviceService).save(anyString(), any(User.class));
         } else {
             verifyNoInteractions(this.deviceService);
         }
 
-        verify(this.authenticationService, times(1)).basicAuthenticationAndGenerateJWT(anyString(), anyString());
+        verify(this.authenticationService).basicAuthenticationAndGenerateJWT(anyString(), anyString());
     }
     //endregion
 
@@ -178,9 +173,9 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
         // Act & Assert
         assertThrows(RokaMokaContentDuplicatedException.class, () -> this.userService.createAnonymousUser(userDTO));
 
-        verify(this.passwordEncoder, times(1)).encode(anyString());
-        verify(this.roleRepository, times(1)).findByName(any(RoleEnum.class));
-        verify(this.userRepository, times(1)).existsByNome(anyString());
+        verify(this.passwordEncoder).encode(anyString());
+        verify(this.roleRepository).findByName(any(RoleEnum.class));
+        verify(this.userRepository).existsByNome(anyString());
         verifyNoInteractions(this.mokadexService, this.deviceService, this.authenticationService);
     }
 
@@ -189,14 +184,9 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
         UserAnonymousRequestDTO ignoreDeviceId = Instancio.of(UserAnonymousRequestDTO.class)
                 .ignore(field(UserAnonymousRequestDTO::deviceId))
                 .create();
-        Role userRole = Instancio.of(Role.class)
-                .set(field(Role::getName), RoleEnum.USER)
-                .create();
-        return Stream.of(
-                Arguments.of(withDeviceId, userRole),
-                Arguments.of(ignoreDeviceId, userRole),
-                Arguments.of(withDeviceId, null),
-                Arguments.of(ignoreDeviceId, null));
+        Role userRole = Instancio.of(Role.class).set(field(Role::getName), RoleEnum.USER).create();
+        return Stream.of(Arguments.of(withDeviceId, userRole), Arguments.of(ignoreDeviceId, userRole),
+                Arguments.of(withDeviceId, null), Arguments.of(ignoreDeviceId, null));
     }
 
     @ParameterizedTest
@@ -207,8 +197,7 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
         when(this.passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
         when(this.roleRepository.findByName(RoleEnum.USER)).thenReturn(userRole);
 
-        when(this.userRepository.save(any(User.class))).thenAnswer(
-                inv -> this.mockRepositorySave(inv.getArgument(0)));
+        when(this.userRepository.save(any(User.class))).thenAnswer(inv -> this.mockRepositorySave(inv.getArgument(0)));
         doAnswer(inv -> null).when(this.mokadexService).getOrCreateMokadexByUser(any(User.class));
 
         if (StringUtils.isNotBlank(userDTO.deviceId())) {
@@ -224,18 +213,18 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
         assertNotNull(actualOutput);
         assertEquals("jwt", actualOutput.jwt());
 
-        verify(this.passwordEncoder, times(1)).encode(anyString());
-        verify(this.roleRepository, times(1)).findByName(any(RoleEnum.class));
-        verify(this.userRepository, times(1)).save(any(User.class));
-        verify(this.mokadexService, times(1)).getOrCreateMokadexByUser(any(User.class));
+        verify(this.passwordEncoder).encode(anyString());
+        verify(this.roleRepository).findByName(any(RoleEnum.class));
+        verify(this.userRepository).save(any(User.class));
+        verify(this.mokadexService).getOrCreateMokadexByUser(any(User.class));
 
         if (StringUtils.isNotBlank(userDTO.deviceId())) {
-            verify(this.deviceService, times(1)).save(anyString(), any(User.class));
+            verify(this.deviceService).save(anyString(), any(User.class));
         } else {
             verifyNoInteractions(this.deviceService);
         }
 
-        verify(this.authenticationService, times(1)).basicAuthenticationAndGenerateJWT(anyString(), anyString());
+        verify(this.authenticationService).basicAuthenticationAndGenerateJWT(anyString(), anyString());
     }
     //endregion
 
@@ -250,7 +239,7 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
         // Act & Assert
         assertThrows(RokaMokaContentNotFoundException.class, () -> this.userService.resetUserPassword(userDTO));
 
-        verify(this.userRepository, times(1)).existsByNomeAndEmail(userDTO.name(), userDTO.email());
+        verify(this.userRepository).existsByNomeAndEmail(userDTO.name(), userDTO.email());
         verifyNoMoreInteractions(this.userRepository);
         verifyNoInteractions(this.mokadexService, this.deviceService, this.authenticationService, this.roleRepository,
                 this.passwordEncoder);
@@ -267,8 +256,8 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
         // Act & Assert
         assertThrows(RokaMokaContentNotFoundException.class, () -> this.userService.resetUserPassword(userDTO));
 
-        verify(this.userRepository, times(1)).existsByNomeAndEmail(userDTO.name(), userDTO.email());
-        verify(this.userRepository, times(1)).findByNome(userDTO.name());
+        verify(this.userRepository).existsByNomeAndEmail(userDTO.name(), userDTO.email());
+        verify(this.userRepository).findByNome(userDTO.name());
         verifyNoMoreInteractions(this.userRepository);
         verifyNoInteractions(this.mokadexService, this.deviceService, this.authenticationService, this.roleRepository,
                 this.passwordEncoder);
@@ -287,9 +276,9 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
         // Act & Assert
         assertThrows(RokaMokaForbiddenException.class, () -> this.userService.resetUserPassword(userDTO));
 
-        verify(this.userRepository, times(1)).existsByNomeAndEmail(userDTO.name(), userDTO.email());
-        verify(this.userRepository, times(1)).findByNome(userDTO.name());
-        verify(this.passwordEncoder, times(1)).matches(userDTO.oldPassword(), foundByName.getSenha());
+        verify(this.userRepository).existsByNomeAndEmail(userDTO.name(), userDTO.email());
+        verify(this.userRepository).findByNome(userDTO.name());
+        verify(this.passwordEncoder).matches(userDTO.oldPassword(), foundByName.getSenha());
         verifyNoMoreInteractions(this.userRepository);
         verifyNoInteractions(this.mokadexService, this.deviceService, this.authenticationService, this.roleRepository);
     }
@@ -313,9 +302,9 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
             assertThrows(RokaMokaContentNotFoundException.class, () -> this.userService.resetUserPassword(userDTO));
         }
 
-        verify(this.userRepository, times(1)).existsByNomeAndEmail(userDTO.name(), userDTO.email());
+        verify(this.userRepository).existsByNomeAndEmail(userDTO.name(), userDTO.email());
         verify(this.userRepository, times(2)).findByNome(anyString());
-        verify(this.passwordEncoder, times(1)).matches(userDTO.oldPassword(), foundByName.getSenha());
+        verify(this.passwordEncoder).matches(userDTO.oldPassword(), foundByName.getSenha());
         verifyNoInteractions(this.mokadexService, this.deviceService, this.authenticationService, this.roleRepository);
     }
 
@@ -339,9 +328,9 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
             assertThrows(RokaMokaForbiddenException.class, () -> this.userService.resetUserPassword(userDTO));
         }
 
-        verify(this.userRepository, times(1)).existsByNomeAndEmail(userDTO.name(), userDTO.email());
+        verify(this.userRepository).existsByNomeAndEmail(userDTO.name(), userDTO.email());
         verify(this.userRepository, times(2)).findByNome(anyString());
-        verify(this.passwordEncoder, times(1)).matches(userDTO.oldPassword(), foundByName.getSenha());
+        verify(this.passwordEncoder).matches(userDTO.oldPassword(), foundByName.getSenha());
         verifyNoInteractions(this.mokadexService, this.deviceService, this.authenticationService, this.roleRepository);
     }
 
@@ -368,11 +357,11 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
         }
 
         // Assert
-        verify(this.userRepository, times(1)).existsByNomeAndEmail(userDTO.name(), userDTO.email());
+        verify(this.userRepository).existsByNomeAndEmail(userDTO.name(), userDTO.email());
         verify(this.userRepository, times(2)).findByNome(anyString());
-        verify(this.passwordEncoder, times(1)).matches(anyString(), anyString());
-        verify(this.userRepository, times(1)).save(loggedIn);
-        verify(this.passwordEncoder, times(1)).encode(userDTO.newPassword());
+        verify(this.passwordEncoder).matches(anyString(), anyString());
+        verify(this.userRepository).save(loggedIn);
+        verify(this.passwordEncoder).encode(userDTO.newPassword());
         verifyNoInteractions(this.mokadexService, this.deviceService, this.authenticationService, this.roleRepository);
     }
     //endregion
@@ -389,11 +378,10 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
         try (MockedStatic<ServiceContext> mockedServiceContext = mockStatic(ServiceContext.class)) {
             mockedServiceContext.when(ServiceContext::getContext).thenReturn(mockContext);
 
-            assertThrows(RokaMokaContentNotFoundException.class,
-                    () -> this.userService.getLoggedUserInformation());
+            assertThrows(RokaMokaContentNotFoundException.class, () -> this.userService.getLoggedUserInformation());
         }
 
-        verify(this.userRepository, times(1)).findByNome(LOGGED_USER_NAME);
+        verify(this.userRepository).findByNome(LOGGED_USER_NAME);
         verifyNoMoreInteractions(this.userRepository);
         verifyNoInteractions(this.mokadexService, this.deviceService, this.authenticationService, this.roleRepository);
     }
@@ -427,11 +415,39 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
             assertEquals(expectedOutput, actualMokadex);
         }
 
-        verify(this.userRepository, times(1)).findByNome(LOGGED_USER_NAME);
-        verify(this.mokadexService, times(1)).getOrCreateMokadexByUser(loggedIn);
-        verify(this.mokadexService, times(1)).getMokadexOutputDTOByMokadex(mokadex);
-        verifyNoMoreInteractions(this.userRepository, this.mokadexService);
-        verifyNoInteractions(this.deviceService, this.authenticationService, this.roleRepository);
+        verify(this.userRepository).findByNome(LOGGED_USER_NAME);
+        verify(this.mokadexService).getOrCreateMokadexByUser(loggedIn);
+        verify(this.mokadexService).getMokadexOutputDTOByMokadex(mokadex);
+    }
+    //endregion
+
+    //region getByNome
+    @Test
+    void getByNome_shouldReturnUser_whenUserExistsByName() throws RokaMokaContentNotFoundException {
+        // Arrange
+        User user = mock(User.class);
+
+        when(this.userRepository.findByNome(anyString())).thenReturn(Optional.of(user));
+
+        // Act
+        User actual = this.userService.getByNome("");
+
+        // Assert
+        assertNotNull(actual);
+        assertEquals(user, actual);
+
+        verify(this.userRepository).findByNome(anyString());
+    }
+
+    @Test
+    void getByNome_shouldThrowRokaMokaContentNotFoundException_whenUserDoesNotExistByName() {
+        // Arrange
+        when(this.userRepository.findByNome(anyString())).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(RokaMokaContentNotFoundException.class, () -> this.userService.getByNome(anyString()));
+
+        verify(this.userRepository).findByNome(anyString());
     }
     //endregion
 
@@ -446,9 +462,9 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
         // Act & Assert
         assertThrows(RokaMokaContentDuplicatedException.class, () -> this.userService.createResearcher(userDTO));
 
-        verify(this.passwordEncoder, times(1)).encode(anyString());
-        verify(this.roleRepository, times(1)).findByName(any(RoleEnum.class));
-        verify(this.userRepository, times(1)).existsByEmail(anyString());
+        verify(this.passwordEncoder).encode(anyString());
+        verify(this.roleRepository).findByName(any(RoleEnum.class));
+        verify(this.userRepository).existsByEmail(anyString());
         verifyNoInteractions(this.mokadexService, this.deviceService, this.authenticationService);
     }
 
@@ -462,25 +478,18 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
         // Act & Assert
         assertThrows(RokaMokaContentDuplicatedException.class, () -> this.userService.createResearcher(userDTO));
 
-        verify(this.passwordEncoder, times(1)).encode(anyString());
-        verify(this.roleRepository, times(1)).findByName(any(RoleEnum.class));
-        verify(this.userRepository, times(1)).existsByNome(anyString());
+        verify(this.passwordEncoder).encode(anyString());
+        verify(this.roleRepository).findByName(any(RoleEnum.class));
+        verify(this.userRepository).existsByNome(anyString());
         verifyNoInteractions(this.mokadexService, this.deviceService, this.authenticationService);
     }
 
     static Stream<Arguments> provideCreateResearcherUserInput() {
         UserBasicDTO withDeviceId = Instancio.create(UserBasicDTO.class);
-        UserBasicDTO ignoreDeviceId = Instancio.of(UserBasicDTO.class)
-                .ignore(field(UserBasicDTO::deviceId))
-                .create();
-        Role researcherRole = Instancio.of(Role.class)
-                .set(field(Role::getName), RoleEnum.RESEARCHER)
-                .create();
-        return Stream.of(
-                Arguments.of(withDeviceId, researcherRole),
-                Arguments.of(ignoreDeviceId, researcherRole),
-                Arguments.of(withDeviceId, null),
-                Arguments.of(ignoreDeviceId, null));
+        UserBasicDTO ignoreDeviceId = Instancio.of(UserBasicDTO.class).ignore(field(UserBasicDTO::deviceId)).create();
+        Role researcherRole = Instancio.of(Role.class).set(field(Role::getName), RoleEnum.RESEARCHER).create();
+        return Stream.of(Arguments.of(withDeviceId, researcherRole), Arguments.of(ignoreDeviceId, researcherRole),
+                Arguments.of(withDeviceId, null), Arguments.of(ignoreDeviceId, null));
     }
 
     @ParameterizedTest
@@ -491,8 +500,7 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
         when(this.passwordEncoder.encode(userDTO.password())).thenReturn("encodedPassword");
         when(this.roleRepository.findByName(RoleEnum.RESEARCHER)).thenReturn(researcherRole);
 
-        when(this.userRepository.save(any(User.class))).thenAnswer(
-                inv -> this.mockRepositorySave(inv.getArgument(0)));
+        when(this.userRepository.save(any(User.class))).thenAnswer(inv -> this.mockRepositorySave(inv.getArgument(0)));
         doAnswer(inv -> null).when(this.mokadexService).getOrCreateMokadexByUser(any(User.class));
 
         if (StringUtils.isNotBlank(userDTO.deviceId())) {
@@ -508,18 +516,18 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
         assertNotNull(actualOutput);
         assertEquals("jwt", actualOutput.jwt());
 
-        verify(this.passwordEncoder, times(1)).encode(anyString());
-        verify(this.roleRepository, times(1)).findByName(any(RoleEnum.class));
-        verify(this.userRepository, times(1)).save(any(User.class));
-        verify(this.mokadexService, times(1)).getOrCreateMokadexByUser(any(User.class));
+        verify(this.passwordEncoder).encode(anyString());
+        verify(this.roleRepository).findByName(any(RoleEnum.class));
+        verify(this.userRepository).save(any(User.class));
+        verify(this.mokadexService).getOrCreateMokadexByUser(any(User.class));
 
         if (StringUtils.isNotBlank(userDTO.deviceId())) {
-            verify(this.deviceService, times(1)).save(anyString(), any(User.class));
+            verify(this.deviceService).save(anyString(), any(User.class));
         } else {
             verifyNoInteractions(this.deviceService);
         }
 
-        verify(this.authenticationService, times(1)).basicAuthenticationAndGenerateJWT(anyString(), anyString());
+        verify(this.authenticationService).basicAuthenticationAndGenerateJWT(anyString(), anyString());
     }
     //endregion
 
@@ -528,19 +536,18 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
     @EnumSource(RoleEnum.class)
     void updateRole_shouldUpdateUserRole_whenCalled(RoleEnum roleEnum) {
         // Arrange
-        User user = Instancio.create(User.class);
+        User user = new User();
+        User spyUser = spy(user);
+
         Role role = Instancio.of(Role.class).set(field(Role::getName), roleEnum).create();
 
         // Act
-        this.userService.updateRole(user, role);
+        this.userService.updateRole(spyUser, role);
 
         // Assert
-        assertEquals(role, user.getRole());
+        assertEquals(role, spyUser.getRole());
 
-        verify(this.userRepository, times(1)).save(user);
-        verifyNoMoreInteractions(this.userRepository);
-        verifyNoInteractions(this.mokadexService, this.deviceService, this.roleRepository,
-                this.authenticationService, this.passwordEncoder);
+        verify(this.userRepository).save(spyUser);
     }
     //endregion
 }

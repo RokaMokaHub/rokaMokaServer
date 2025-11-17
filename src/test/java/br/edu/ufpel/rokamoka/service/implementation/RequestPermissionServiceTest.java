@@ -12,27 +12,31 @@ import br.edu.ufpel.rokamoka.repository.PermissionReqRepository;
 import br.edu.ufpel.rokamoka.repository.RoleRepository;
 import br.edu.ufpel.rokamoka.service.MockRepository;
 import br.edu.ufpel.rokamoka.service.user.IUserService;
+import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -122,34 +126,45 @@ class RequestPermissionServiceTest implements MockRepository<PermissionReq> {
     }
     //endregion
 
-    //region getPermissionRequestStatus
-    @Test
-    void getPermissionRequestStatus_shouldReturnPermissionRequestStatusDTO_whenRequestExistsById()
+    //region getAllPermissionRequestStatusByLoggedUser
+    static Stream<List<PermissionReq>> providePermissionReqList() {
+        return Stream.of(Collections.emptyList(), Instancio.ofList(PermissionReq.class).create());
+    }
+
+    @ParameterizedTest
+    @MethodSource("providePermissionReqList")
+    void getAllPermissionRequestStatusByLoggedUser_shouldReturnAllPermissionRequestStatusDTO_whenRequestExistsByIdByLoggedInUser(
+            List<PermissionReq> requests)
     throws RokaMokaContentNotFoundException {
         // Arrange
-        PermissionReq request = mock(PermissionReq.class);
+        User requester = mock(User.class);
 
-        when(this.permissionReqRepository.findById(anyLong())).thenReturn(Optional.of(request));
+        when(this.userService.getLoggedUser()).thenReturn(requester);
+        when(this.permissionReqRepository.findByRequester(requester)).thenReturn(requests);
 
         // Act
-        PermissionRequestStatusDTO actual = this.requestPermissionService.getPermissionRequestStatus();
+        List<PermissionRequestStatusDTO> actual = this.requestPermissionService.getAllPermissionRequestStatusByLoggedUser();
 
         // Assert
-        assertOutputByPermissionReq(request, actual);
+        assertNotNull(actual);
+        assertEquals(requests.size(), actual.size());
 
-        verify(this.permissionReqRepository).findById(anyLong());
+        verify(this.userService).getLoggedUser();
+        verify(this.permissionReqRepository).findByRequester(requester);
     }
 
     @Test
-    void getPermissionRequestStatus_shouldThrowRokaMokaContentNotFoundException_whenRequestDoesNotExistById() {
+    void getAllPermissionRequestStatusByLoggedUser_shouldThrowRokaMokaContentNotFoundException_whenLoggedUserIsNotFound()
+    throws RokaMokaContentNotFoundException {
         // Arrange
-        when(this.permissionReqRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(this.userService.getLoggedUser()).thenThrow(RokaMokaContentNotFoundException.class);
 
         // Act & Assert
         assertThrows(RokaMokaContentNotFoundException.class,
-                () -> this.requestPermissionService.getPermissionRequestStatus());
+                () -> this.requestPermissionService.getAllPermissionRequestStatusByLoggedUser());
 
-        verify(this.permissionReqRepository).findById(anyLong());
+        verify(this.userService).getLoggedUser();
+        verifyNoInteractions(this.permissionReqRepository);
     }
     //endregion
 }

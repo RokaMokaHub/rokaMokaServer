@@ -5,9 +5,11 @@ import br.edu.ufpel.rokamoka.dto.permission.output.PermissionRequestStatusDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 
+import java.util.List;
+
 public interface IRequestPermissionService {
 
     PermissionRequestStatusDTO createRequest(String userName, RoleEnum role) throws RokaMokaContentNotFoundException, RokaMokaContentDuplicatedException;
 
-    PermissionRequestStatusDTO getPermissionRequestStatus() throws RokaMokaContentNotFoundException;
+    List<PermissionRequestStatusDTO> getAllPermissionRequestStatusByLoggedUser() throws RokaMokaContentNotFoundException;
 }

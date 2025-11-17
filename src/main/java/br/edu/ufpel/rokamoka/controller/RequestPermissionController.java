@@ -19,9 +19,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @Validated
 @RequiredArgsConstructor
-@Tag(name = "Solicitação de Acesso", description = "API para o usuário soliciar acesso como Curador ou Pesquisador")
+@Tag(name = "Solicitação de Acesso",
+        description = "API para o usuário solicitar diferentes níveis de acesso (e.g., Curador ou Pesquisador)")
 @RestController
 @RequestMapping("/request/permission")
 public class RequestPermissionController extends RokaMokaController {
@@ -46,10 +49,10 @@ public class RequestPermissionController extends RokaMokaController {
         return this.success(request);
     }
 
-    @Operation(summary = "Adquirir solicitação do usuário logado")
+    @Operation(summary = "Adquirir solicitações do usuário logado")
     @GetMapping(value = "/me/status", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponseWrapper<PermissionRequestStatusDTO>> getPermissionRequestStatus() throws RokaMokaContentNotFoundException {
-        PermissionRequestStatusDTO dto = this.requestPermissionService.getPermissionRequestStatus();
-        return this.success(dto);
+    public ResponseEntity<ApiResponseWrapper<List<PermissionRequestStatusDTO>>> listAllPermissionRequestStatusByLoggedUser() throws RokaMokaContentNotFoundException {
+        List<PermissionRequestStatusDTO> requests = this.requestPermissionService.getAllPermissionRequestStatusByLoggedUser();
+        return this.success(requests);
     }
 }

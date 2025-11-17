@@ -186,6 +186,11 @@ public class UserService implements IUserService {
                 .orElseThrow(() -> new RokaMokaContentNotFoundException("Usuário não encontrado"));
     }
 
+    @Override
+    public User getLoggedUser() throws RokaMokaContentNotFoundException {
+        return this.findLoggedUser();
+    }
+
     private User findLoggedUser() throws RokaMokaContentNotFoundException {
         return this.userRepository
                 .findByNome(ServiceContext.getContext().getUser().getUsername())
