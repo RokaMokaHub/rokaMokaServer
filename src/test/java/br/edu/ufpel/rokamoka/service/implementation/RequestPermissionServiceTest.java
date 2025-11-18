@@ -73,8 +73,7 @@ class RequestPermissionServiceTest implements MockRepository<PermissionReq> {
     //region createRequest
     @ParameterizedTest
     @EnumSource(value = RoleEnum.class)
-    void createRequest_shouldSaveNewRequest_whenSuccessful(RoleEnum roleName)
-    throws RokaMokaContentNotFoundException, RokaMokaContentDuplicatedException {
+    void createRequest_shouldSaveNewRequest_whenSuccessful(RoleEnum roleName) {
         // Arrange
         when(this.userService.getByNome(anyString())).thenReturn(this.requester);
         when(this.roleRepository.findByName(roleName)).thenReturn(this.targetRole);
@@ -106,8 +105,7 @@ class RequestPermissionServiceTest implements MockRepository<PermissionReq> {
 
     @ParameterizedTest
     @EnumSource(value = RoleEnum.class)
-    void createRequest_shouldThrowRokaMokaContentDuplicatedException_whenRequestAlreadyExists(RoleEnum roleName)
-    throws RokaMokaContentNotFoundException {
+    void createRequest_shouldThrowRokaMokaContentDuplicatedException_whenRequestAlreadyExists(RoleEnum roleName) {
         // Arrange
         when(this.userService.getByNome(anyString())).thenReturn(this.requester);
         when(this.roleRepository.findByName(roleName)).thenReturn(this.targetRole);
@@ -120,8 +118,8 @@ class RequestPermissionServiceTest implements MockRepository<PermissionReq> {
 
         verify(this.userService).getByNome(anyString());
         verify(this.roleRepository).findByName(roleName);
-        verify(this.permissionReqRepository).existsByRequesterAndStatusAndTargetRole(this.requester, RequestStatus.PENDING,
-                this.targetRole);
+        verify(this.permissionReqRepository).existsByRequesterAndStatusAndTargetRole(this.requester,
+                RequestStatus.PENDING, this.targetRole);
         verifyNoMoreInteractions(this.permissionReqRepository);
     }
     //endregion
@@ -134,12 +132,11 @@ class RequestPermissionServiceTest implements MockRepository<PermissionReq> {
     @ParameterizedTest
     @MethodSource("providePermissionReqList")
     void getAllPermissionRequestStatusByLoggedUser_shouldReturnAllPermissionRequestStatusDTO_whenRequestExistsByIdByLoggedInUser(
-            List<PermissionReq> requests)
-    throws RokaMokaContentNotFoundException {
+            List<PermissionReq> requests) {
         // Arrange
         User requester = mock(User.class);
 
-        when(this.userService.getLoggedUser()).thenReturn(requester);
+        when(this.userService.getLoggedUserOrElseThrow()).thenReturn(requester);
         when(this.permissionReqRepository.findByRequester(requester)).thenReturn(requests);
 
         // Act
@@ -149,7 +146,7 @@ class RequestPermissionServiceTest implements MockRepository<PermissionReq> {
         assertNotNull(actual);
         assertEquals(requests.size(), actual.size());
 
-        verify(this.userService).getLoggedUser();
+        verify(this.userService).getLoggedUserOrElseThrow();
         verify(this.permissionReqRepository).findByRequester(requester);
     }
 
@@ -157,13 +154,13 @@ class RequestPermissionServiceTest implements MockRepository<PermissionReq> {
     void getAllPermissionRequestStatusByLoggedUser_shouldThrowRokaMokaContentNotFoundException_whenLoggedUserIsNotFound()
     throws RokaMokaContentNotFoundException {
         // Arrange
-        when(this.userService.getLoggedUser()).thenThrow(RokaMokaContentNotFoundException.class);
+        when(this.userService.getLoggedUserOrElseThrow()).thenThrow(RokaMokaContentNotFoundException.class);
 
         // Act & Assert
         assertThrows(RokaMokaContentNotFoundException.class,
                 () -> this.requestPermissionService.getAllPermissionRequestStatusByLoggedUser());
 
-        verify(this.userService).getLoggedUser();
+        verify(this.userService).getLoggedUserOrElseThrow();
         verifyNoInteractions(this.permissionReqRepository);
     }
     //endregion

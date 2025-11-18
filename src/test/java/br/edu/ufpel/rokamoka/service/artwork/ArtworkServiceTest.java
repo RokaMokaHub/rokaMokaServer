@@ -100,7 +100,7 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
 
     //region getArtworkOrElseThrow
     @Test
-    void getArtworkOrElseThrow_shouldReturnArtwork_whenArtworkExistsById() throws RokaMokaContentNotFoundException {
+    void getArtworkOrElseThrow_shouldReturnArtwork_whenArtworkExistsById() {
         // Arrange
         when(this.artworkRepository.findById(anyLong())).thenReturn(Optional.of(this.artwork));
 
@@ -164,7 +164,7 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
 
     //region getByQrCodeOrThrow
     @Test
-    void getByQrCodeOrThrow_shouldReturnArtwork_whenArtworkExistsByQrCode() throws RokaMokaContentNotFoundException {
+    void getByQrCodeOrThrow_shouldReturnArtwork_whenArtworkExistsByQrCode() {
         // Arrange
         when(this.artworkRepository.findByQrCode(anyString())).thenReturn(Optional.of(this.artwork));
 
@@ -195,7 +195,7 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
 
     //region create
     @Test
-    void create_shouldReturnNewArtwork_whenInputIsValid() throws RokaMokaContentNotFoundException {
+    void create_shouldReturnNewArtwork_whenInputIsValid() {
         // Arrange
         Exhibition exhibition = Instancio.create(Exhibition.class);
         ArtworkInputDTO input = Instancio.create(ArtworkInputDTO.class);
@@ -241,8 +241,7 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
 
     //region addImage
     @Test
-    void addImage_shouldUploadImage_whenImageIsValid()
-    throws RokaMokaContentNotFoundException, RokaMokaForbiddenException {
+    void addImage_shouldUploadImage_whenImageIsValid() {
         // Arrange
         Artwork artwork = Instancio.of(Artwork.class)
                 .set(field(Artwork::getId), 1L)
@@ -322,11 +321,8 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
     static Stream<Arguments> provideInputAddArtworksToExhibition() {
         Exhibition exhibition = Instancio.create(Exhibition.class);
         List<ArtworkInputDTO> artworks = Instancio.ofList(ArtworkInputDTO.class).create();
-        return Stream.of(
-                Arguments.of(Collections.emptyList(), null),
-                Arguments.of(Collections.emptyList(), exhibition),
-                Arguments.of(artworks, null),
-                Arguments.of(artworks, exhibition));
+        return Stream.of(Arguments.of(Collections.emptyList(), null), Arguments.of(Collections.emptyList(), exhibition),
+                Arguments.of(artworks, null), Arguments.of(artworks, exhibition));
     }
 
     @ParameterizedTest
@@ -337,7 +333,7 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
 
         // Act
         List<ArtworkOutputDTO> actual = this.artworkService.addArtworksToExhibition(artworks, exhibition);
-        
+
         // Assert
         assertNotNull(actual);
         assertEquals(artworks.size(), actual.size());
@@ -353,7 +349,6 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
         // Arrange
         when(this.artworkRepository.findByExhibition_Id(anyLong())).thenReturn(artworks);
 
-
         // Act
         List<ArtworkOutputDTO> actual = this.artworkService.deleteByExhibitionId(1L);
 
@@ -368,7 +363,7 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
 
     //region update
     @Test
-    void update_shouldReturnArtworkOutputDTO_whenSuccessful() throws RokaMokaContentNotFoundException {
+    void update_shouldReturnArtworkOutputDTO_whenSuccessful() {
         // Arrange
         ArtworkInputDTO input = Instancio.create(ArtworkInputDTO.class);
         Artwork art = new Artwork();
@@ -384,7 +379,7 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
 
         // Assert
         assertArtworkOutputByArtwork(spyArtwork, actual);
-        
+
         verify(this.artworkRepository).findById(anyLong());
         verify(this.imageService).upload(input.image());
         verify(this.artworkRepository).save(any(Artwork.class));
@@ -407,7 +402,7 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
 
     //region delete
     @Test
-    void delete_shouldReturnArtworkOutput_whenSuccessful() throws RokaMokaContentNotFoundException {
+    void delete_shouldReturnArtworkOutput_whenSuccessful() {
         // Arrange
         when(this.artworkRepository.findById(anyLong())).thenReturn(Optional.of(this.artwork));
 

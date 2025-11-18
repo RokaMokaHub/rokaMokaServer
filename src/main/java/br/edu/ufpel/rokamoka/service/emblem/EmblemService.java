@@ -10,11 +10,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.Optional;
+
+import static org.springframework.transaction.annotation.Propagation.REQUIRED;
 
 /**
  * Service implementation of the {@link IEmblemService} interface for managing operations on the {@link Emblem}
@@ -33,22 +34,20 @@ public class EmblemService implements IEmblemService {
     private final IExhibitionService exhibitionService;
 
     @Override
-    public Emblem findById(Long exhibitionId) throws RokaMokaContentNotFoundException {
+    public Emblem findById(Long exhibitionId) {
         return this.emblemRepository.findById(exhibitionId).orElseThrow(RokaMokaContentNotFoundException::new);
     }
 
     @Override
     public Optional<Emblem> findByExhibitionId(Long exhibitionId) {
         Optional<Emblem> maybeEmblem = this.emblemRepository.findEmblemByExhibitionId(exhibitionId);
-        maybeEmblem.ifPresentOrElse(
-                emblem -> log.info("[{}] encontrado com sucesso", emblem),
-                () -> log.info("[{}] não foi encontrado", Emblem.class.getSimpleName())
-        );
+        maybeEmblem.ifPresentOrElse(emblem -> log.info("[{}] encontrado com sucesso", emblem),
+                () -> log.info("[{}] não foi encontrado", Emblem.class.getSimpleName()));
         return maybeEmblem;
     }
 
     @Override
-    public Emblem create(EmblemInputDTO emblemInputDTO) throws RokaMokaContentNotFoundException {
+    public Emblem create(EmblemInputDTO emblemInputDTO) {
         log.info("Criando [{}] para o [{}]", Emblem.class.getSimpleName(), emblemInputDTO);
 
         var emblem = new Emblem();
@@ -61,8 +60,8 @@ public class EmblemService implements IEmblemService {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public Emblem delete(@NotNull Long emblemId) throws RokaMokaContentNotFoundException {
+    @Transactional(propagation = REQUIRED)
+    public Emblem delete(@NotNull Long emblemId) {
         Emblem emblem = this.emblemRepository.findById(emblemId).orElseThrow(RokaMokaContentNotFoundException::new);
         this.emblemRepository.delete(emblem);
         return emblem;

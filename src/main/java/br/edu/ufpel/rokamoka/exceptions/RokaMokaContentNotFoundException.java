@@ -8,7 +8,7 @@ package br.edu.ufpel.rokamoka.exceptions;
  *
  * @author mauriciomucci
  */
-public class RokaMokaContentNotFoundException extends Throwable {
+public class RokaMokaContentNotFoundException extends RuntimeException {
 
     public RokaMokaContentNotFoundException(String message) {
         super(message);
@@ -17,5 +17,4 @@ public class RokaMokaContentNotFoundException extends Throwable {
     public RokaMokaContentNotFoundException() {
         super("O conteúdo não foi encontrado");
     }
-
 }

@@ -40,7 +40,7 @@ class LocationService implements ILocationService {
     private final AddressRepository addressRepository;
 
     @Override
-    public LocationOutputDTO getLocation(@NotNull Long id) throws RokaMokaContentNotFoundException {
+    public LocationOutputDTO getLocation(@NotNull Long id) {
         Location location = this.getLocationOrElseThrow(id);
         return toOutput(location);
     }
@@ -61,7 +61,7 @@ class LocationService implements ILocationService {
 
     @Override
     @Transactional(propagation = REQUIRED)
-    public LocationOutputDTO create(@NotNull LocationInputDTO input) throws RokaMokaContentDuplicatedException {
+    public LocationOutputDTO create(@NotNull LocationInputDTO input) {
         if (this.locationRepository.existsByNome(input.nome())) {
             throw new RokaMokaContentDuplicatedException("Localização já existe");
         }
@@ -83,7 +83,7 @@ class LocationService implements ILocationService {
 
     @Override
     @Transactional(propagation = REQUIRED)
-    public LocationOutputDTO update(@NotNull LocationInputDTO input) throws RokaMokaContentNotFoundException {
+    public LocationOutputDTO update(@NotNull LocationInputDTO input) {
         Location location = this.getLocationOrElseThrow(input.id());
         Address address = location.getEndereco();
 
@@ -100,7 +100,7 @@ class LocationService implements ILocationService {
 
     @Override
     @Transactional(propagation = REQUIRED)
-    public LocationOutputDTO delete(@NotNull Long id) throws RokaMokaContentNotFoundException {
+    public LocationOutputDTO delete(@NotNull Long id) {
         Location location = this.getLocationOrElseThrow(id);
         this.locationRepository.delete(location);
         return toOutput(location);
@@ -112,7 +112,7 @@ class LocationService implements ILocationService {
     }
 
     @Override
-    public Location getLocationOrElseThrow(Long id) throws RokaMokaContentNotFoundException {
+    public Location getLocationOrElseThrow(Long id) {
         return this.locationRepository.findById(id)
                 .orElseThrow(() -> new RokaMokaContentNotFoundException("Localização não encontrada: ID=" + id));
     }

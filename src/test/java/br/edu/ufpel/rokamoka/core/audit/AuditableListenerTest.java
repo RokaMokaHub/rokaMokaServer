@@ -2,6 +2,7 @@ package br.edu.ufpel.rokamoka.core.audit;
 
 import br.edu.ufpel.rokamoka.context.ServiceContext;
 import br.edu.ufpel.rokamoka.core.User;
+import br.edu.ufpel.rokamoka.exceptions.RokaMokaNoUserInContextException;
 import br.edu.ufpel.rokamoka.service.MockUserSession;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,8 +12,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 /**
  *
@@ -30,13 +33,15 @@ class AuditableListenerTest implements MockUserSession {
         User user = new User();
         User spyUser = spy(user);
 
-        ServiceContext mockContext = this.mockServiceContext();
+        ServiceContext mockContext = mock(ServiceContext.class);
 
         // Act
         try (MockedStatic<ServiceContext> mockedServiceContext = mockStatic(ServiceContext.class)) {
             mockedServiceContext.when(ServiceContext::getContext).thenReturn(mockContext);
+            when(mockContext.getUsernameOrThrow()).thenReturn(LOGGED_USER_NAME);
 
             this.auditableListener.onCreate(spyUser);
+        } catch (RokaMokaNoUserInContextException ignored) {
         }
 
         // Assert
@@ -47,16 +52,17 @@ class AuditableListenerTest implements MockUserSession {
     }
 
     @Test
-    void onCreate_shouldDefault_whenContextUserIsEmpty() {
+    void onCreate_shouldDefault_whenContextUserIsEmpty() throws RokaMokaNoUserInContextException {
         // Arrange
         User user = new User();
         User spyUser = spy(user);
 
-        ServiceContext mockContext = this.mockBlankServiceContext();
+        ServiceContext mockContext = mock(ServiceContext.class);
 
         // Act
         try (MockedStatic<ServiceContext> mockedServiceContext = mockStatic(ServiceContext.class)) {
             mockedServiceContext.when(ServiceContext::getContext).thenReturn(mockContext);
+            when(mockContext.getUsernameOrThrow()).thenThrow(RokaMokaNoUserInContextException.class);
 
             this.auditableListener.onCreate(spyUser);
         }
@@ -76,13 +82,15 @@ class AuditableListenerTest implements MockUserSession {
         User user = new User();
         User spyUser = spy(user);
 
-        ServiceContext mockContext = this.mockServiceContext();
+        ServiceContext mockContext = mock(ServiceContext.class);
 
         // Act
         try (MockedStatic<ServiceContext> mockedServiceContext = mockStatic(ServiceContext.class)) {
             mockedServiceContext.when(ServiceContext::getContext).thenReturn(mockContext);
+            when(mockContext.getUsernameOrThrow()).thenReturn(LOGGED_USER_NAME);
 
             this.auditableListener.onUpdate(spyUser);
+        } catch (RokaMokaNoUserInContextException ignored) {
         }
 
         // Assert
@@ -91,16 +99,17 @@ class AuditableListenerTest implements MockUserSession {
     }
 
     @Test
-    void onUpdate_shouldDefault_whenContextUserIsEmpty() {
+    void onUpdate_shouldDefault_whenContextUserIsEmpty() throws RokaMokaNoUserInContextException {
         // Arrange
         User user = new User();
         User spyUser = spy(user);
 
-        ServiceContext mockContext = this.mockBlankServiceContext();
+        ServiceContext mockContext = mock(ServiceContext.class);
 
         // Act
         try (MockedStatic<ServiceContext> mockedServiceContext = mockStatic(ServiceContext.class)) {
             mockedServiceContext.when(ServiceContext::getContext).thenReturn(mockContext);
+            when(mockContext.getUsernameOrThrow()).thenThrow(RokaMokaNoUserInContextException.class);
 
             this.auditableListener.onUpdate(spyUser);
         }

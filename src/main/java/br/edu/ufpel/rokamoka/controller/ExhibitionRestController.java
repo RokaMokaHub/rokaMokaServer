@@ -6,7 +6,6 @@ import br.edu.ufpel.rokamoka.dto.GroupValidators.Update;
 import br.edu.ufpel.rokamoka.dto.artwork.input.ArtworkInputDTO;
 import br.edu.ufpel.rokamoka.dto.exhibition.input.ExhibitionInputDTO;
 import br.edu.ufpel.rokamoka.dto.exhibition.output.ExhibitionOutputDTO;
-import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.service.exhibition.IExhibitionService;
 import br.edu.ufpel.rokamoka.wrapper.RokaMokaController;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,12 +26,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Tag(name = "Exposição", description = "API para operações de CRUD em exposições")
 @Validated
+@RequiredArgsConstructor
+@Tag(name = "Exposição", description = "API para operações de CRUD em exposições")
 @RestController
 @RequestMapping("/exhibition")
-@RequiredArgsConstructor
-public class ExhibitionController extends RokaMokaController {
+public class ExhibitionRestController extends RokaMokaController {
 
     private final IExhibitionService exhibitionService;
 
@@ -41,8 +40,7 @@ public class ExhibitionController extends RokaMokaController {
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Exposição encontrada"),
             @ApiResponse(responseCode = "404", description = "Exposição não encontrada")})
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponseWrapper<ExhibitionOutputDTO>> getExhibition(@PathVariable Long id)
-    throws RokaMokaContentNotFoundException {
+    public ResponseEntity<ApiResponseWrapper<ExhibitionOutputDTO>> getExhibition(@PathVariable Long id) {
         ExhibitionOutputDTO exhibition = this.exhibitionService.getExhibitionWithArtworks(id);
         return this.success(exhibition);
     }
@@ -63,35 +61,30 @@ public class ExhibitionController extends RokaMokaController {
             @ApiResponse(responseCode = "500", description = "Erro inesperado ao cadastrar exposição")})
     @PostMapping
     public ResponseEntity<ApiResponseWrapper<ExhibitionOutputDTO>> register(
-            @RequestBody @Validated(value = Create.class) ExhibitionInputDTO dto)
-    throws RokaMokaContentNotFoundException {
+            @RequestBody @Validated(value = Create.class) ExhibitionInputDTO dto) {
         ExhibitionOutputDTO exhibition = this.exhibitionService.create(dto);
         return this.success(exhibition);
     }
 
     @Operation(summary = "Atualizar uma exposição",
             description = "Atualiza o registro de uma exposição a partir dos dados fornecidos.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Exposição atualizada com sucesso"),
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Exposição atualizada com sucesso"),
             @ApiResponse(responseCode = "400", description = "Erro de validação nos dados enviados"),
-            @ApiResponse(responseCode = "500", description = "Erro inesperado ao atualizar exposição")
-    })
+            @ApiResponse(responseCode = "500", description = "Erro inesperado ao atualizar exposição")})
     @PatchMapping
     public ResponseEntity<ApiResponseWrapper<ExhibitionOutputDTO>> patch(
-            @RequestBody @Validated(value = Update.class) ExhibitionInputDTO dto)
-    throws RokaMokaContentNotFoundException {
+            @RequestBody @Validated(value = Update.class) ExhibitionInputDTO dto) {
         ExhibitionOutputDTO exhibition = this.exhibitionService.update(dto);
         return this.success(exhibition);
     }
 
     @Operation(summary = "Adicionar obras a uma exposição",
-            description = """
-                          Adiciona uma lista de novas obras de arte a uma exposição existente, criando-as e \
-                          associando-as à exposição informada.""")
+            description = "Adiciona uma lista de novas obras de arte a uma exposição existente, criando-as e " +
+                          "associando-as à exposição informada.")
     @PostMapping("add/artwork/{id}")
     public ResponseEntity<ApiResponseWrapper<ExhibitionOutputDTO>> addArtworks(
             @PathVariable Long id,
-            @RequestBody List<ArtworkInputDTO> artworks) throws RokaMokaContentNotFoundException {
+            @RequestBody List<ArtworkInputDTO> artworks) {
         ExhibitionOutputDTO exhibition = this.exhibitionService.addArtworks(id, artworks);
         return this.success(exhibition);
     }
@@ -99,8 +92,7 @@ public class ExhibitionController extends RokaMokaController {
     @Operation(summary = "Remover uma exposição",
             description = "Remove o registro de uma exposição com base no ID informado.")
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponseWrapper<ExhibitionOutputDTO>> remove(@PathVariable Long id)
-    throws RokaMokaContentNotFoundException {
+    public ResponseEntity<ApiResponseWrapper<ExhibitionOutputDTO>> remove(@PathVariable Long id) {
         ExhibitionOutputDTO exhibition = this.exhibitionService.delete(id);
         return this.success(exhibition);
     }

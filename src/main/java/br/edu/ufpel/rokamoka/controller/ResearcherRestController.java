@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Pesquisador", description = "API para cadastros de pesquisadores")
 @RestController
 @RequestMapping("/researcher")
-public class ResearcherController extends RokaMokaController {
+public class ResearcherRestController extends RokaMokaController {
 
     private final IUserService userService;
 
@@ -33,14 +33,16 @@ public class ResearcherController extends RokaMokaController {
      * Creates a new user using the provided data.
      *
      * @param userDTO A {@link UserBasicDTO} containing the user's name, email and password.
+     *
      * @return A {@link ResponseEntity} containing the created user's JWT
      * @throws RokaMokaContentDuplicatedException if the email or name are already in use.
      */
     @Operation(summary = "Criação de pesquisador", description = "Cria um pesquisador")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Usuário criado")})
-    @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponseWrapper<UserAuthDTO>> register(@RequestBody @Valid UserBasicDTO userDTO)
-            throws RokaMokaContentDuplicatedException {
+    @PostMapping(value = "/create",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ApiResponseWrapper<UserAuthDTO>> register(@RequestBody @Valid UserBasicDTO userDTO) {
         UserAuthDTO researcher = this.userService.createResearcher(userDTO);
         return this.success(researcher);
     }

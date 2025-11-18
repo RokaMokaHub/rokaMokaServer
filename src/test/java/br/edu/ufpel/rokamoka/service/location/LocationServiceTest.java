@@ -12,11 +12,9 @@ import br.edu.ufpel.rokamoka.repository.AddressRepository;
 import br.edu.ufpel.rokamoka.repository.LocationRepository;
 import br.edu.ufpel.rokamoka.service.MockRepository;
 import org.instancio.Instancio;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -57,20 +55,13 @@ class LocationServiceTest implements MockRepository<Location> {
 
     @Captor private ArgumentCaptor<Location> locationCaptor;
 
-    private Location location;
-    private Address address;
-
-    @BeforeEach
-    void setUp() {
-        this.location = Instancio.create(Location.class);
-        this.address = mock(Address.class);
-    }
-
     //region getLocation
     @Test
-    void getLocation_shouldReturnLocationDTO_whenLocationExistsById() throws RokaMokaContentNotFoundException {
+    void getLocation_shouldReturnLocationDTO_whenLocationExistsById() {
         // Arrange
-        when(this.locationRepository.findById(anyLong())).thenReturn(Optional.of(this.location));
+        Location location = Instancio.create(Location.class);
+
+        when(this.locationRepository.findById(anyLong())).thenReturn(Optional.of(location));
 
         // Act
         LocationOutputDTO actual = this.locationService.getLocation(1L);
@@ -94,13 +85,12 @@ class LocationServiceTest implements MockRepository<Location> {
     //endregion
 
     //region getAllLocationsByAddress
-    static Stream<Arguments> buildLocationList() {
-        return Stream.of(Arguments.of(Collections.emptyList()),
-                Arguments.of(Instancio.ofList(Location.class).create()));
+    static Stream<List<Location>> provideLocationList() {
+        return Stream.of(Collections.emptyList(), Instancio.ofList(Location.class).create());
     }
 
     @ParameterizedTest
-    @MethodSource("buildLocationList")
+    @MethodSource("provideLocationList")
     void getAllLocationsByAddress_shouldReturnLocationOutputDTOList_whenCalled(List<Location> locations) {
         // Arrange
         when(this.locationRepository.findAllByEndereco_Id(anyLong())).thenReturn(locations);
@@ -118,7 +108,7 @@ class LocationServiceTest implements MockRepository<Location> {
 
     //region getAllLocations
     @ParameterizedTest
-    @MethodSource("buildLocationList")
+    @MethodSource("provideLocationList")
     void getAllLocations_shouldReturnLocationOutputDTOList_whenCalled(List<Location> locations) {
         // Arrange
         when(this.locationRepository.findAll()).thenReturn(locations);
@@ -135,13 +125,12 @@ class LocationServiceTest implements MockRepository<Location> {
     //endregion
 
     //region getAllLocations
-    static Stream<Arguments> buildAddressList() {
-        return Stream.of(Arguments.of(Collections.emptyList()),
-                Arguments.of(Instancio.ofList(Address.class).create()));
+    static Stream<List<Address>> provideAddressList() {
+        return Stream.of(Collections.emptyList(), Instancio.ofList(Address.class).create());
     }
 
     @ParameterizedTest
-    @MethodSource("buildAddressList")
+    @MethodSource("provideAddressList")
     void getAllLocations_shouldReturnAddressOutputDTOList_whenCalled(List<Address> addresses) {
         // Arrange
         when(this.addressRepository.findAll()).thenReturn(addresses);
@@ -158,35 +147,35 @@ class LocationServiceTest implements MockRepository<Location> {
     //endregion
 
     //region create
-    static Stream<Arguments> buildCreateInput() {
-        AddressInputDTO endereco =
-                Instancio.of(AddressInputDTO.class).ignore(field(AddressInputDTO::complemento)).create();
-        LocationInputDTO locationWithoutComplemento =
-                Instancio.of(LocationInputDTO.class)
-                        .ignore(field(LocationInputDTO::id))
-                        .set(field(LocationInputDTO::endereco), endereco)
-                        .create();
-
+    static Stream<LocationInputDTO> provideCreateInput() {
+        AddressInputDTO endereco = Instancio.of(AddressInputDTO.class)
+                .ignore(field(AddressInputDTO::complemento))
+                .create();
         LocationInputDTO locationWithComplemento = Instancio.of(LocationInputDTO.class)
                 .ignore(field(LocationInputDTO::id))
                 .create();
-        return Stream.of(Arguments.of(locationWithComplemento), Arguments.of(locationWithoutComplemento));
+        LocationInputDTO locationWithoutComplemento = Instancio.of(LocationInputDTO.class)
+                .ignore(field(LocationInputDTO::id))
+                .set(field(LocationInputDTO::endereco), endereco)
+                .create();
+        return Stream.of(locationWithComplemento, locationWithoutComplemento);
     }
 
     @ParameterizedTest
-    @MethodSource("buildCreateInput")
-    void create_shouldReturnLocationWithOlderAddress_whenAddressAlreadyExists(LocationInputDTO input)
-    throws RokaMokaContentDuplicatedException {
+    @MethodSource("provideCreateInput")
+    void create_shouldReturnLocationWithOlderAddress_whenAddressAlreadyExists(LocationInputDTO input) {
         // Arrange
+        Address address = mock(Address.class);
+
         when(this.locationRepository.existsByNome(anyString())).thenReturn(false);
 
         boolean isComplementoNull = input.endereco().complemento() == null;
         if (isComplementoNull) {
             when(this.addressRepository.findByRuaAndNumeroAndCep(anyString(), anyString(), anyString())).thenReturn(
-                    Optional.ofNullable(this.address));
+                    Optional.ofNullable(address));
         } else {
             when(this.addressRepository.findByRuaAndNumeroAndCepAndComplemento(anyString(), anyString(), anyString(),
-                    anyString())).thenReturn(Optional.ofNullable(this.address));
+                    anyString())).thenReturn(Optional.ofNullable(address));
         }
 
         when(this.locationRepository.save(any(Location.class))).thenAnswer(
@@ -197,7 +186,7 @@ class LocationServiceTest implements MockRepository<Location> {
 
         // Assert
         verify(this.locationRepository).existsByNome(anyString());
-        if (isComplementoNull){
+        if (isComplementoNull) {
             verify(this.addressRepository).findByRuaAndNumeroAndCep(anyString(), anyString(), anyString());
         } else {
             verify(this.addressRepository).findByRuaAndNumeroAndCepAndComplemento(anyString(), anyString(), anyString(),
@@ -208,11 +197,11 @@ class LocationServiceTest implements MockRepository<Location> {
         Location newLocation = this.locationCaptor.getValue();
         assertNotNull(actual);
         assertEquals(input.nome(), newLocation.getNome());
-        assertEquals(this.address, newLocation.getEndereco());
+        assertEquals(address, newLocation.getEndereco());
     }
 
     @ParameterizedTest
-    @MethodSource("buildCreateInput")
+    @MethodSource("provideCreateInput")
     void create_shouldThrowRokaMokaContentDuplicatedException_whenLocationExistsByName(LocationInputDTO input) {
         // Arrange
         when(this.locationRepository.existsByNome(anyString())).thenReturn(true);
@@ -226,17 +215,21 @@ class LocationServiceTest implements MockRepository<Location> {
     //endregion
 
     //region update
-    static Stream<Arguments> buildUpdateInput() {
-        LocationInputDTO location =
-                Instancio.of(LocationInputDTO.class).ignore(field(LocationInputDTO::endereco)).create();
-        return Stream.of(Arguments.of(Instancio.create(LocationInputDTO.class)), Arguments.of(location));
+    static Stream<LocationInputDTO> provideUpdateInput() {
+        LocationInputDTO locationIgnoreEndereco = Instancio.of(LocationInputDTO.class)
+                .ignore(field(LocationInputDTO::endereco))
+                .create();
+        LocationInputDTO location = Instancio.create(LocationInputDTO.class);
+        return Stream.of(location, locationIgnoreEndereco);
     }
 
     @ParameterizedTest
-    @MethodSource("buildUpdateInput")
-    void update_shouldReturnLocationOutputDTO_whenSuccessful(LocationInputDTO input) throws RokaMokaContentNotFoundException {
+    @MethodSource("provideUpdateInput")
+    void update_shouldReturnLocationOutputDTO_whenSuccessful(LocationInputDTO input) {
         // Arrange
-        when(this.locationRepository.findById(input.id())).thenReturn(Optional.of(this.location));
+        Location location = Instancio.create(Location.class);
+
+        when(this.locationRepository.findById(input.id())).thenReturn(Optional.of(location));
         when(this.locationRepository.save(any(Location.class))).thenAnswer(
                 inv -> this.mockRepositorySave(inv.getArgument(0)));
 
@@ -262,7 +255,7 @@ class LocationServiceTest implements MockRepository<Location> {
     }
 
     @ParameterizedTest
-    @MethodSource("buildUpdateInput")
+    @MethodSource("provideUpdateInput")
     void update_shouldThrowRokaMokaContentNotFoundException_whenLocationDoesNotExistById(LocationInputDTO input) {
         // Arrange
         when(this.locationRepository.findById(input.id())).thenReturn(Optional.empty());
@@ -277,9 +270,11 @@ class LocationServiceTest implements MockRepository<Location> {
 
     //region delete
     @Test
-    void delete_shouldReturnLocationOutputDTO_whenSuccessful() throws RokaMokaContentNotFoundException {
+    void delete_shouldReturnLocationOutputDTO_whenSuccessful() {
         // Arrange
-        when(this.locationRepository.findById(anyLong())).thenReturn(Optional.of(this.location));
+        Location location = Instancio.create(Location.class);
+
+        when(this.locationRepository.findById(anyLong())).thenReturn(Optional.of(location));
 
         // Act
         LocationOutputDTO actual = this.locationService.delete(1L);

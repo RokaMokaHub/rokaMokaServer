@@ -3,8 +3,6 @@ package br.edu.ufpel.rokamoka.controller;
 import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
 import br.edu.ufpel.rokamoka.core.RoleEnum;
 import br.edu.ufpel.rokamoka.dto.permission.output.PermissionRequestStatusDTO;
-import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
-import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.service.IRequestPermissionService;
 import br.edu.ufpel.rokamoka.wrapper.RokaMokaController;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,31 +25,31 @@ import java.util.List;
         description = "API para o usuário solicitar diferentes níveis de acesso (e.g., Curador ou Pesquisador)")
 @RestController
 @RequestMapping("/request/permission")
-public class RequestPermissionController extends RokaMokaController {
+public class RequestPermissionRestController extends RokaMokaController {
 
     private final IRequestPermissionService requestPermissionService;
 
     @Operation(summary = "Solicitar acesso como curador")
     @PostMapping(value = "/curator", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseWrapper<PermissionRequestStatusDTO>> createPermissionRequestCurator(
-            Authentication authentication) throws RokaMokaContentNotFoundException, RokaMokaContentDuplicatedException {
-        PermissionRequestStatusDTO request =
-                this.requestPermissionService.createRequest(authentication.getName(), RoleEnum.CURATOR);
+            Authentication authentication) {
+        PermissionRequestStatusDTO request = this.requestPermissionService.createRequest(authentication.getName(),
+                RoleEnum.CURATOR);
         return this.success(request);
     }
 
     @Operation(summary = "Solicitar acesso como Pesquisador")
     @PostMapping(value = "/researcher", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseWrapper<PermissionRequestStatusDTO>> createPermissionRequestResearcher(
-            Authentication authentication) throws RokaMokaContentNotFoundException, RokaMokaContentDuplicatedException {
-        PermissionRequestStatusDTO request =
-                this.requestPermissionService.createRequest(authentication.getName(), RoleEnum.RESEARCHER);
+            Authentication authentication) {
+        PermissionRequestStatusDTO request = this.requestPermissionService.createRequest(authentication.getName(),
+                RoleEnum.RESEARCHER);
         return this.success(request);
     }
 
     @Operation(summary = "Adquirir solicitações do usuário logado")
     @GetMapping(value = "/me/status", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponseWrapper<List<PermissionRequestStatusDTO>>> listAllPermissionRequestStatusByLoggedUser() throws RokaMokaContentNotFoundException {
+    public ResponseEntity<ApiResponseWrapper<List<PermissionRequestStatusDTO>>> listAllPermissionRequestStatusByLoggedUser() {
         List<PermissionRequestStatusDTO> requests = this.requestPermissionService.getAllPermissionRequestStatusByLoggedUser();
         return this.success(requests);
     }

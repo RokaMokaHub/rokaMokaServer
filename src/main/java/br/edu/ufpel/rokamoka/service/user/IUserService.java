@@ -8,9 +8,6 @@ import br.edu.ufpel.rokamoka.dto.user.input.UserResetPasswordDTO;
 import br.edu.ufpel.rokamoka.dto.user.output.UserAnonymousResponseDTO;
 import br.edu.ufpel.rokamoka.dto.user.output.UserAuthDTO;
 import br.edu.ufpel.rokamoka.dto.user.output.UserOutputDTO;
-import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
-import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
-import br.edu.ufpel.rokamoka.exceptions.RokaMokaForbiddenException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.validation.annotation.Validated;
@@ -24,21 +21,19 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public interface IUserService {
 
-    UserAuthDTO createNormalUser(@Valid UserBasicDTO userDTO) throws RokaMokaContentDuplicatedException;
+    UserAuthDTO createNormalUser(@Valid UserBasicDTO userDTO);
 
-    UserAnonymousResponseDTO createAnonymousUser(@Valid UserAnonymousRequestDTO userDTO)
-    throws RokaMokaContentDuplicatedException;
+    UserAnonymousResponseDTO createAnonymousUser(@Valid UserAnonymousRequestDTO userDTO);
 
-    void resetUserPassword(@Valid UserResetPasswordDTO userDTO)
-    throws RokaMokaContentNotFoundException, RokaMokaForbiddenException;
+    void resetUserPassword(@Valid UserResetPasswordDTO userDTO);
 
-    UserAuthDTO createResearcher(@Valid UserBasicDTO userDTO) throws RokaMokaContentDuplicatedException;
+    UserAuthDTO createResearcher(@Valid UserBasicDTO userDTO);
 
     void updateRole(@NotNull User requester, Role role);
 
-    UserOutputDTO getLoggedUserInformation() throws RokaMokaContentNotFoundException;
+    UserOutputDTO getLoggedUserInformation();
 
-    User getByNome(@NotNull String nome) throws RokaMokaContentNotFoundException;
+    User getByNome(@NotNull String nome);
 
-    User getLoggedUser() throws RokaMokaContentNotFoundException;
+    User getLoggedUserOrElseThrow();
 }

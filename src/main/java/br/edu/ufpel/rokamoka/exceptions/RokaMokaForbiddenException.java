@@ -8,7 +8,7 @@ package br.edu.ufpel.rokamoka.exceptions;
  *
  * @author mauriciomucci
  */
-public class RokaMokaForbiddenException extends Throwable {
+public class RokaMokaForbiddenException extends RuntimeException {
 
     public RokaMokaForbiddenException(String message) {
         super(message);

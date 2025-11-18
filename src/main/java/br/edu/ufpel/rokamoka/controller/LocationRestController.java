@@ -6,8 +6,6 @@ import br.edu.ufpel.rokamoka.dto.GroupValidators.Update;
 import br.edu.ufpel.rokamoka.dto.location.input.LocationInputDTO;
 import br.edu.ufpel.rokamoka.dto.location.output.AddressOutputDTO;
 import br.edu.ufpel.rokamoka.dto.location.output.LocationOutputDTO;
-import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
-import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.service.location.ILocationService;
 import br.edu.ufpel.rokamoka.wrapper.RokaMokaController;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,12 +34,12 @@ import java.util.List;
  * @see RokaMokaController
  * @see ILocationService
  */
-@Tag(name = "Local", description = "API para gerenciamento de locais e seus endereços")
 @Validated
+@RequiredArgsConstructor
+@Tag(name = "Local", description = "API para gerenciamento de locais e seus endereços")
 @RestController
 @RequestMapping("/location")
-@RequiredArgsConstructor
-class LocationController extends RokaMokaController {
+class LocationRestController extends RokaMokaController {
 
     private final ILocationService locationService;
 
@@ -49,8 +47,7 @@ class LocationController extends RokaMokaController {
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Local encontrado"),
             @ApiResponse(responseCode = "404", description = "Local não encontrado")})
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponseWrapper<LocationOutputDTO>> getLocation(@PathVariable @NotNull Long id)
-    throws RokaMokaContentNotFoundException {
+    public ResponseEntity<ApiResponseWrapper<LocationOutputDTO>> getLocation(@PathVariable @NotNull Long id) {
         LocationOutputDTO location = this.locationService.getLocation(id);
         return this.success(location);
     }
@@ -89,8 +86,7 @@ class LocationController extends RokaMokaController {
             @ApiResponse(responseCode = "500", description = "Erro inesperado ao cadastrar local")})
     @PostMapping
     public ResponseEntity<ApiResponseWrapper<LocationOutputDTO>> register(
-            @RequestBody @Validated(value = Create.class) @NotNull LocationInputDTO input)
-    throws RokaMokaContentDuplicatedException {
+            @RequestBody @Validated(value = Create.class) @NotNull LocationInputDTO input) {
         LocationOutputDTO location = this.locationService.create(input);
         return this.success(location);
     }
@@ -102,8 +98,7 @@ class LocationController extends RokaMokaController {
             @ApiResponse(responseCode = "500", description = "Erro inesperado ao atualizar local")})
     @PatchMapping
     public ResponseEntity<ApiResponseWrapper<LocationOutputDTO>> patch(
-            @RequestBody @Validated(value = Update.class) @NotNull LocationInputDTO input)
-    throws RokaMokaContentNotFoundException {
+            @RequestBody @Validated(value = Update.class) @NotNull LocationInputDTO input) {
         LocationOutputDTO location = this.locationService.update(input);
         return this.success(location);
     }
@@ -113,8 +108,7 @@ class LocationController extends RokaMokaController {
             @ApiResponse(responseCode = "404", description = "Local não encontrado"),
             @ApiResponse(responseCode = "500", description = "Erro inesperado ao remover local")})
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponseWrapper<LocationOutputDTO>> remove(@PathVariable @NotNull Long id)
-    throws RokaMokaContentNotFoundException {
+    public ResponseEntity<ApiResponseWrapper<LocationOutputDTO>> remove(@PathVariable @NotNull Long id) {
         LocationOutputDTO location = this.locationService.delete(id);
         return this.success(location);
     }

@@ -6,8 +6,6 @@ import br.edu.ufpel.rokamoka.dto.GroupValidators.Create;
 import br.edu.ufpel.rokamoka.dto.GroupValidators.Update;
 import br.edu.ufpel.rokamoka.dto.artwork.input.ArtworkInputDTO;
 import br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO;
-import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
-import br.edu.ufpel.rokamoka.exceptions.RokaMokaForbiddenException;
 import br.edu.ufpel.rokamoka.repository.ArtworkRepository;
 import br.edu.ufpel.rokamoka.service.artwork.IArtworkService;
 import br.edu.ufpel.rokamoka.wrapper.RokaMokaController;
@@ -33,11 +31,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+@Validated
+@RequiredArgsConstructor
 @Tag(name = "Obra", description = "API para operações de CRUD em obras")
 @RestController
 @RequestMapping("/artwork")
-@RequiredArgsConstructor
-public class ArtworkController extends RokaMokaController {
+public class ArtworkRestController extends RokaMokaController {
 
     private final IArtworkService artworkService;
     private final ArtworkRepository artworkRepository;
@@ -47,8 +46,7 @@ public class ArtworkController extends RokaMokaController {
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Obra encontrada"),
             @ApiResponse(responseCode = "404", description = "Obra não encontrada")})
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> findById(@PathVariable Long id)
-    throws RokaMokaContentNotFoundException {
+    public ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> findById(@PathVariable Long id) {
         Artwork artwork = this.artworkService.getArtworkOrElseThrow(id);
         ArtworkOutputDTO dto = this.artworkRepository.createFullArtworkInfo(artwork.getId());
         return this.success(dto);
@@ -58,7 +56,8 @@ public class ArtworkController extends RokaMokaController {
             description = "Retorna todas as obras de uma determinada exposição.")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Obras encontradas")})
     @GetMapping("/exposicao/{exhibitionId}")
-    public ResponseEntity<ApiResponseWrapper<List<ArtworkOutputDTO>>> getAllByExhibitionId(@PathVariable Long exhibitionId) {
+    public ResponseEntity<ApiResponseWrapper<List<ArtworkOutputDTO>>> getAllByExhibitionId(
+            @PathVariable Long exhibitionId) {
         List<Artwork> artworks = this.artworkService.getAllArtworkByExhibitionId(exhibitionId);
         return this.success(artworks.stream().map(ArtworkOutputDTO::new).toList());
     }
@@ -68,16 +67,18 @@ public class ArtworkController extends RokaMokaController {
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Obra encontrada"),
             @ApiResponse(responseCode = "404", description = "Obra não encontrada")})
     @GetMapping("/qrcode/{qrcode}")
-    public ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> getArtworkByQrCode(@PathVariable String qrcode)
-    throws RokaMokaContentNotFoundException {
+    public ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> getArtworkByQrCode(@PathVariable String qrcode) {
         Artwork artwork = this.artworkService.getByQrCodeOrThrow(qrcode);
         ArtworkOutputDTO dto = this.artworkRepository.createFullArtworkInfo(artwork.getId());
         return this.success(dto);
     }
 
-    @Operation(summary = "Upload de uma image em uma obra", description = "Faz upload de uma image, caso já exista estoura um erro")
+    @Operation(summary = "Upload de uma image em uma obra",
+            description = "Faz upload de uma image, caso já exista estoura um erro")
     @PostMapping(value = "/upload/{artworkId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ApiResponseWrapper<Void>> uploadImage(@PathVariable Long artworkId, @RequestParam("image") MultipartFile image) throws BadRequestException, RokaMokaForbiddenException, RokaMokaContentNotFoundException {
+    public ResponseEntity<ApiResponseWrapper<Void>> uploadImage(
+            @PathVariable Long artworkId,
+            @RequestParam("image") MultipartFile image) throws BadRequestException {
         if (image == null || image.isEmpty()) {
             throw new BadRequestException("É necessário enviar uma imagem");
         }
@@ -87,39 +88,35 @@ public class ArtworkController extends RokaMokaController {
 
     @Operation(summary = "Cadastrar uma nova obra",
             description = "Cria o registro de uma nova obra a partir dos dados fornecidos.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Obra cadastrada com sucesso"),
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Obra cadastrada com sucesso"),
             @ApiResponse(responseCode = "400", description = "Erro de validação nos dados enviados"),
             @ApiResponse(responseCode = "404", description = "Exposição não encontrada"),
-            @ApiResponse(responseCode = "500", description = "Erro inesperado ao cadastrar obra")
-    })
-    @PostMapping(path = "/{exhibitionId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+            @ApiResponse(responseCode = "500", description = "Erro inesperado ao cadastrar obra")})
+    @PostMapping(path = "/{exhibitionId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> register(
             @PathVariable Long exhibitionId,
-            @ModelAttribute @Validated(value = Create.class) ArtworkInputDTO artworkDTO) throws RokaMokaContentNotFoundException {
+            @ModelAttribute @Validated(value = Create.class) ArtworkInputDTO artworkDTO) {
         Artwork artwork = this.artworkService.create(exhibitionId, artworkDTO);
         return this.success(new ArtworkOutputDTO(artwork));
     }
 
     @Operation(summary = "Atualizar uma obra",
             description = "Atualiza o registro de uma obra a partir dos dados fornecidos.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Obra atualizada com sucesso"),
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Obra atualizada com sucesso"),
             @ApiResponse(responseCode = "400", description = "Erro de validação nos dados enviados"),
             @ApiResponse(responseCode = "404", description = "Obra não encontrada"),
-            @ApiResponse(responseCode = "500", description = "Erro inesperado ao atualizar obra")
-    })
+            @ApiResponse(responseCode = "500", description = "Erro inesperado ao atualizar obra")})
     @PatchMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> patch(
-            @ModelAttribute @Validated(value = Update.class) ArtworkInputDTO input) throws RokaMokaContentNotFoundException {
+            @ModelAttribute @Validated(value = Update.class) ArtworkInputDTO input) {
         ArtworkOutputDTO artwork = this.artworkService.update(input);
         return this.success(artwork);
     }
 
     @Operation(summary = "Remover uma obra", description = "Remove o registro de uma obra com base no ID informado.")
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> remove(@PathVariable Long id)
-    throws RokaMokaContentNotFoundException {
+    public ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> remove(@PathVariable Long id) {
         ArtworkOutputDTO artwork = this.artworkService.delete(id);
         return this.success(artwork);
     }
