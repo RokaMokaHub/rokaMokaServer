@@ -29,7 +29,7 @@ import java.lang.annotation.Target;
  * @see Target
  */
 @NotNull(message = "Nome de familia não pode ser nulo")
-@Pattern(regexp = "^[A-Z][a-zA-Z]*$",
+@Pattern(regexp = "^\\p{Lu}\\p{L}*$",
         message = "Nome de família inválido - deve começar com letra maiúscula e conter apenas letras.")
 @Constraint(validatedBy = {})
 @Retention(RetentionPolicy.RUNTIME)
