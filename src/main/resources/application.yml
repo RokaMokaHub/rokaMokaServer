@@ -65,3 +65,9 @@ broker:
     emblems: emblems.v1
   queue:
     collect-emblem: emblems.v1.collect
+
+springdoc:
+  swagger-ui:
+    tags-sorter: alpha
+    operations-sorter: method
+  writer-with-order-by-keys: true
