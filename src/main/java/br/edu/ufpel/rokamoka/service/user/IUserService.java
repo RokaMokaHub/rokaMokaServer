@@ -2,6 +2,7 @@ package br.edu.ufpel.rokamoka.service.user;
 
 import br.edu.ufpel.rokamoka.core.Role;
 import br.edu.ufpel.rokamoka.core.User;
+import br.edu.ufpel.rokamoka.dto.authentication.input.AuthForgotPasswordDTO;
 import br.edu.ufpel.rokamoka.dto.authentication.input.AuthResetPasswordDTO;
 import br.edu.ufpel.rokamoka.dto.authentication.output.AuthOutputDTO;
 import br.edu.ufpel.rokamoka.dto.user.input.UserAnonymousRequestDTO;
@@ -25,9 +26,11 @@ public interface IUserService {
 
     UserAnonymousResponseDTO createAnonymousUser(@Valid UserAnonymousRequestDTO userDTO);
 
+    AuthOutputDTO createResearcher(@Valid UserInputDTO userDTO);
+
     void resetUserPassword(@Valid AuthResetPasswordDTO userDTO);
 
-    AuthOutputDTO createResearcher(@Valid UserInputDTO userDTO);
+    void forgotUserPassword(@Valid AuthForgotPasswordDTO forgotPasswordDTO);
 
     void updateRole(@NotNull User requester, Role role);
 

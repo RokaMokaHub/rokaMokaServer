@@ -1,6 +1,7 @@
 package br.edu.ufpel.rokamoka.controller;
 
 import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
+import br.edu.ufpel.rokamoka.dto.authentication.input.AuthForgotPasswordDTO;
 import br.edu.ufpel.rokamoka.dto.authentication.input.AuthResetPasswordDTO;
 import br.edu.ufpel.rokamoka.dto.authentication.output.AuthOutputDTO;
 import br.edu.ufpel.rokamoka.security.AuthenticationService;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author MauricioMucci
  * @see RokaMokaController
  * @see AuthenticationService
+ * @see IUserService
  */
 @Validated
 @Tag(name = "Autenticação", description = "API para operações de autenticação")
@@ -57,9 +59,9 @@ class AuthenticationRestController extends RokaMokaController {
     }
 
     /**
-     * Resets the password of a user using the provided credentials.
+     * Updated the password of a user using the provided credentials.
      *
-     * @param userDTO A {@code AuthResetPasswordDTO} containing the user's credentials.
+     * @param resetPasswordDTO A {@code AuthResetPasswordDTO} containing the user's credentials.
      *
      * @return A {@code ResponseEntity} wrapping an {@code ApiResponseWrapper<Void>} indicating success or failure.
      * @see AuthResetPasswordDTO
@@ -68,8 +70,25 @@ class AuthenticationRestController extends RokaMokaController {
             description = "Permite que um usuário redefina sua senha fornecendo suas credenciais")
     @PostMapping(value = "/reset-password", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponseWrapper<Void>> resetPassword(@RequestBody @Valid AuthResetPasswordDTO userDTO) {
-        this.userService.resetUserPassword(userDTO);
+    public ResponseEntity<ApiResponseWrapper<Void>> resetPassword(@RequestBody @Valid AuthResetPasswordDTO resetPasswordDTO) {
+        this.userService.resetUserPassword(resetPasswordDTO);
+        return this.success();
+    }
+
+    /**
+     * Resets the password of a user using the provided credentials.
+     *
+     * @param forgotPasswordDTO A {@code AuthForgotPasswordDTO} containing the user's credentials.
+     *
+     * @return A {@code ResponseEntity} wrapping an {@code ApiResponseWrapper<Void>} indicating success or failure.
+     * @see AuthForgotPasswordDTO
+     */
+    @Operation(summary = "Redefinição de senha do usuário",
+            description = "Permite que um usuário redefina sua senha fornecendo suas credenciais")
+    @PostMapping(value = "/forgot-password", consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ApiResponseWrapper<Void>> forgotPassword(@RequestBody @Valid AuthForgotPasswordDTO forgotPasswordDTO) {
+        this.userService.forgotUserPassword(forgotPasswordDTO);
         return this.success();
     }
 }
