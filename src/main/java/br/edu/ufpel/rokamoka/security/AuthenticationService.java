@@ -26,7 +26,7 @@ public class AuthenticationService {
      * @return A {@link String} containing the JWT.
      */
     public String authenticate(Authentication authentication) {
-        return jwtService.generateToken(authentication);
+        return this.jwtService.generateToken(authentication);
     }
 
     /**
