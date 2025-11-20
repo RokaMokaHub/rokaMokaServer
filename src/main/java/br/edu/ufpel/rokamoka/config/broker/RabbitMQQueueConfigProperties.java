@@ -1,15 +1,18 @@
 package br.edu.ufpel.rokamoka.config.broker;
 
 import lombok.Getter;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * @author MauricioMucci
  */
 @Getter
-@Component
+@Setter
+@Configuration
+@ConfigurationProperties(prefix = "broker.queue")
 public class RabbitMQQueueConfigProperties {
 
-    @Value("${broker.queue.collect-emblem}") private String collectEmblem;
+    private String collectEmblem;
 }

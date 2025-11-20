@@ -35,9 +35,9 @@ public class CollectEmblemConsumer {
     public void consumeCollectEmblem(CollectEmblemDTO collectEmblemDTO) {
         log.info("Listener coletar emblema acionado para [{}]", collectEmblemDTO);
 
-        emblemService
+        this.emblemService
                 .findByExhibitionId(collectEmblemDTO.exhibitionId())
-                .ifPresent(emblem -> tryToCollectEmblem(collectEmblemDTO.mokadexId(), emblem));
+                .ifPresent(emblem -> this.tryToCollectEmblem(collectEmblemDTO.mokadexId(), emblem));
 
         log.info("Listener coletar emblema finalizado para [{}]", collectEmblemDTO);
     }
