@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
@@ -14,6 +15,7 @@ import java.util.TimeZone;
 
 @Slf4j
 @SpringBootApplication
+@ConfigurationPropertiesScan("br.edu.ufpel.rokamoka.config")
 public class RokaMokaApplication implements ApplicationContextAware, ApplicationListener<ContextClosedEvent> {
 
     private static final String TIMEZONE = "America/Sao_Paulo";

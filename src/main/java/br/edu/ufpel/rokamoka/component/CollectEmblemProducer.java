@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 public class CollectEmblemProducer {
 
     private final RabbitTemplate rabbitTemplate;
-    private final RabbitMQExchangeConfigProperties exchangeConfigProperties;
+    private final RabbitMQExchangeConfigProperties rabbitMQExchangeConfigProperties;
 
     /**
      * Publishes an emblem collection event to a RabbitMQ exchange.
@@ -29,7 +29,7 @@ public class CollectEmblemProducer {
     public void publishCollectEmblem(Mokadex mokadex, Exhibition exhibition) {
         CollectEmblemDTO collectEmblemDTO = new CollectEmblemDTO(mokadex.getId(), exhibition.getId());
         this.rabbitTemplate.convertAndSend(
-                this.exchangeConfigProperties.getEmblems(),
+                this.rabbitMQExchangeConfigProperties.getEmblems(),
                 "",
                 collectEmblemDTO
         );
