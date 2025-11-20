@@ -1,11 +1,11 @@
 package br.edu.ufpel.rokamoka.controller;
 
 import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
+import br.edu.ufpel.rokamoka.dto.authentication.input.AuthResetPasswordDTO;
+import br.edu.ufpel.rokamoka.dto.authentication.output.AuthOutputDTO;
 import br.edu.ufpel.rokamoka.dto.user.input.UserAnonymousRequestDTO;
-import br.edu.ufpel.rokamoka.dto.user.input.UserBasicDTO;
-import br.edu.ufpel.rokamoka.dto.user.input.UserResetPasswordDTO;
+import br.edu.ufpel.rokamoka.dto.user.input.UserInputDTO;
 import br.edu.ufpel.rokamoka.dto.user.output.UserAnonymousResponseDTO;
-import br.edu.ufpel.rokamoka.dto.user.output.UserAuthDTO;
 import br.edu.ufpel.rokamoka.dto.user.output.UserOutputDTO;
 import br.edu.ufpel.rokamoka.security.AuthenticationService;
 import br.edu.ufpel.rokamoka.service.user.IUserService;
@@ -45,7 +45,7 @@ public class UserRestController extends RokaMokaController {
     /**
      * Creates a new user using the provided data.
      *
-     * @param userDTO A {@link UserBasicDTO} containing the user's name, email and password.
+     * @param userDTO A {@link UserInputDTO} containing the user's name, email and password.
      *
      * @return A {@link ResponseEntity} containing the created user's JWT
      */
@@ -54,8 +54,8 @@ public class UserRestController extends RokaMokaController {
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Usuário criado")})
     @PostMapping(value = "/normal/create", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponseWrapper<UserAuthDTO>> register(@RequestBody @Valid UserBasicDTO userDTO) {
-        UserAuthDTO normalUser = this.userService.createNormalUser(userDTO);
+    public ResponseEntity<ApiResponseWrapper<AuthOutputDTO>> register(@RequestBody @Valid UserInputDTO userDTO) {
+        AuthOutputDTO normalUser = this.userService.createNormalUser(userDTO);
         return this.success(normalUser);
     }
 
@@ -80,9 +80,9 @@ public class UserRestController extends RokaMokaController {
             description = "Login de um determinado usuário")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Login de usuário")})
     @GetMapping(value = "/login", consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponseWrapper<UserAuthDTO>> login(Authentication authentication) {
+    public ResponseEntity<ApiResponseWrapper<AuthOutputDTO>> login(Authentication authentication) {
         String jwt = this.authenticationService.authenticate(authentication);
-        return this.success(new UserAuthDTO(jwt));
+        return this.success(new AuthOutputDTO(jwt));
     }
 
     @GetMapping(value = "/teste-acao", consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -93,7 +93,7 @@ public class UserRestController extends RokaMokaController {
     /**
      * Resets the password of a user using the provided credentials.
      *
-     * @param userDTO A {@link UserResetPasswordDTO} containing the user's credentials.
+     * @param userDTO A {@link AuthResetPasswordDTO} containing the user's credentials.
      *
      * @return A {@link ResponseEntity} wrapping an {@code ApiResponseWrapper<Void>} indicating this.success or failure.
      */
@@ -101,7 +101,7 @@ public class UserRestController extends RokaMokaController {
             description = "Permite que um usuário redefina sua senha fornecendo suas credenciais")
     @PostMapping(value = "/reset-password", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponseWrapper<Void>> resetPassword(@RequestBody @Valid UserResetPasswordDTO userDTO) {
+    public ResponseEntity<ApiResponseWrapper<Void>> resetPassword(@RequestBody @Valid AuthResetPasswordDTO userDTO) {
         this.userService.resetUserPassword(userDTO);
         return this.success();
     }

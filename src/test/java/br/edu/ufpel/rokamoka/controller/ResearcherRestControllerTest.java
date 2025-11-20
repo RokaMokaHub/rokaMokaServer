@@ -1,8 +1,8 @@
 package br.edu.ufpel.rokamoka.controller;
 
 import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
-import br.edu.ufpel.rokamoka.dto.user.input.UserBasicDTO;
-import br.edu.ufpel.rokamoka.dto.user.output.UserAuthDTO;
+import br.edu.ufpel.rokamoka.dto.authentication.output.AuthOutputDTO;
+import br.edu.ufpel.rokamoka.dto.user.input.UserInputDTO;
 import br.edu.ufpel.rokamoka.service.user.UserService;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.Test;
@@ -37,18 +37,18 @@ class ResearcherRestControllerTest implements ControllerResponseValidator {
     @Test
     void register_shouldReturnTokenGeneratedForNewUser_whenSuccessful() {
         // Arrange
-        UserAuthDTO expectedOutput = Instancio.create(UserAuthDTO.class);
+        AuthOutputDTO expectedOutput = Instancio.create(AuthOutputDTO.class);
 
-        when(this.userService.createResearcher(any(UserBasicDTO.class))).thenReturn(expectedOutput);
+        when(this.userService.createResearcher(any(UserInputDTO.class))).thenReturn(expectedOutput);
 
         // Act
-        ResponseEntity<ApiResponseWrapper<UserAuthDTO>> response = this.researcherController.register(
-                mock(UserBasicDTO.class));
+        ResponseEntity<ApiResponseWrapper<AuthOutputDTO>> response = this.researcherController.register(
+                mock(UserInputDTO.class));
 
         // Assert
         this.assertExpectedResponse(response, expectedOutput);
 
-        verify(this.userService, times(1)).createResearcher(any(UserBasicDTO.class));
+        verify(this.userService, times(1)).createResearcher(any(UserInputDTO.class));
     }
     //endregion
 }

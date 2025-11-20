@@ -6,12 +6,12 @@ import br.edu.ufpel.rokamoka.core.Mokadex;
 import br.edu.ufpel.rokamoka.core.Role;
 import br.edu.ufpel.rokamoka.core.RoleEnum;
 import br.edu.ufpel.rokamoka.core.User;
+import br.edu.ufpel.rokamoka.dto.authentication.input.AuthResetPasswordDTO;
+import br.edu.ufpel.rokamoka.dto.authentication.output.AuthOutputDTO;
 import br.edu.ufpel.rokamoka.dto.mokadex.output.MokadexOutputDTO;
 import br.edu.ufpel.rokamoka.dto.user.input.UserAnonymousRequestDTO;
-import br.edu.ufpel.rokamoka.dto.user.input.UserBasicDTO;
-import br.edu.ufpel.rokamoka.dto.user.input.UserResetPasswordDTO;
+import br.edu.ufpel.rokamoka.dto.user.input.UserInputDTO;
 import br.edu.ufpel.rokamoka.dto.user.output.UserAnonymousResponseDTO;
-import br.edu.ufpel.rokamoka.dto.user.output.UserAuthDTO;
 import br.edu.ufpel.rokamoka.dto.user.output.UserOutputDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
@@ -60,11 +60,11 @@ public class UserService implements IUserService {
      *
      * @param userDTO A {@code userDTO} containing the user's name, email, and password.
      *
-     * @return A {@link UserAuthDTO} containing the generated JWT.
+     * @return A {@link AuthOutputDTO} containing the generated JWT.
      * @throws RokaMokaContentDuplicatedException if the user's email or name already exists.
      */
     @Override
-    public UserAuthDTO createNormalUser(@Valid UserBasicDTO userDTO) {
+    public AuthOutputDTO createNormalUser(@Valid UserInputDTO userDTO) {
         var undecodedPasswd = userDTO.password();
         var user = User.builder()
                 .nome(userDTO.name())
@@ -81,7 +81,7 @@ public class UserService implements IUserService {
 
         String userJWT = this.authenticationService.basicAuthenticationAndGenerateJWT(newUser.getNome(),
                 undecodedPasswd);
-        return new UserAuthDTO(userJWT);
+        return new AuthOutputDTO(userJWT);
     }
 
     private User save(User user) {
@@ -122,23 +122,23 @@ public class UserService implements IUserService {
     /**
      * Resets the password for a specific user.
      *
-     * <p>This method validates that the user identified by the provided {@link UserBasicDTO} exists in the system. It
+     * <p>This method validates that the user identified by the provided {@link UserInputDTO} exists in the system. It
      * ensures that the currently authenticated user matches the user whose password is being reset, enforcing a
      * self-service password reset policy.
      *
-     * @param userDTO A {@link UserBasicDTO} containing the user's credentials.
+     * @param userDTO A {@link UserInputDTO} containing the user's credentials.
      *
      * @throws RokaMokaContentNotFoundException if the user specified in the request is not found.
      * @throws RokaMokaForbiddenException if the user does not have permission to perform this action.
      */
     @Override
-    public void resetUserPassword(@Valid UserResetPasswordDTO userDTO) {
+    public void resetUserPassword(@Valid AuthResetPasswordDTO userDTO) {
         User user = this.getResetPasswordUser(userDTO);
         user.setSenha(this.passwordEncoder.encode(userDTO.newPassword()));
         this.userRepository.save(user);
     }
 
-    private User getResetPasswordUser(UserResetPasswordDTO userDTO) {
+    private User getResetPasswordUser(AuthResetPasswordDTO userDTO) {
         if (!this.userRepository.existsByNomeAndEmail(userDTO.name(), userDTO.email())) {
             throw new RokaMokaContentNotFoundException("Nome de usuário ou email inválido");
         }
@@ -195,7 +195,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public UserAuthDTO createResearcher(@Valid UserBasicDTO userDTO) {
+    public AuthOutputDTO createResearcher(@Valid UserInputDTO userDTO) {
         var undecodedPasswd = userDTO.password();
         var user = User.builder()
                 .nome(userDTO.name())
@@ -212,7 +212,7 @@ public class UserService implements IUserService {
 
         String userJWT = this.authenticationService.basicAuthenticationAndGenerateJWT(newUser.getNome(),
                 undecodedPasswd);
-        return new UserAuthDTO(userJWT);
+        return new AuthOutputDTO(userJWT);
     }
 
     private Optional<Device> saveUserDevice(String deviceId, User newUser) {

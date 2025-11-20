@@ -2,11 +2,11 @@ package br.edu.ufpel.rokamoka.service.user;
 
 import br.edu.ufpel.rokamoka.core.Role;
 import br.edu.ufpel.rokamoka.core.User;
+import br.edu.ufpel.rokamoka.dto.authentication.input.AuthResetPasswordDTO;
+import br.edu.ufpel.rokamoka.dto.authentication.output.AuthOutputDTO;
 import br.edu.ufpel.rokamoka.dto.user.input.UserAnonymousRequestDTO;
-import br.edu.ufpel.rokamoka.dto.user.input.UserBasicDTO;
-import br.edu.ufpel.rokamoka.dto.user.input.UserResetPasswordDTO;
+import br.edu.ufpel.rokamoka.dto.user.input.UserInputDTO;
 import br.edu.ufpel.rokamoka.dto.user.output.UserAnonymousResponseDTO;
-import br.edu.ufpel.rokamoka.dto.user.output.UserAuthDTO;
 import br.edu.ufpel.rokamoka.dto.user.output.UserOutputDTO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -21,13 +21,13 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public interface IUserService {
 
-    UserAuthDTO createNormalUser(@Valid UserBasicDTO userDTO);
+    AuthOutputDTO createNormalUser(@Valid UserInputDTO userDTO);
 
     UserAnonymousResponseDTO createAnonymousUser(@Valid UserAnonymousRequestDTO userDTO);
 
-    void resetUserPassword(@Valid UserResetPasswordDTO userDTO);
+    void resetUserPassword(@Valid AuthResetPasswordDTO userDTO);
 
-    UserAuthDTO createResearcher(@Valid UserBasicDTO userDTO);
+    AuthOutputDTO createResearcher(@Valid UserInputDTO userDTO);
 
     void updateRole(@NotNull User requester, Role role);
 

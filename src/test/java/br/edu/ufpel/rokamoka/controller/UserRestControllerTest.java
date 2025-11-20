@@ -1,11 +1,11 @@
 package br.edu.ufpel.rokamoka.controller;
 
 import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
+import br.edu.ufpel.rokamoka.dto.authentication.input.AuthResetPasswordDTO;
+import br.edu.ufpel.rokamoka.dto.authentication.output.AuthOutputDTO;
 import br.edu.ufpel.rokamoka.dto.user.input.UserAnonymousRequestDTO;
-import br.edu.ufpel.rokamoka.dto.user.input.UserBasicDTO;
-import br.edu.ufpel.rokamoka.dto.user.input.UserResetPasswordDTO;
+import br.edu.ufpel.rokamoka.dto.user.input.UserInputDTO;
 import br.edu.ufpel.rokamoka.dto.user.output.UserAnonymousResponseDTO;
-import br.edu.ufpel.rokamoka.dto.user.output.UserAuthDTO;
 import br.edu.ufpel.rokamoka.dto.user.output.UserOutputDTO;
 import br.edu.ufpel.rokamoka.security.AuthenticationService;
 import br.edu.ufpel.rokamoka.service.user.UserService;
@@ -45,18 +45,18 @@ class UserRestControllerTest implements ControllerResponseValidator {
     @Test
     void register_shouldReturnTokenGeneratedForNewUser_whenSuccessful() {
         // Arrange
-        UserAuthDTO expectedOutput = Instancio.create(UserAuthDTO.class);
+        AuthOutputDTO expectedOutput = Instancio.create(AuthOutputDTO.class);
 
-        when(this.userService.createNormalUser(any(UserBasicDTO.class))).thenReturn(expectedOutput);
+        when(this.userService.createNormalUser(any(UserInputDTO.class))).thenReturn(expectedOutput);
 
         // Act
-        ResponseEntity<ApiResponseWrapper<UserAuthDTO>> response = this.userRestController.register(
-                mock(UserBasicDTO.class));
+        ResponseEntity<ApiResponseWrapper<AuthOutputDTO>> response = this.userRestController.register(
+                mock(UserInputDTO.class));
 
         // Assert
         this.assertExpectedResponse(response, expectedOutput);
 
-        verify(this.userService).createNormalUser(any(UserBasicDTO.class));
+        verify(this.userService).createNormalUser(any(UserInputDTO.class));
     }
     //endregion
 
@@ -84,12 +84,12 @@ class UserRestControllerTest implements ControllerResponseValidator {
     @Test
     void login_shouldReturnUserToken_whenSuccessful() {
         // Arrange
-        UserAuthDTO expectedOutput = Instancio.create(UserAuthDTO.class);
+        AuthOutputDTO expectedOutput = Instancio.create(AuthOutputDTO.class);
 
         when(this.authenticationService.authenticate(any(Authentication.class))).thenReturn(expectedOutput.jwt());
 
         // Act
-        ResponseEntity<ApiResponseWrapper<UserAuthDTO>> response = this.userRestController.login(
+        ResponseEntity<ApiResponseWrapper<AuthOutputDTO>> response = this.userRestController.login(
                 mock(Authentication.class));
 
         // Assert
@@ -119,7 +119,7 @@ class UserRestControllerTest implements ControllerResponseValidator {
     @Test
     void resetPassword_shouldReturnVoid_whenSuccessful() {
         // Arrange
-        UserResetPasswordDTO userDTO = Instancio.create(UserResetPasswordDTO.class);
+        AuthResetPasswordDTO userDTO = Instancio.create(AuthResetPasswordDTO.class);
 
         doNothing().when(this.userService).resetUserPassword(userDTO);
 
@@ -129,7 +129,7 @@ class UserRestControllerTest implements ControllerResponseValidator {
         // Assert
         this.assertVoidResponse(response);
 
-        verify(this.userService).resetUserPassword(any(UserResetPasswordDTO.class));
+        verify(this.userService).resetUserPassword(any(AuthResetPasswordDTO.class));
     }
     //endregion
 
