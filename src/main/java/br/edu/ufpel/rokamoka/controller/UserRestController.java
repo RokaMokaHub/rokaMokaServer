@@ -1,7 +1,6 @@
 package br.edu.ufpel.rokamoka.controller;
 
 import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
-import br.edu.ufpel.rokamoka.dto.authentication.input.AuthResetPasswordDTO;
 import br.edu.ufpel.rokamoka.dto.authentication.output.AuthOutputDTO;
 import br.edu.ufpel.rokamoka.dto.user.input.UserAnonymousRequestDTO;
 import br.edu.ufpel.rokamoka.dto.user.input.UserInputDTO;
@@ -64,22 +63,6 @@ public class UserRestController extends RokaMokaController {
             @RequestBody @Valid UserAnonymousRequestDTO userDTO) {
         UserAnonymousResponseDTO anonymousUser = this.userService.createAnonymousUser(userDTO);
         return this.success(anonymousUser);
-    }
-
-    /**
-     * Resets the password of a user using the provided credentials.
-     *
-     * @param userDTO A {@link AuthResetPasswordDTO} containing the user's credentials.
-     *
-     * @return A {@link ResponseEntity} wrapping an {@code ApiResponseWrapper<Void>} indicating this.success or failure.
-     */
-    @Operation(summary = "Redefinição de senha do usuário",
-            description = "Permite que um usuário redefina sua senha fornecendo suas credenciais")
-    @PostMapping(value = "/reset-password", consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponseWrapper<Void>> resetPassword(@RequestBody @Valid AuthResetPasswordDTO userDTO) {
-        this.userService.resetUserPassword(userDTO);
-        return this.success();
     }
 
     /**

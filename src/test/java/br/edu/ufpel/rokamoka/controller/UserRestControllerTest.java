@@ -1,7 +1,6 @@
 package br.edu.ufpel.rokamoka.controller;
 
 import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
-import br.edu.ufpel.rokamoka.dto.authentication.input.AuthResetPasswordDTO;
 import br.edu.ufpel.rokamoka.dto.authentication.output.AuthOutputDTO;
 import br.edu.ufpel.rokamoka.dto.user.input.UserAnonymousRequestDTO;
 import br.edu.ufpel.rokamoka.dto.user.input.UserInputDTO;
@@ -17,7 +16,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -72,24 +70,6 @@ class UserRestControllerTest implements ControllerResponseValidator {
         this.assertExpectedResponse(response, expectedOutput);
 
         verify(this.userService).createAnonymousUser(any(UserAnonymousRequestDTO.class));
-    }
-    //endregion
-
-    //region resetPassword
-    @Test
-    void resetPassword_shouldReturnVoid_whenSuccessful() {
-        // Arrange
-        AuthResetPasswordDTO userDTO = Instancio.create(AuthResetPasswordDTO.class);
-
-        doNothing().when(this.userService).resetUserPassword(userDTO);
-
-        // Act
-        ResponseEntity<ApiResponseWrapper<Void>> response = this.userRestController.resetPassword(userDTO);
-
-        // Assert
-        this.assertVoidResponse(response);
-
-        verify(this.userService).resetUserPassword(any(AuthResetPasswordDTO.class));
     }
     //endregion
 
