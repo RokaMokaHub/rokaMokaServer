@@ -39,6 +39,13 @@ public class Address extends Auditable {
     private String complemento;
 
     @Override
+    public final int hashCode() {
+        return this instanceof HibernateProxy hp
+               ? hp.getHibernateLazyInitializer().getPersistentClass().hashCode()
+               : this.getClass().hashCode();
+    }
+
+    @Override
     public final boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -50,15 +57,9 @@ public class Address extends Auditable {
         if (this.id != null && Objects.equals(this.id, other.getId())) {
             return true;
         }
-        return this.rua != null && this.numero != null && this.cep != null &&
-               Objects.equals(this.rua, other.rua) &&
-               Objects.equals(this.numero, other.numero) &&
-               Objects.equals(this.cep, other.cep);
-    }
-
-    @Override
-    public final int hashCode() {
-        return this instanceof HibernateProxy hp ? hp.getHibernateLazyInitializer().getPersistentClass().hashCode()
-                : this.getClass().hashCode();
+        boolean isSameCep = this.cep != null && Objects.equals(this.cep, other.getCep());
+        boolean isSameRua = this.rua != null && Objects.equals(this.rua, other.getRua());
+        boolean isSameNumero = this.numero != null && Objects.equals(this.numero, other.getNumero());
+        return isSameCep && isSameNumero && isSameRua;
     }
 }

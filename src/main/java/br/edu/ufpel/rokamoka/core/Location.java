@@ -43,6 +43,13 @@ public class Location extends Auditable {
     private Address endereco;
 
     @Override
+    public final int hashCode() {
+        return this instanceof HibernateProxy hp
+               ? hp.getHibernateLazyInitializer().getPersistentClass().hashCode()
+               : this.getClass().hashCode();
+    }
+
+    @Override
     public final boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -54,12 +61,8 @@ public class Location extends Auditable {
         if (this.id != null && Objects.equals(this.id, other.getId())) {
             return true;
         }
-        return this.nome != null && Objects.equals(this.nome, other.getNome());
-    }
-
-    @Override
-    public final int hashCode() {
-        return this instanceof HibernateProxy hp ? hp.getHibernateLazyInitializer().getPersistentClass().hashCode()
-                : this.getClass().hashCode();
+        boolean isSameName = this.nome != null && Objects.equals(this.nome, other.getNome());
+        boolean isSameAddress = this.endereco != null && Objects.equals(this.endereco, other.getEndereco());
+        return isSameName && isSameAddress;
     }
 }

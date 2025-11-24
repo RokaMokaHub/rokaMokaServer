@@ -33,29 +33,28 @@ public class Mokadex extends Auditable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
-    private User usuario;
+    @OneToOne(fetch = FetchType.EAGER) private User usuario;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "mokadex_emblema",
-            joinColumns = @JoinColumn(
-                    name = "mokadex_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_mokadex")
-            ),
-            inverseJoinColumns = @JoinColumn(
-                    name = "emblema_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_emblema")
-            )
-    )
+    @JoinTable(name = "mokadex_emblema", joinColumns = @JoinColumn(name = "mokadex_id", referencedColumnName = "id",
+            foreignKey = @ForeignKey(name = "fk_mokadex")),
+            inverseJoinColumns = @JoinColumn(name = "emblema_id", referencedColumnName = "id",
+                    foreignKey = @ForeignKey(name = "fk_emblema")))
     private Set<Emblem> emblems = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "mokadex_obra",
-            joinColumns = @JoinColumn(
-                    name = "mokadex_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_mokadex")),
-            inverseJoinColumns = @JoinColumn(
-                    name = "obra_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_obra"))
-    )
+    @JoinTable(name = "mokadex_obra", joinColumns = @JoinColumn(name = "mokadex_id", referencedColumnName = "id",
+            foreignKey = @ForeignKey(name = "fk_mokadex")),
+            inverseJoinColumns = @JoinColumn(name = "obra_id", referencedColumnName = "id",
+                    foreignKey = @ForeignKey(name = "fk_obra")))
     private Set<Artwork> artworks = new HashSet<>();
+
+    @Override
+    public final int hashCode() {
+        return this instanceof HibernateProxy hp
+               ? hp.getHibernateLazyInitializer().getPersistentClass().hashCode()
+               : this.getClass().hashCode();
+    }
 
     @Override
     public final boolean equals(Object o) {
@@ -65,14 +64,8 @@ public class Mokadex extends Auditable {
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
             return false;
         }
-        Mokadex mokadex = (Mokadex) o;
-        return this.id != null && Objects.equals(this.id, mokadex.getId());
-    }
-
-    @Override
-    public final int hashCode() {
-        return this instanceof HibernateProxy hp ? hp.getHibernateLazyInitializer().getPersistentClass().hashCode()
-                : this.getClass().hashCode();
+        Mokadex other = (Mokadex) o;
+        return this.id != null && Objects.equals(this.id, other.getId());
     }
 
     public boolean containsArtwork(Artwork artwork) {

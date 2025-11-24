@@ -33,11 +33,19 @@ public class Device extends Auditable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // TODO: adcionar constraint unique entre deviceId e user?
     @Column(nullable = false) private String deviceId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+    @Override
+    public final int hashCode() {
+        return this instanceof HibernateProxy hp
+               ? hp.getHibernateLazyInitializer().getPersistentClass().hashCode()
+               : this.getClass().hashCode();
+    }
 
     @Override
     public final boolean equals(Object o) {
@@ -47,13 +55,7 @@ public class Device extends Auditable {
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
             return false;
         }
-        Device device = (Device) o;
-        return this.id != null && Objects.equals(this.id, device.getId());
-    }
-
-    @Override
-    public final int hashCode() {
-        return this instanceof HibernateProxy hp ? hp.getHibernateLazyInitializer().getPersistentClass().hashCode()
-                : this.getClass().hashCode();
+        Device other = (Device) o;
+        return this.id != null && Objects.equals(this.id, other.getId());
     }
 }

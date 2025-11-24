@@ -38,8 +38,15 @@ public class Role extends Auditable {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private RoleEnum name;
+
+    @Override
+    public final int hashCode() {
+        return this instanceof HibernateProxy hp
+               ? hp.getHibernateLazyInitializer().getPersistentClass().hashCode()
+               : this.getClass().hashCode();
+    }
 
     @Override
     public final boolean equals(Object o) {
@@ -49,14 +56,11 @@ public class Role extends Auditable {
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
             return false;
         }
-        Role role = (Role) o;
-        return this.id != null && Objects.equals(this.id, role.getId());
-    }
-
-    @Override
-    public final int hashCode() {
-        return this instanceof HibernateProxy hp ? hp.getHibernateLazyInitializer().getPersistentClass().hashCode()
-                : this.getClass().hashCode();
+        Role other = (Role) o;
+        if (this.id != null && Objects.equals(this.id, other.getId())) {
+            return true;
+        }
+        return this.name != null && Objects.equals(this.name, other.getName());
     }
 
     @Override

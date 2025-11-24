@@ -44,9 +44,16 @@ public class Exhibition extends Auditable {
     @JoinColumn(name = "local_id", nullable = false)
     private Location location;
 
-    @Transient
     @Default
+    @Transient
     private List<Artwork> artworks = new ArrayList<>();
+
+    @Override
+    public final int hashCode() {
+        return this instanceof HibernateProxy hp
+               ? hp.getHibernateLazyInitializer().getPersistentClass().hashCode()
+               : this.getClass().hashCode();
+    }
 
     @Override
     public final boolean equals(Object o) {
@@ -56,13 +63,12 @@ public class Exhibition extends Auditable {
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
             return false;
         }
-        Exhibition exhibition = (Exhibition) o;
-        return this.id != null && Objects.equals(this.id, exhibition.getId());
-    }
-
-    @Override
-    public final int hashCode() {
-        return this instanceof HibernateProxy hp ? hp.getHibernateLazyInitializer().getPersistentClass().hashCode()
-                : this.getClass().hashCode();
+        Exhibition other = (Exhibition) o;
+        if (this.id != null && Objects.equals(this.id, other.getId())) {
+            return true;
+        }
+        boolean isSameName = this.name != null && Objects.equals(this.name, other.getName());
+        boolean isSameLocation = this.location != null && Objects.equals(this.location, other.getLocation());
+        return isSameName && isSameLocation;
     }
 }

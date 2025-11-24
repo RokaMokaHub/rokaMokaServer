@@ -50,6 +50,13 @@ public class PermissionReq extends Auditable {
     private Role targetRole;
 
     @Override
+    public final int hashCode() {
+        return this instanceof HibernateProxy hp
+               ? hp.getHibernateLazyInitializer().getPersistentClass().hashCode()
+               : this.getClass().hashCode();
+    }
+
+    @Override
     public final boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -57,14 +64,8 @@ public class PermissionReq extends Auditable {
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
             return false;
         }
-        PermissionReq pq = (PermissionReq) o;
-        return this.id != null && Objects.equals(this.id, pq.getId());
-    }
-
-    @Override
-    public final int hashCode() {
-        return this instanceof HibernateProxy hp ? hp.getHibernateLazyInitializer().getPersistentClass().hashCode()
-                : this.getClass().hashCode();
+        PermissionReq other = (PermissionReq) o;
+        return this.id != null && Objects.equals(this.id, other.getId());
     }
 
     public boolean isPending() {

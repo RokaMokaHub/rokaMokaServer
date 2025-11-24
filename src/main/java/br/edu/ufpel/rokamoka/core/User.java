@@ -43,7 +43,7 @@ public class User extends Auditable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String email;
+    @Column(nullable = false) private String email;
 
     @Column(nullable = false, unique = true) private String nome;
 
@@ -57,6 +57,13 @@ public class User extends Auditable {
     private Role role;
 
     @Override
+    public final int hashCode() {
+        return this instanceof HibernateProxy hp
+               ? hp.getHibernateLazyInitializer().getPersistentClass().hashCode()
+               : this.getClass().hashCode();
+    }
+
+    @Override
     public final boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -68,12 +75,9 @@ public class User extends Auditable {
         if (this.id != null && Objects.equals(this.id, other.getId())) {
             return true;
         }
-        return this.nome != null && Objects.equals(this.nome, other.getNome());
-    }
-
-    @Override
-    public final int hashCode() {
-        return this instanceof HibernateProxy hp ? hp.getHibernateLazyInitializer().getPersistentClass().hashCode()
-                : this.getClass().hashCode();
+        boolean isSameName = this.nome != null && Objects.equals(this.nome, other.getNome());
+        boolean isSameEmail = this.email != null && Objects.equals(this.email, other.getEmail());
+        boolean isSameRole = this.role != null && Objects.equals(this.role, other.getRole());
+        return isSameName && isSameEmail && isSameRole;
     }
 }
