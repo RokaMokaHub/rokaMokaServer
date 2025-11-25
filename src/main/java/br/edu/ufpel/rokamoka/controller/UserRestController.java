@@ -1,25 +1,21 @@
 package br.edu.ufpel.rokamoka.controller;
 
 import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
+import br.edu.ufpel.rokamoka.dto.authentication.output.AuthOutputDTO;
 import br.edu.ufpel.rokamoka.dto.user.input.UserAnonymousRequestDTO;
-import br.edu.ufpel.rokamoka.dto.user.input.UserBasicDTO;
-import br.edu.ufpel.rokamoka.dto.user.input.UserResetPasswordDTO;
+import br.edu.ufpel.rokamoka.dto.user.input.UserInputDTO;
 import br.edu.ufpel.rokamoka.dto.user.output.UserAnonymousResponseDTO;
-import br.edu.ufpel.rokamoka.dto.user.output.UserAuthDTO;
 import br.edu.ufpel.rokamoka.dto.user.output.UserOutputDTO;
-import br.edu.ufpel.rokamoka.security.AuthenticationService;
 import br.edu.ufpel.rokamoka.service.user.IUserService;
 import br.edu.ufpel.rokamoka.wrapper.RokaMokaController;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,24 +24,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * This class is a controller for user operations. It provides endpoints for creating users and logging in.
+ * REST Controller providing endpoints for CRUD operations on the {@code User} resource.
  *
  * @author iyisakuma
+ * @see IUserService
  */
 @Validated
 @RequiredArgsConstructor
-@Tag(name = "Usuário", description = "API para cadastros de usuários e login")
+@Tag(name = "Usuário", description = "API para cadastros de usuários")
 @RestController
 @RequestMapping("/user")
 public class UserRestController extends RokaMokaController {
 
     private final IUserService userService;
-    private final AuthenticationService authenticationService;
 
     /**
      * Creates a new user using the provided data.
      *
-     * @param userDTO A {@link UserBasicDTO} containing the user's name, email and password.
+     * @param userDTO A {@link UserInputDTO} containing the user's name, email and password.
      *
      * @return A {@link ResponseEntity} containing the created user's JWT
      */
@@ -54,8 +50,8 @@ public class UserRestController extends RokaMokaController {
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Usuário criado")})
     @PostMapping(value = "/normal/create", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponseWrapper<UserAuthDTO>> register(@RequestBody @Valid UserBasicDTO userDTO) {
-        UserAuthDTO normalUser = this.userService.createNormalUser(userDTO);
+    public ResponseEntity<ApiResponseWrapper<AuthOutputDTO>> register(@RequestBody @Valid UserInputDTO userDTO) {
+        AuthOutputDTO normalUser = this.userService.createNormalUser(userDTO);
         return this.success(normalUser);
     }
 
@@ -67,43 +63,6 @@ public class UserRestController extends RokaMokaController {
             @RequestBody @Valid UserAnonymousRequestDTO userDTO) {
         UserAnonymousResponseDTO anonymousUser = this.userService.createAnonymousUser(userDTO);
         return this.success(anonymousUser);
-    }
-
-    /**
-     * Authenticates a user and generates a JWT.
-     *
-     * @param authentication An {@link Authentication} object containing the user's credentials.
-     *
-     * @return A {@link ResponseEntity} containing the user's JWT.
-     */
-    @Operation(security = @SecurityRequirement(name = "basic"), summary = "Login de um determinado usuário",
-            description = "Login de um determinado usuário")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Login de usuário")})
-    @GetMapping(value = "/login", consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponseWrapper<UserAuthDTO>> login(Authentication authentication) {
-        String jwt = this.authenticationService.authenticate(authentication);
-        return this.success(new UserAuthDTO(jwt));
-    }
-
-    @GetMapping(value = "/teste-acao", consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponseWrapper<String>> teste() {
-        return this.success("Ok, funcionou");
-    }
-
-    /**
-     * Resets the password of a user using the provided credentials.
-     *
-     * @param userDTO A {@link UserResetPasswordDTO} containing the user's credentials.
-     *
-     * @return A {@link ResponseEntity} wrapping an {@code ApiResponseWrapper<Void>} indicating this.success or failure.
-     */
-    @Operation(summary = "Redefinição de senha do usuário",
-            description = "Permite que um usuário redefina sua senha fornecendo suas credenciais")
-    @PostMapping(value = "/reset-password", consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponseWrapper<Void>> resetPassword(@RequestBody @Valid UserResetPasswordDTO userDTO) {
-        this.userService.resetUserPassword(userDTO);
-        return this.success();
     }
 
     /**

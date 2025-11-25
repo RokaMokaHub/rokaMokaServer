@@ -1,6 +1,5 @@
 package br.edu.ufpel.rokamoka.security;
 
-
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,7 +25,7 @@ public class AuthenticationService {
      * @return A {@link String} containing the JWT.
      */
     public String authenticate(Authentication authentication) {
-        return jwtService.generateToken(authentication);
+        return this.jwtService.generateToken(authentication);
     }
 
     /**

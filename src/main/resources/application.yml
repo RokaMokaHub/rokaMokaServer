@@ -53,15 +53,36 @@ spring:
     password: ${SPRING_RABBITMQ_PASSWORD:teste123}
     connection-timeout: ${SPRING_RABBITMQ_CONNECTION_TIMEOUT:30000}
 
+  mail:
+    port: 587
+    default-encoding: UTF-8
+    host: ${EMAIL_HOST:smtp.gmail.com}
+    password: ${EMAIL_PASSWORD}
+    username: ${EMAIL_USERNAME}
+    protocol: smtp
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          quitwait: true
+
 jwt:
   private:
     key: classpath:app.key
   public:
     key: classpath:app.pub
 
-## CUSTOM CONFIGURATIONS
 broker:
   exchange:
     emblems: emblems.v1
   queue:
     collect-emblem: emblems.v1.collect
+
+springdoc:
+  swagger-ui:
+    tags-sorter: alpha
+    operations-sorter: method
+  writer-with-order-by-keys: true

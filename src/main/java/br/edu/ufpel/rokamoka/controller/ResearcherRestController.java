@@ -1,8 +1,8 @@
 package br.edu.ufpel.rokamoka.controller;
 
 import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
-import br.edu.ufpel.rokamoka.dto.user.input.UserBasicDTO;
-import br.edu.ufpel.rokamoka.dto.user.output.UserAuthDTO;
+import br.edu.ufpel.rokamoka.dto.authentication.output.AuthOutputDTO;
+import br.edu.ufpel.rokamoka.dto.user.input.UserInputDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.service.user.IUserService;
 import br.edu.ufpel.rokamoka.wrapper.RokaMokaController;
@@ -32,7 +32,7 @@ public class ResearcherRestController extends RokaMokaController {
     /**
      * Creates a new user using the provided data.
      *
-     * @param userDTO A {@link UserBasicDTO} containing the user's name, email and password.
+     * @param userDTO A {@link UserInputDTO} containing the user's name, email and password.
      *
      * @return A {@link ResponseEntity} containing the created user's JWT
      * @throws RokaMokaContentDuplicatedException if the email or name are already in use.
@@ -42,8 +42,8 @@ public class ResearcherRestController extends RokaMokaController {
     @PostMapping(value = "/create",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponseWrapper<UserAuthDTO>> register(@RequestBody @Valid UserBasicDTO userDTO) {
-        UserAuthDTO researcher = this.userService.createResearcher(userDTO);
+    public ResponseEntity<ApiResponseWrapper<AuthOutputDTO>> register(@RequestBody @Valid UserInputDTO userDTO) {
+        AuthOutputDTO researcher = this.userService.createResearcher(userDTO);
         return this.success(researcher);
     }
 }

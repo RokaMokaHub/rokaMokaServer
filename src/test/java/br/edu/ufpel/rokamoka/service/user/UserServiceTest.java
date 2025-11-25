@@ -6,12 +6,12 @@ import br.edu.ufpel.rokamoka.core.Mokadex;
 import br.edu.ufpel.rokamoka.core.Role;
 import br.edu.ufpel.rokamoka.core.RoleEnum;
 import br.edu.ufpel.rokamoka.core.User;
+import br.edu.ufpel.rokamoka.dto.authentication.input.AuthResetPasswordDTO;
+import br.edu.ufpel.rokamoka.dto.authentication.output.AuthOutputDTO;
 import br.edu.ufpel.rokamoka.dto.mokadex.output.MokadexOutputDTO;
 import br.edu.ufpel.rokamoka.dto.user.input.UserAnonymousRequestDTO;
-import br.edu.ufpel.rokamoka.dto.user.input.UserBasicDTO;
-import br.edu.ufpel.rokamoka.dto.user.input.UserResetPasswordDTO;
+import br.edu.ufpel.rokamoka.dto.user.input.UserInputDTO;
 import br.edu.ufpel.rokamoka.dto.user.output.UserAnonymousResponseDTO;
-import br.edu.ufpel.rokamoka.dto.user.output.UserAuthDTO;
 import br.edu.ufpel.rokamoka.dto.user.output.UserOutputDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
@@ -86,7 +86,7 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
     @Test
     void createNormalUser_shouldThrowRokaMokaContentDuplicatedException_whenUserAlreadyExistsByEmail() {
         // Arrange
-        UserBasicDTO userDTO = Instancio.create(UserBasicDTO.class);
+        UserInputDTO userDTO = Instancio.create(UserInputDTO.class);
 
         when(this.userRepository.existsByEmail(anyString())).thenReturn(true);
 
@@ -102,7 +102,7 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
     @Test
     void createNormalUser_shouldThrowRokaMokaContentDuplicatedException_whenUserAlreadyExistsByName() {
         // Arrange
-        UserBasicDTO userDTO = Instancio.create(UserBasicDTO.class);
+        UserInputDTO userDTO = Instancio.create(UserInputDTO.class);
 
         when(this.userRepository.existsByNome(anyString())).thenReturn(true);
 
@@ -116,8 +116,8 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
     }
 
     static Stream<Arguments> provideCreateNormalUserInput() {
-        UserBasicDTO withDeviceId = Instancio.create(UserBasicDTO.class);
-        UserBasicDTO ignoreDeviceId = Instancio.of(UserBasicDTO.class).ignore(field(UserBasicDTO::deviceId)).create();
+        UserInputDTO withDeviceId = Instancio.create(UserInputDTO.class);
+        UserInputDTO ignoreDeviceId = Instancio.of(UserInputDTO.class).ignore(field(UserInputDTO::deviceId)).create();
         Role userRole = Instancio.of(Role.class).set(field(Role::getName), RoleEnum.USER).create();
         return Stream.of(Arguments.of(withDeviceId, userRole), Arguments.of(ignoreDeviceId, userRole),
                 Arguments.of(withDeviceId, null), Arguments.of(ignoreDeviceId, null));
@@ -125,7 +125,7 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
 
     @ParameterizedTest
     @MethodSource("provideCreateNormalUserInput")
-    void createNormalUser_shouldSaveNewUser_whenInputIsValid(UserBasicDTO userDTO, Role userRole)
+    void createNormalUser_shouldSaveNewUser_whenInputIsValid(UserInputDTO userDTO, Role userRole)
     throws RokaMokaContentDuplicatedException {
         // Arrange
         when(this.passwordEncoder.encode(userDTO.password())).thenReturn("encodedPassword");
@@ -141,7 +141,7 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
         when(this.authenticationService.basicAuthenticationAndGenerateJWT(anyString(), anyString())).thenReturn("jwt");
 
         // Act
-        UserAuthDTO actualOutput = this.userService.createNormalUser(userDTO);
+        AuthOutputDTO actualOutput = this.userService.createNormalUser(userDTO);
 
         // Assert
         assertNotNull(actualOutput);
@@ -232,7 +232,7 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
     @Test
     void resetUserPassword_shouldThrowRokaMokaContentNotFoundException_whenUserDoesNotExistByNameAndEmail() {
         // Arrange
-        UserResetPasswordDTO userDTO = Instancio.create(UserResetPasswordDTO.class);
+        AuthResetPasswordDTO userDTO = Instancio.create(AuthResetPasswordDTO.class);
 
         when(this.userRepository.existsByNomeAndEmail(userDTO.name(), userDTO.email())).thenReturn(false);
 
@@ -248,7 +248,7 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
     @Test
     void resetUserPassword_shouldThrowRokaMokaContentNotFoundException_whenUserIsNotFoundByName() {
         // Arrange
-        UserResetPasswordDTO userDTO = Instancio.create(UserResetPasswordDTO.class);
+        AuthResetPasswordDTO userDTO = Instancio.create(AuthResetPasswordDTO.class);
 
         when(this.userRepository.existsByNomeAndEmail(userDTO.name(), userDTO.email())).thenReturn(true);
         when(this.userRepository.findByNome(userDTO.name())).thenReturn(Optional.empty());
@@ -266,7 +266,7 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
     @Test
     void resetUserPassword_shouldThrowRokaMokaForbiddenException_whenOldPasswordDoesNotMatch() {
         // Arrange
-        UserResetPasswordDTO userDTO = Instancio.create(UserResetPasswordDTO.class);
+        AuthResetPasswordDTO userDTO = Instancio.create(AuthResetPasswordDTO.class);
         User foundByName = Instancio.create(User.class);
 
         when(this.userRepository.existsByNomeAndEmail(userDTO.name(), userDTO.email())).thenReturn(true);
@@ -286,7 +286,7 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
     @Test
     void resetUserPassword_shouldThrowRokaMokaContentNotFoundException_whenLoggedInUserIsNotFound() {
         // Arrange
-        UserResetPasswordDTO userDTO = Instancio.create(UserResetPasswordDTO.class);
+        AuthResetPasswordDTO userDTO = Instancio.create(AuthResetPasswordDTO.class);
         User foundByName = Instancio.create(User.class);
         ServiceContext mockContext = this.mockServiceContext();
 
@@ -311,7 +311,7 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
     @Test
     void resetUserPassword_shouldThrowRokaMokaForbiddenException_whenLoggedInUserDiffersFromInput() {
         // Arrange
-        UserResetPasswordDTO userDTO = Instancio.create(UserResetPasswordDTO.class);
+        AuthResetPasswordDTO userDTO = Instancio.create(AuthResetPasswordDTO.class);
         User foundByName = Instancio.create(User.class);
         User loggedIn = Instancio.create(User.class);
         ServiceContext mockContext = this.mockServiceContext();
@@ -338,7 +338,7 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
     void resetUserPassword_shouldResetUserPassword_whenInputIsValid()
     throws RokaMokaForbiddenException, RokaMokaContentNotFoundException {
         // Arrange
-        UserResetPasswordDTO userDTO = Instancio.create(UserResetPasswordDTO.class);
+        AuthResetPasswordDTO userDTO = Instancio.create(AuthResetPasswordDTO.class);
         User loggedIn = Instancio.create(User.class);
         ServiceContext mockContext = this.mockServiceContext();
 
@@ -455,7 +455,7 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
     @Test
     void createResearcher_shouldThrowRokaMokaContentDuplicatedException_whenUserAlreadyExistsByEmail() {
         // Arrange
-        UserBasicDTO userDTO = Instancio.create(UserBasicDTO.class);
+        UserInputDTO userDTO = Instancio.create(UserInputDTO.class);
 
         when(this.userRepository.existsByEmail(anyString())).thenReturn(true);
 
@@ -471,7 +471,7 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
     @Test
     void createResearcher_shouldThrowRokaMokaContentDuplicatedException_whenUserAlreadyExistsByName() {
         // Arrange
-        UserBasicDTO userDTO = Instancio.create(UserBasicDTO.class);
+        UserInputDTO userDTO = Instancio.create(UserInputDTO.class);
 
         when(this.userRepository.existsByNome(anyString())).thenReturn(true);
 
@@ -485,8 +485,8 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
     }
 
     static Stream<Arguments> provideCreateResearcherUserInput() {
-        UserBasicDTO withDeviceId = Instancio.create(UserBasicDTO.class);
-        UserBasicDTO ignoreDeviceId = Instancio.of(UserBasicDTO.class).ignore(field(UserBasicDTO::deviceId)).create();
+        UserInputDTO withDeviceId = Instancio.create(UserInputDTO.class);
+        UserInputDTO ignoreDeviceId = Instancio.of(UserInputDTO.class).ignore(field(UserInputDTO::deviceId)).create();
         Role researcherRole = Instancio.of(Role.class).set(field(Role::getName), RoleEnum.RESEARCHER).create();
         return Stream.of(Arguments.of(withDeviceId, researcherRole), Arguments.of(ignoreDeviceId, researcherRole),
                 Arguments.of(withDeviceId, null), Arguments.of(ignoreDeviceId, null));
@@ -494,7 +494,7 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
 
     @ParameterizedTest
     @MethodSource("provideCreateResearcherUserInput")
-    void createResearcher_shouldSaveNewUser_whenInputIsValid(UserBasicDTO userDTO, Role researcherRole)
+    void createResearcher_shouldSaveNewUser_whenInputIsValid(UserInputDTO userDTO, Role researcherRole)
     throws RokaMokaContentDuplicatedException {
         // Arrange
         when(this.passwordEncoder.encode(userDTO.password())).thenReturn("encodedPassword");
@@ -510,7 +510,7 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
         when(this.authenticationService.basicAuthenticationAndGenerateJWT(anyString(), anyString())).thenReturn("jwt");
 
         // Act
-        UserAuthDTO actualOutput = this.userService.createResearcher(userDTO);
+        AuthOutputDTO actualOutput = this.userService.createResearcher(userDTO);
 
         // Assert
         assertNotNull(actualOutput);

@@ -1,10 +1,8 @@
-package br.edu.ufpel.rokamoka.dto.user.output;
+package br.edu.ufpel.rokamoka.dto.authentication.output;
 
 /**
  * A Data Transfer Object for a user's response after a successful authentication.
  *
  * @author iyisakuma
  */
-public record UserAuthDTO(String jwt) {
-
-}
+public record AuthOutputDTO(String jwt) {}

@@ -21,7 +21,7 @@ import br.edu.ufpel.rokamoka.utils.user.UserNameConstraint;
  * @see PasswordConstraint
  * @see UserNameConstraint
  */
-public record UserBasicDTO(
+public record UserInputDTO(
         @EmailConstraint String email,
         @PasswordConstraint String password,
         @UserNameConstraint String name,
