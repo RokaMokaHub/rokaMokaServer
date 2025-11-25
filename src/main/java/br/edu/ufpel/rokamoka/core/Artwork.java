@@ -38,8 +38,7 @@ public class Artwork extends Auditable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String nome;
+    @Column(nullable = false) private String nome;
     private String nomeArtista;
     private String descricao;
     private String link;
@@ -57,6 +56,13 @@ public class Artwork extends Auditable {
     }
 
     @Override
+    public final int hashCode() {
+        return this instanceof HibernateProxy hp
+               ? hp.getHibernateLazyInitializer().getPersistentClass().hashCode()
+               : this.getClass().hashCode();
+    }
+
+    @Override
     public final boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -64,13 +70,12 @@ public class Artwork extends Auditable {
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
             return false;
         }
-        Artwork artwork = (Artwork) o;
-        return this.id != null && Objects.equals(this.id, artwork.getId());
-    }
-
-    @Override
-    public final int hashCode() {
-        return this instanceof HibernateProxy hp ? hp.getHibernateLazyInitializer().getPersistentClass().hashCode()
-                : this.getClass().hashCode();
+        Artwork other = (Artwork) o;
+        if (this.id != null && Objects.equals(this.id, other.getId())) {
+            return true;
+        }
+        boolean isSameName = this.nome != null && Objects.equals(this.nome, other.getNome());
+        boolean isSameArtist = this.nomeArtista != null && Objects.equals(this.nomeArtista, other.getNomeArtista());
+        return isSameArtist && isSameName;
     }
 }
