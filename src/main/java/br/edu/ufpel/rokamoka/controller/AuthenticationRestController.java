@@ -4,8 +4,10 @@ import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
 import br.edu.ufpel.rokamoka.dto.authentication.input.AuthForgotPasswordDTO;
 import br.edu.ufpel.rokamoka.dto.authentication.input.AuthResetPasswordDTO;
 import br.edu.ufpel.rokamoka.dto.authentication.output.AuthOutputDTO;
+import br.edu.ufpel.rokamoka.email.EmailService;
 import br.edu.ufpel.rokamoka.security.AuthenticationService;
 import br.edu.ufpel.rokamoka.service.user.IUserService;
+import br.edu.ufpel.rokamoka.utils.user.EmailConstraint;
 import br.edu.ufpel.rokamoka.wrapper.RokaMokaController;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -19,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,6 +43,8 @@ import org.springframework.web.bind.annotation.RestController;
 class AuthenticationRestController extends RokaMokaController {
 
     private final AuthenticationService authenticationService;
+    private final EmailService emailService;
+
     private final IUserService userService;
 
     /**
@@ -89,6 +94,15 @@ class AuthenticationRestController extends RokaMokaController {
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseWrapper<Void>> forgotPassword(@RequestBody @Valid AuthForgotPasswordDTO forgotPasswordDTO) {
         this.userService.forgotUserPassword(forgotPasswordDTO);
+        return this.success();
+    }
+
+    @Operation(summary = "Disparo de email para redefinição de senha do usuário",
+            description = "Permite que o sistema dispare um email para que o usuário possa redefinir sua senha")
+    @PostMapping(value = "/send-email/forgot-password/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ApiResponseWrapper<Void>> sendForgotPasswordEmail(@PathVariable @EmailConstraint
+    String email) {
+        this.emailService.sendForgotPasswordEmail(email);
         return this.success();
     }
 }

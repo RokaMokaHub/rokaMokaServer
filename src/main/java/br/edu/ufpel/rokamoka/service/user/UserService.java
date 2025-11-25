@@ -211,6 +211,12 @@ public class UserService implements IUserService {
     }
 
     @Override
+    public User getByEmail(String email) {
+        return this.userRepository.findByEmail(email)
+                .orElseThrow(() -> new RokaMokaContentNotFoundException("Usuário não encontrado"));
+    }
+
+    @Override
     public User getLoggedUserOrElseThrow() {
         try {
             return this.userRepository.findByNome(ServiceContext.getContext().getUsernameOrThrow())

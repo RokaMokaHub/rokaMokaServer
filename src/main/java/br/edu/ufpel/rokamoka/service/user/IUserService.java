@@ -36,7 +36,9 @@ public interface IUserService {
 
     UserOutputDTO getLoggedUserInformation();
 
-    User getByNome(@NotNull String nome);
+    User getByNome(String nome);
+
+    User getByEmail(String email);
 
     User getLoggedUserOrElseThrow();
 }
