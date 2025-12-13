@@ -21,10 +21,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -75,7 +75,8 @@ class AuthenticationRestController extends RokaMokaController {
             description = "Permite que um usuário redefina sua senha fornecendo suas credenciais")
     @PostMapping(value = "/reset-password", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponseWrapper<Void>> resetPassword(@RequestBody @Valid AuthResetPasswordDTO resetPasswordDTO) {
+    public ResponseEntity<ApiResponseWrapper<Void>> resetPassword(
+            @RequestBody @Valid AuthResetPasswordDTO resetPasswordDTO) {
         this.userService.resetUserPassword(resetPasswordDTO);
         return this.success();
     }
@@ -83,25 +84,26 @@ class AuthenticationRestController extends RokaMokaController {
     /**
      * Resets the password of a user using the provided credentials.
      *
-     * @param forgotPasswordDTO A {@code AuthForgotPasswordDTO} containing the user's credentials.
+     * @param token A {@code token} containing the user's credentials.
      *
      * @return A {@code ResponseEntity} wrapping an {@code ApiResponseWrapper<Void>} indicating success or failure.
      * @see AuthForgotPasswordDTO
      */
     @Operation(summary = "Redefinição de senha do usuário",
             description = "Permite que um usuário redefina sua senha fornecendo suas credenciais")
-    @PostMapping(value = "/forgot-password", consumes = MediaType.APPLICATION_JSON_VALUE,
+    @PostMapping(value = "/forgot-password/reset", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponseWrapper<Void>> forgotPassword(@RequestBody @Valid AuthForgotPasswordDTO forgotPasswordDTO) {
-        this.userService.forgotUserPassword(forgotPasswordDTO);
+    public ResponseEntity<ApiResponseWrapper<Void>> forgotPassword(
+            @RequestBody @Valid AuthForgotPasswordDTO forgotPasswordRequest) {
+        this.userService.resetUserPassword(forgotPasswordRequest);
         return this.success();
     }
 
     @Operation(summary = "Disparo de email para redefinição de senha do usuário",
             description = "Permite que o sistema dispare um email para que o usuário possa redefinir sua senha")
-    @PostMapping(value = "/send-email/forgot-password/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponseWrapper<Void>> sendForgotPasswordEmail(@PathVariable @EmailConstraint
-    String email) {
+    @PostMapping(value = "/forgot-password/send", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ApiResponseWrapper<Void>> sendForgotPasswordEmail(
+            @RequestParam @EmailConstraint String email) {
         this.emailService.sendForgotPasswordEmail(email);
         return this.success();
     }

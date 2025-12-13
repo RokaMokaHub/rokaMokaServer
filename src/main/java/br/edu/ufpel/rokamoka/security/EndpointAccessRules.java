@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 public class EndpointAccessRules {
 
     private final String[] endpointWhiteList = {
-            "/auth/send-email/forgot-password/**",
             "/auth/forgot-password/**",
             "/user/anonymous/create",
             "/user/normal/create",
