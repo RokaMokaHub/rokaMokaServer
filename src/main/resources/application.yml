@@ -1,7 +1,7 @@
 spring:
 
   application:
-    name: roka-moka
+    name: roka-moka-default
 
   datasource:
     # URL do banco de dados, configurável via variável de ambiente. Default: localhost.
@@ -56,9 +56,9 @@ spring:
   mail:
     port: 587
     default-encoding: UTF-8
-    host: ${EMAIL_HOST:smtp.gmail.com}
-    password: ${EMAIL_PASSWORD}
-    username: ${EMAIL_USERNAME}
+    host: ${SPRING_EMAIL_HOST}
+    password: ${SPRING_EMAIL_PASSWORD}
+    username: ${SPRING_EMAIL_USERNAME}
     protocol: smtp
     properties:
       mail:
