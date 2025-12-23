@@ -32,25 +32,11 @@ public class EmailService {
     private final JwtService jwtService;
     private final IUserService userService;
 
-    private Optional<MimeMessage> tryToComposeEmail(EmailDetails details) {
-        try {
-            return Optional.of(this.composeEmail(details));
-        } catch (MessagingException | UnsupportedEncodingException e) {
-            log.error("Erro ao construir email [SUBJECT: {}] - [TO: {}]", details.subject(), details.to(), e);
-        }
-        return Optional.empty();
-    }
-
-    private MimeMessage composeEmail(EmailDetails details) throws MessagingException, UnsupportedEncodingException {
-        MimeMessage mimeMessage = this.javaMailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
-        helper.setSubject(details.subject());
-        helper.setFrom(details.from());
-        helper.setTo(details.to());
-        helper.setText(details.body(), true);
-        return mimeMessage;
-    }
-
+    /**
+     * Sends a "forgot password" email to a user, allowing them to reset their password.
+     *
+     * @param email The email address of the user who has requested a password reset.
+     */
     public void sendForgotPasswordEmail(String email) {
         String template = "/password_reset";
         String subject = "RokaMokaApp - Redefinir Senha";
@@ -68,8 +54,7 @@ public class EmailService {
 
     private String generatePasswordResetLink(User user) {
         String token = this.jwtService.generateToken(new UserAuthenticated(user));
-        // TODO: dinei dominio do app
-        return "https://app.dominio.com/auth/reset?token=" + token;
+        return "http://rokamoka.inf.ufpel.edu.br/auth/reset?token=" + token;
     }
 
     private void sendEmail(EmailDetails details) {
@@ -79,5 +64,24 @@ public class EmailService {
         }
         MimeMessage mimeMessage = maybeMessage.get();
         this.javaMailSender.send(mimeMessage);
+    }
+
+    private Optional<MimeMessage> tryToComposeEmail(EmailDetails details) {
+        try {
+            return Optional.of(this.composeEmail(details));
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            log.error("Erro ao construir email [SUBJECT: {}] - [TO: {}]", details.subject(), details.to(), e);
+        }
+        return Optional.empty();
+    }
+
+    private MimeMessage composeEmail(EmailDetails details) throws MessagingException, UnsupportedEncodingException {
+        MimeMessage mimeMessage = this.javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
+        helper.setSubject(details.subject());
+        helper.setFrom(details.from());
+        helper.setTo(details.to());
+        helper.setText(details.body(), true);
+        return mimeMessage;
     }
 }

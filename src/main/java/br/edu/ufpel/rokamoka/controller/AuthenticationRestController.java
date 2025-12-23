@@ -73,7 +73,8 @@ class AuthenticationRestController extends RokaMokaController {
      */
     @Operation(summary = "Redefinição de senha do usuário",
             description = "Permite que um usuário redefina sua senha fornecendo suas credenciais")
-    @PostMapping(value = "/reset-password", consumes = MediaType.APPLICATION_JSON_VALUE,
+    @PostMapping(value = "/reset-password",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseWrapper<Void>> resetPassword(
             @RequestBody @Valid AuthResetPasswordDTO resetPasswordDTO) {
@@ -91,7 +92,8 @@ class AuthenticationRestController extends RokaMokaController {
      */
     @Operation(summary = "Redefinição de senha do usuário",
             description = "Permite que um usuário redefina sua senha fornecendo suas credenciais")
-    @PostMapping(value = "/forgot-password/reset", consumes = MediaType.APPLICATION_JSON_VALUE,
+    @PostMapping(value = "/forgot-password/reset",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseWrapper<Void>> forgotPassword(
             @RequestBody @Valid AuthForgotPasswordDTO forgotPasswordRequest) {
@@ -101,7 +103,9 @@ class AuthenticationRestController extends RokaMokaController {
 
     @Operation(summary = "Disparo de email para redefinição de senha do usuário",
             description = "Permite que o sistema dispare um email para que o usuário possa redefinir sua senha")
-    @PostMapping(value = "/forgot-password/send", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/forgot-password/send",
+            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseWrapper<Void>> sendForgotPasswordEmail(
             @RequestParam @EmailConstraint String email) {
         this.emailService.sendForgotPasswordEmail(email);
