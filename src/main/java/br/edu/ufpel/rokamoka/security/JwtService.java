@@ -1,6 +1,5 @@
 package br.edu.ufpel.rokamoka.security;
 
-import br.edu.ufpel.rokamoka.exceptions.RokaMokaForbiddenException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -34,7 +33,7 @@ public class JwtService {
      * @param token the JWT token as a {@link String}, which must be a valid, non-expired token.
      *
      * @return the subject of the token as a {@link String}, which typically identifies the user.
-     * @throws RokaMokaForbiddenException if the token is expired or does not contain a valid expiration claim.
+     * @throws org.springframework.security.oauth2.jwt.JwtException if the token is invalid.
      */
     public String getSubject(String token) {
         Jwt jwt = this.jwtDecoder.decode(token);
