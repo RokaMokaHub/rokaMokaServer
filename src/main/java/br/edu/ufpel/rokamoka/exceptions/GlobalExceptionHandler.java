@@ -8,6 +8,7 @@ import org.apache.coyote.BadRequestException;
 import org.hibernate.service.spi.ServiceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -50,7 +51,8 @@ public class GlobalExceptionHandler extends RokaMokaController {
 
     @ExceptionHandler(value = {
             RokaMokaForbiddenException.class,
-            RokaMokaNoUserInContextException.class
+            RokaMokaNoUserInContextException.class,
+            JwtException.class
     })
     public ResponseEntity<ApiResponseWrapper<Void>> handleForbidden(Exception ex) {
         return this.error(ex, HttpStatus.FORBIDDEN);

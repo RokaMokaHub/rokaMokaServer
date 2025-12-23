@@ -35,13 +35,9 @@ public class JwtService {
      *
      * @return the subject of the token as a {@link String}, which typically identifies the user.
      * @throws RokaMokaForbiddenException if the token is expired or does not contain a valid expiration claim.
-     */ 
+     */
     public String getSubject(String token) {
         Jwt jwt = this.jwtDecoder.decode(token);
-        Instant expiresAt = jwt.getExpiresAt();
-        if (expiresAt == null || expiresAt.isBefore(Instant.now())) {
-            throw new RokaMokaForbiddenException("O token expirou");
-        }
         return jwt.getSubject();
     }
 

@@ -85,13 +85,13 @@ class AuthenticationRestController extends RokaMokaController {
     /**
      * Resets the password of a user using the provided credentials.
      *
-     * @param token A {@code token} containing the user's credentials.
+     * @param forgotPasswordRequest A {@code AuthForgotPasswordDTO} containing the user's credentials.
      *
      * @return A {@code ResponseEntity} wrapping an {@code ApiResponseWrapper<Void>} indicating success or failure.
      * @see AuthForgotPasswordDTO
      */
-    @Operation(summary = "Redefinição de senha do usuário",
-            description = "Permite que um usuário redefina sua senha fornecendo suas credenciais")
+    @Operation(summary = "Redefinição de senha do usuário via token de recuperação",
+            description = "Permite que um usuário que esqueceu sua senha a redefina utilizando um token de redefinição recebido por email")
     @PostMapping(value = "/forgot-password/reset",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -103,9 +103,7 @@ class AuthenticationRestController extends RokaMokaController {
 
     @Operation(summary = "Disparo de email para redefinição de senha do usuário",
             description = "Permite que o sistema dispare um email para que o usuário possa redefinir sua senha")
-    @PostMapping(value = "/forgot-password/send",
-            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/forgot-password/send", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseWrapper<Void>> sendForgotPasswordEmail(
             @RequestParam @EmailConstraint String email) {
         this.emailService.sendForgotPasswordEmail(email);
