@@ -271,10 +271,10 @@ public class UserService implements IUserService {
      */
     private void validateOrThrowException(User user) {
         if (user.getEmail() != null && this.userRepository.existsByEmail(user.getEmail())) {
-            throw new RokaMokaContentDuplicatedException("O email já está sendo utilizado,");
+            throw new RokaMokaContentDuplicatedException("O email já está sendo utilizado!");
         }
         if (user.getNome() != null && this.userRepository.existsByNome(user.getNome())) {
-            throw new RokaMokaContentDuplicatedException("O nome do usuário já está sendo utilizado");
+            throw new RokaMokaContentDuplicatedException("O nome do usuário já está sendo utilizado!");
         }
     }
 }
