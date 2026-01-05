@@ -47,7 +47,7 @@ public class UserAuthenticated implements UserDetails {
      */
     @Override
     public String getPassword() {
-        return user.getSenha();
+        return this.user.getSenha();
     }
 
     /**
@@ -60,6 +60,6 @@ public class UserAuthenticated implements UserDetails {
      */
     @Override
     public String getUsername() {
-        return user.getNome();
+        return this.user.getNome();
     }
 }

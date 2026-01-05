@@ -30,7 +30,7 @@ public interface IUserService {
 
     void resetUserPassword(@Valid AuthResetPasswordDTO userDTO);
 
-    void forgotUserPassword(@Valid AuthForgotPasswordDTO forgotPasswordDTO);
+    void resetUserPassword(@Valid AuthForgotPasswordDTO forgotPasswordDTO);
 
     void updateRole(@NotNull User requester, Role role);
 

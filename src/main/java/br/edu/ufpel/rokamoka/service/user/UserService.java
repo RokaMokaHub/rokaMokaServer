@@ -21,6 +21,7 @@ import br.edu.ufpel.rokamoka.exceptions.RokaMokaNoUserInContextException;
 import br.edu.ufpel.rokamoka.repository.RoleRepository;
 import br.edu.ufpel.rokamoka.repository.UserRepository;
 import br.edu.ufpel.rokamoka.security.AuthenticationService;
+import br.edu.ufpel.rokamoka.security.JwtService;
 import br.edu.ufpel.rokamoka.service.device.IDeviceService;
 import br.edu.ufpel.rokamoka.service.mokadex.MokadexService;
 import jakarta.validation.Valid;
@@ -58,6 +59,7 @@ public class UserService implements IUserService {
     private final PasswordEncoder passwordEncoder;
     private final MokadexService mokadexService;
     private final IDeviceService deviceService;
+    private final JwtService jwtService;
 
     /**
      * Generates a random password consisting of 10 lowercase letters.
@@ -145,14 +147,15 @@ public class UserService implements IUserService {
     /**
      * Resets the password for a specific user.
      *
-     * @param forgotPasswordDTO A {@code AuthForgotPasswordDTO} containing the user's credentials.
+     * @param forgotPasswordDTO A {@code AuthForgotPasswordDTO} containing user info.
      *
      * @throws RokaMokaContentNotFoundException if the user specified in the request is not found.
      */
     @Override
     @Transactional(propagation = REQUIRED)
-    public void forgotUserPassword(AuthForgotPasswordDTO forgotPasswordDTO) {
-        User user = this.getForgotPasswordUser(forgotPasswordDTO);
+    public void resetUserPassword(AuthForgotPasswordDTO forgotPasswordDTO) {
+        String username = this.jwtService.getSubject(forgotPasswordDTO.token());
+        User user = this.getByNome(username);
         user.setSenha(this.passwordEncoder.encode(forgotPasswordDTO.newPassword()));
         this.userRepository.save(user);
     }
@@ -232,13 +235,6 @@ public class UserService implements IUserService {
         return newUser;
     }
 
-    private User getForgotPasswordUser(AuthForgotPasswordDTO forgotPasswordDTO) {
-        if (!this.userRepository.existsByNomeAndEmail(forgotPasswordDTO.name(), forgotPasswordDTO.email())) {
-            throw new RokaMokaContentNotFoundException("Nome de usuário ou email inválido");
-        }
-        return this.getByNome(forgotPasswordDTO.name());
-    }
-
     private User getResetPasswordUser(AuthResetPasswordDTO resetPasswordDTO) {
         if (!this.userRepository.existsByNomeAndEmail(resetPasswordDTO.name(), resetPasswordDTO.email())) {
             throw new RokaMokaContentNotFoundException("Nome de usuário ou email inválido");
@@ -275,10 +271,10 @@ public class UserService implements IUserService {
      */
     private void validateOrThrowException(User user) {
         if (user.getEmail() != null && this.userRepository.existsByEmail(user.getEmail())) {
-            throw new RokaMokaContentDuplicatedException("O email já está sendo utilizado,");
+            throw new RokaMokaContentDuplicatedException("O email já está sendo utilizado!");
         }
         if (user.getNome() != null && this.userRepository.existsByNome(user.getNome())) {
-            throw new RokaMokaContentDuplicatedException("O nome do usuário já está sendo utilizado");
+            throw new RokaMokaContentDuplicatedException("O nome do usuário já está sendo utilizado!");
         }
     }
 }

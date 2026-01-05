@@ -1,11 +1,10 @@
 package br.edu.ufpel.rokamoka.config;
 
-
 import br.edu.ufpel.rokamoka.core.RoleEnum;
 import br.edu.ufpel.rokamoka.security.EndpointAccessRules;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.RSAKey.Builder;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
@@ -44,9 +43,9 @@ public class SecurityConfig {
                 .httpBasic(Customizer.withDefaults())
                 .authorizeHttpRequests(authorizeHttpRequests ->
                         authorizeHttpRequests
-                                .requestMatchers(endpointAccessRules.getPermissionsEndpoints()).hasAnyAuthority(RoleEnum.CURATOR.name(), RoleEnum.ADMINISTRATOR.name())
-                                .requestMatchers(endpointAccessRules.getExhibitionEndpoints()).hasAnyAuthority(RoleEnum.RESEARCHER.name(), RoleEnum.ADMINISTRATOR.name())
-                                .requestMatchers(endpointAccessRules.getEndpointsWithoutAuthentication())
+                                .requestMatchers(this.endpointAccessRules.getPermissionsEndpoints()).hasAnyAuthority(RoleEnum.CURATOR.name(), RoleEnum.ADMINISTRATOR.name())
+                                .requestMatchers(this.endpointAccessRules.getExhibitionEndpoints()).hasAnyAuthority(RoleEnum.RESEARCHER.name(), RoleEnum.ADMINISTRATOR.name())
+                                .requestMatchers(this.endpointAccessRules.getEndpointWhiteList())
                                 .permitAll()
                                 .anyRequest()
                                 .authenticated()
@@ -63,17 +62,12 @@ public class SecurityConfig {
 
     @Bean
     JwtDecoder jwtDecoder() {
-        return NimbusJwtDecoder
-                .withPublicKey(properties.getPublicKey())
-                .build();
+        return NimbusJwtDecoder.withPublicKey(this.properties.getPublicKey()).build();
     }
 
     @Bean
     JwtEncoder jwtEncoder() {
-        JWK jwk = new RSAKey
-                .Builder(properties.getPublicKey())
-                .privateKey(properties.getPrivateKey())
-                .build();
+        JWK jwk = new Builder(this.properties.getPublicKey()).privateKey(this.properties.getPrivateKey()).build();
         JWKSource<SecurityContext> jwkSource = new ImmutableJWKSet<>(new JWKSet(jwk));
         return new NimbusJwtEncoder(jwkSource);
     }

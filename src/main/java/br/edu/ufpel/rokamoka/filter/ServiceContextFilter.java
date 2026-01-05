@@ -59,7 +59,7 @@ public class ServiceContextFilter implements Filter {
 
         ServiceContext ctx = ServiceContext.newContext();
 
-        if (shouldSkipFilter(request)) {
+        if (this.shouldSkipFilter(request)) {
             chain.doFilter(request, response);
             return;
         }
@@ -87,7 +87,7 @@ public class ServiceContextFilter implements Filter {
      */
     private boolean shouldSkipFilter(ServletRequest request) {
         String requestPath = new UrlPathHelper().getPathWithinApplication((HttpServletRequest) request);
-        return Arrays.stream(this.endpointAccessRules.getEndpointsWithoutAuthentication())
+        return Arrays.stream(this.endpointAccessRules.getEndpointWhiteList())
                 .anyMatch(endpointsPermited -> this.matcher.match(endpointsPermited, requestPath));
     }
 

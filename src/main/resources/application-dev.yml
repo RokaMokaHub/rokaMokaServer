@@ -1,67 +1,9 @@
-spring:
+# As configurações comuns a todos os ambientes estão em application.yml.
+# Este arquivo contém apenas as configurações específicas para o ambiente de DESENVOLVIMENTO.
 
+spring:
   application:
     name: roka-moka-dev
 
-  datasource:
-    # URL do banco de dados, configurável via variável de ambiente. Default: localhost.
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/RokaMokaDb}
-
-    # Credenciais do banco, também configuráveis via env.
-    username: ${SPRING_DATASOURCE_USERNAME:rokamoka}
-    password: ${SPRING_DATASOURCE_PASSWORD:teste123}
-
-    driver-class-name: org.postgresql.Driver
-    type: com.zaxxer.hikari.HikariDataSource
-
-    hikari:
-      # Nome do pool para identificar logs
-      pool-name: HikariCP-Pool
-
-      # Máximo de conexões simultâneas no pool
-      maximum-pool-size: ${DB_MAX_POOL_SIZE:10}
-
-      # Mínimo de conexões inativas mantidas
-      minimum-idle: ${DB_MIN_IDLE:5}
-
-      # Tempo máximo que uma conexão pode ficar ociosa (em ms)
-      idle-timeout: ${DB_IDLE_TIMEOUT:180000} # 3 minutos
-
-      # Tempo máximo de vida de uma conexão (em ms)
-      max-lifetime: ${DB_MAX_LIFETIME:900000} # 15 minutos
-
-      # Tempo máximo de espera por uma conexão do pool (em ms)
-      connection-timeout: ${DB_CONNECTION_TIMEOUT:3000} # 3 segundos
-
-      # Tempo para validação da conexão (em ms)
-      validation-timeout: ${DB_VALIDATION_TIMEOUT:5000} # 5 segundos
-
   jpa:
-    hibernate:
-      # Define se o Hibernate deve criar/atualizar o schema. Ideal manter como "none" em produção.
-      ddl-auto: ${JPA_DDL_AUTO:none}
-    open-in-view: false
-    properties:
-      hibernate:
-        format_sql: true
-    show-sql: false
-
-  rabbitmq:
-    host: ${SPRING_RABBITMQ_HOST:localhost}
-    port: ${SPRING_RABBITMQ_PORT:5672}
-    username: ${SPRING_RABBITMQ_USERNAME:rokamoka}
-    password: ${SPRING_RABBITMQ_PASSWORD:teste123}
-    connection-timeout: ${SPRING_RABBITMQ_CONNECTION_TIMEOUT:30000}
-
-jwt:
-  private:
-    key: classpath:app.key
-  public:
-    key: classpath:app.pub
-
-## CUSTOM CONFIGURATIONS
-broker:
-  exchange:
-    emblems: emblems.v1
-  queue:
-    collect-emblem: emblems.v1.collect
+    show-sql: true
