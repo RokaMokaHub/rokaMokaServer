@@ -1,0 +1,9 @@
+# As configurações comuns a todos os ambientes estão em application.yml.
+# Este arquivo contém apenas as configurações específicas para o ambiente de DESENVOLVIMENTO.
+
+spring:
+  application:
+    name: roka-moka-dev
+
+  jpa:
+    show-sql: true

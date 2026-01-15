@@ -1,0 +1,80 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: roka-moka-app
+    restart: on-failure
+    depends_on:
+      db:
+        condition: service_healthy
+      broker:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILE:-dev}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:${DB_PORT}/${DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_RABBITMQ_HOST: broker
+      SPRING_RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
+      SPRING_RABBITMQ_USERNAME: ${RABBITMQ_USER:-guest}
+      SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
+      SPRING_RABBITMQ_CONNECTION_TIMEOUT: ${RABBITMQ_CONNECTION_TIMEOUT:-30000}
+      SPRING_EMAIL_HOST: ${EMAIL_HOST}
+      SPRING_EMAIL_PASSWORD: ${EMAIL_PASSWORD}
+      SPRING_EMAIL_USERNAME: ${EMAIL_USERNAME}
+    ports:
+      - "${APP_PORT_EXPOSE:-8080}:8080"
+      - "${APP_DEBUG_PORT_EXPOSE:-5005}:5005"
+    volumes:
+      - app-logs:/app/logs
+    networks:
+      - hoka-moka-network
+
+  db:
+    image: postgres:15-alpine
+    container_name: roka-moka-db
+    restart: on-failure
+    volumes:
+      - db-data:/var/lib/postgresql/data/
+      - ./initial-dump.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "${DB_PORT_EXPOSE}:${DB_PORT}"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hoka-moka-network
+
+  broker:
+    image: rabbitmq:3-management-alpine
+    container_name: roka-moka-broker
+    ports:
+      - "${RABBITMQ_PORT_EXPOSE}:${RABBITMQ_PORT}"
+      - "${RABBITMQ_MANAGEMENT_PORT_EXPOSE}:${RABBITMQ_MANAGEMENT_PORT}"
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-guest}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD:-guest}
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    networks:
+      - hoka-moka-network
+
+volumes:
+  db-data:
+    name: rokamoka-db
+  app-logs:
+    name: rokamoka-logs
+
+networks:
+  hoka-moka-network:
+    driver: bridge

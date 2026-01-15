@@ -1,0 +1,6 @@
+# As configurações comuns a todos os ambientes estão em application.yml.
+# Este arquivo contém apenas as configurações específicas para o ambiente de PRODUÇÃO.
+
+spring:
+  application:
+    name: roka-moka-prod

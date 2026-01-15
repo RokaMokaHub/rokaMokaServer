@@ -1,0 +1,11 @@
+
+
+${AnsiColor.BRIGHT_RED}██████╗  ██████╗ ██╗  ██╗ █████╗     ███╗   ███╗ ██████╗ ██╗  ██╗ █████╗
+${AnsiColor.BRIGHT_RED}██╔══██╗██╔═══██╗██║ ██╔╝██╔══██╗    ████╗ ████║██╔═══██╗██║ ██╔╝██╔══██╗
+${AnsiColor.BRIGHT_BLUE}██████╔╝██║   ██║█████╔╝ ███████║    ██╔████╔██║██║   ██║█████╔╝ ███████║
+${AnsiColor.BRIGHT_BLUE}██╔══██╗██║   ██║██╔═██╗ ██╔══██║    ██║╚██╔╝██║██║   ██║██╔═██╗ ██╔══██║
+${AnsiColor.BRIGHT_GREEN}██║  ██║╚██████╔╝██║  ██╗██║  ██║    ██║ ╚═╝ ██║╚██████╔╝██║  ██╗██║  ██║
+${AnsiColor.BRIGHT_GREEN}╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝    ╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝
+
+${AnsiColor.BRIGHT_RED}Powered by ${AnsiColor.BRIGHT_BLUE}:: Spring Boot :: ${AnsiColor.BRIGHT_GREEN}${spring-boot.version}
+${AnsiColor.DEFAULT}
