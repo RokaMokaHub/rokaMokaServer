@@ -22,7 +22,7 @@ public interface IMokadexService {
 
     Mokadex findById(@NotNull Long mokadexId);
 
-    Mokadex getOrCreateMokadexByUser(@NotNull User usuario);
+    Mokadex getOrCreateMokadexByUser(@NotNull User user);
 
     MokadexOutputDTO getMokadexOutputDTOByMokadex(@NotNull Mokadex mokadex);
 
