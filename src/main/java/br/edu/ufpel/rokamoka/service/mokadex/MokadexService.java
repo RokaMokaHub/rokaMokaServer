@@ -78,19 +78,19 @@ public class MokadexService implements IMokadexService {
     /**
      * Retrieves an {@link Optional} containing the {@link Mokadex} associated with the specified {@link User}.
      *
-     * @param usuario The {@code User} whose associated {@link Mokadex} is to be retrieved.
+     * @param user The {@code User} whose associated {@link Mokadex} is to be retrieved.
      *
      * @return An {@code Optional} containing the {@code Mokadex} if found, or empty if no matching {@code Mokadex}
      * exists.
      * @see MokadexRepository#findMokadexByUsername(String)
      */
-    private Optional<Mokadex> getMokadexByUser(User usuario) {
-        log.info("Buscando pelo [{}] do [{}]", Mokadex.class.getSimpleName(), usuario);
+    private Optional<Mokadex> getMokadexByUser(User user) {
+        log.info("Buscando pelo [{}] do [{}]", Mokadex.class.getSimpleName(), user);
 
-        Optional<Mokadex> maybeMokadex = this.mokadexRepository.findMokadexByUsername(usuario.getNome());
+        Optional<Mokadex> maybeMokadex = this.mokadexRepository.findMokadexByUsername(user.getNome());
         maybeMokadex.ifPresentOrElse(mokadex -> log.info("[{}] foi encontrado", mokadex),
                 () -> log.info("Não foi encontrado nenhum [{}] para o [{}] informado", Mokadex.class.getSimpleName(),
-                        usuario));
+                        user));
 
         return maybeMokadex;
     }
