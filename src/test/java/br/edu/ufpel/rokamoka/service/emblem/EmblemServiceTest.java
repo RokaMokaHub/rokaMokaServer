@@ -195,7 +195,7 @@ class EmblemServiceTest implements MockRepository<Emblem> {
     }
 
     @Test
-    void existsEmblemByExhibitionId_shouldReturnFale_whenDoesNotExist() {
+    void existsEmblemByExhibitionId_shouldReturnFalse_whenDoesNotExist() {
         // Arrange
         when(this.emblemRepository.existsEmblemByExhibitionId(anyLong())).thenReturn(false);
 
