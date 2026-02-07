@@ -54,7 +54,7 @@ public class EmailService {
 
     private String generatePasswordResetLink(User user) {
         String token = this.jwtService.generateToken(new UserAuthenticated(user));
-        return "http://rokamoka.inf.ufpel.edu.br/auth/reset?token=" + token;
+        return "http://rokamoka-mobile.inf.ufpel.edu.br/auth/reset?token=" + token;
     }
 
     private void sendEmail(EmailDetails details) {
