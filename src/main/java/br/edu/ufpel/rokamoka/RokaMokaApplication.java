@@ -1,6 +1,7 @@
 package br.edu.ufpel.rokamoka;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -22,7 +23,6 @@ public class RokaMokaApplication implements ApplicationContextAware, Application
     private static ApplicationContext ctx;
 
     public static void main(String[] args) {
-
         String property = "user.timezone";
         System.setProperty(property, TIMEZONE);
         String timeZone = System.getProperty(property);
@@ -40,17 +40,13 @@ public class RokaMokaApplication implements ApplicationContextAware, Application
                 env.getProperty("spring.application.name"), timeZone);
     }
 
-    public static <T> T getBean(Class<T> clazz) {
-        return ctx.getBean(clazz);
-    }
-
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+    public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
         ctx = applicationContext;
     }
 
     @Override
-    public void onApplicationEvent(ContextClosedEvent event) {
+    public void onApplicationEvent(@NonNull ContextClosedEvent event) {
         log.warn("""
                  
                  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
