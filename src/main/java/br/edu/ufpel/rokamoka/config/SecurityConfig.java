@@ -36,15 +36,18 @@ public class SecurityConfig {
     private final EndpointAccessRules endpointAccessRules;
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationConverter jwtAuthenticationConverter) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationConverter jwtAuthenticationConverter)
+    throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(Customizer.withDefaults())
                 .authorizeHttpRequests(authorizeHttpRequests ->
                         authorizeHttpRequests
-                                .requestMatchers(this.endpointAccessRules.getPermissionsEndpoints()).hasAnyAuthority(RoleEnum.CURATOR.name(), RoleEnum.ADMINISTRATOR.name())
-                                .requestMatchers(this.endpointAccessRules.getExhibitionEndpoints()).hasAnyAuthority(RoleEnum.RESEARCHER.name(), RoleEnum.ADMINISTRATOR.name())
+                                .requestMatchers(this.endpointAccessRules.getPermissionsEndpoints())
+                                .hasAnyAuthority(RoleEnum.CURATOR.name(), RoleEnum.ADMINISTRATOR.name())
+                                .requestMatchers(this.endpointAccessRules.getExhibitionEndpoints())
+                                .hasAnyAuthority(RoleEnum.RESEARCHER.name(), RoleEnum.ADMINISTRATOR.name())
                                 .requestMatchers(this.endpointAccessRules.getEndpointWhiteList())
                                 .permitAll()
                                 .anyRequest()

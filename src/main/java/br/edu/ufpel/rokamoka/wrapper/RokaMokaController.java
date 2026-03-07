@@ -1,16 +1,13 @@
 package br.edu.ufpel.rokamoka.wrapper;
 
-
+import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
+import br.edu.ufpel.rokamoka.context.ServiceContext;
+import br.edu.ufpel.rokamoka.utils.DateUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-
-import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
-import br.edu.ufpel.rokamoka.context.ServiceContext;
-import br.edu.ufpel.rokamoka.utils.DateUtils;
-
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * <p>The {@code RokaMokaController} uses {@link ServiceContext} to maintain execution metadata
@@ -41,6 +38,16 @@ public abstract class RokaMokaController {
     private static final String EXECUTION_END_TIME = "Execution-End-Time";
     private static final String EXECUTION_ELAPSED_TIME = "Execution-Elapsed-Time";
 
+    private static HttpHeaders buildResponseHeaders(ServiceContext ctx) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Custom-Headers", String.join(", ", EXECUTION_UUID, EXECUTION_START_TIME, EXECUTION_END_TIME, EXECUTION_ELAPSED_TIME));
+        headers.add(EXECUTION_UUID, ctx.getExecutionUUID());
+        headers.add(EXECUTION_START_TIME, DateUtils.formatDateTimeMillis(ctx.getStartTime()));
+        headers.add(EXECUTION_END_TIME, DateUtils.formatDateTimeMillis(ctx.getEndTime()));
+        headers.add(EXECUTION_ELAPSED_TIME, ctx.getElapsedTime() + "ms");
+        return headers;
+    }
+
     protected ResponseEntity<ApiResponseWrapper<Void>> success() {
         log.info("Sucesso ao executar APIResponse<Void>");
 
@@ -54,7 +61,8 @@ public abstract class RokaMokaController {
     }
 
     protected <T> ResponseEntity<ApiResponseWrapper<T>> success(T response) {
-        log.info("Sucesso ao executar APIResponse<{}>", response.getClass().getSimpleName());
+        log.info("Sucesso ao executar APIResponse<{}>",
+                response == null ? "" : response.getClass().getSimpleName());
 
         ServiceContext ctx = ServiceContext.getContext();
         ctx.setEndTime(System.currentTimeMillis());
@@ -77,16 +85,5 @@ public abstract class RokaMokaController {
         ApiResponseWrapper<Void> body = new ApiResponseWrapper<>(ctx);
 
         return ResponseEntity.status(status).headers(headers).body(body);
-    }
-
-    private HttpHeaders buildResponseHeaders(ServiceContext ctx) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Custom-Headers", String.join(", ",
-                EXECUTION_UUID, EXECUTION_START_TIME, EXECUTION_END_TIME, EXECUTION_ELAPSED_TIME));
-        headers.add(EXECUTION_UUID, ctx.getExecutionUUID());
-        headers.add(EXECUTION_START_TIME, DateUtils.formatDateTimeMillis(ctx.getStartTime()));
-        headers.add(EXECUTION_END_TIME, DateUtils.formatDateTimeMillis(ctx.getEndTime()));
-        headers.add(EXECUTION_ELAPSED_TIME, ctx.getElapsedTime() + "ms");
-        return headers;
     }
 }

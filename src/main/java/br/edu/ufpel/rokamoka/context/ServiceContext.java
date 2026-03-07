@@ -24,7 +24,6 @@ public class ServiceContext {
     // for thread timing
     private final long startTime = System.currentTimeMillis();
     private long endTime;
-    private long elapsedTime;
 
     // for request context
     private UserAuthenticated user;
@@ -44,7 +43,7 @@ public class ServiceContext {
         MDC.remove(USERNAME);
     }
 
-    public static synchronized ServiceContext getContext() {
+    public static ServiceContext getContext() {
         ServiceContext ctx = threadLocal.get();
         if (ctx == null) {
             ctx = newContext();
@@ -64,7 +63,7 @@ public class ServiceContext {
         return ctx;
     }
 
-    public static synchronized void clearContext() {
+    public static void clearContext() {
         if (threadLocal.get() != null) {
             log.debug("Limpando contexto: [{}]", threadLocal.get().executionUUID);
         }
@@ -77,9 +76,8 @@ public class ServiceContext {
         MDC.put(USERNAME, user.getUsername());
     }
 
-    public void setEndTime(long endTime) {
-        this.endTime = endTime;
-        this.elapsedTime = this.endTime - startTime;
+    public long getElapsedTime() {
+        return this.endTime - this.startTime;
     }
 
     public String getUsernameOrThrow() throws RokaMokaNoUserInContextException {
