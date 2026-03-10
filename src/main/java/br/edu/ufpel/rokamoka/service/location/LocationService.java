@@ -39,14 +39,14 @@ class LocationService implements ILocationService {
     private final LocationRepository locationRepository;
     private final AddressRepository addressRepository;
 
+    private static LocationOutputDTO toOutput(Location location) {
+        return new LocationOutputDTO(location);
+    }
+
     @Override
     public LocationOutputDTO getLocation(@NotNull Long id) {
         Location location = this.getLocationOrElseThrow(id);
         return toOutput(location);
-    }
-
-    private static LocationOutputDTO toOutput(Location location) {
-        return new LocationOutputDTO(location);
     }
 
     @Override
@@ -69,16 +69,10 @@ class LocationService implements ILocationService {
         Address address = this.getByAtributesIn(input.endereco())
                 .orElseGet(() -> new AddressBuilder(input.endereco()).build());
 
-        Location location = new LocationBuilder(input, address).build();
+        Location location = new LocationBuilder(address, input).build();
         location = this.locationRepository.save(location);
 
         return toOutput(location);
-    }
-
-    private Optional<Address> getByAtributesIn(AddressInputDTO input) {
-        return StringUtils.isBlank(input.complemento())
-                ? this.addressRepository.findByRuaAndNumeroAndCep(input.rua(), input.numero(), input.cep())
-                : this.addressRepository.findByRuaAndNumeroAndCepAndComplemento(input.rua(), input.numero(), input.cep(), input.complemento());
     }
 
     @Override
@@ -89,12 +83,11 @@ class LocationService implements ILocationService {
 
         AddressInputDTO addressDTO = input.endereco();
         if (addressDTO != null) {
-            address = new AddressBuilder(address.getId(), addressDTO).build();
+            address = new AddressBuilder(address, addressDTO).update();
         }
 
-        location = new LocationBuilder(location.getId(), input, address).build();
+        location = new LocationBuilder(location, address, input).update();
         location = this.locationRepository.save(location);
-
         return toOutput(location);
     }
 
@@ -115,5 +108,11 @@ class LocationService implements ILocationService {
     public Location getLocationOrElseThrow(Long id) {
         return this.locationRepository.findById(id)
                 .orElseThrow(() -> new RokaMokaContentNotFoundException("Localização não encontrada: ID=" + id));
+    }
+
+    private Optional<Address> getByAtributesIn(AddressInputDTO input) {
+        return StringUtils.isBlank(input.complemento())
+                ? this.addressRepository.findByRuaAndNumeroAndCep(input.rua(), input.numero(), input.cep())
+                : this.addressRepository.findByRuaAndNumeroAndCepAndComplemento(input.rua(), input.numero(), input.cep(), input.complemento());
     }
 }
