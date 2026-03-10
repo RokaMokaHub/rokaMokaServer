@@ -26,7 +26,7 @@ public final class AddressBuilder {
 
     public Address build() {
         if (this.address != null) {
-            throw new IllegalStateException("Address must be null when building");
+            throw new IllegalStateException("Address deve ser null ao criar");
         }
         return Address.builder()
                 .rua(this.input.rua())
@@ -38,7 +38,7 @@ public final class AddressBuilder {
 
     public Address update() {
         if (this.address == null) {
-            throw new IllegalStateException("Address cannot be null when updating");
+            throw new IllegalStateException("Address não pode ser null ao atualizar");
         }
         this.address.setRua(this.input.rua());
         this.address.setNumero(this.input.numero());

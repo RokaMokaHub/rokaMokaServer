@@ -30,7 +30,7 @@ public final class LocationBuilder {
 
     public Location build() {
         if (this.location != null) {
-            throw new IllegalStateException("Location must be null when building");
+            throw new IllegalStateException("Location deve ser null ao criar");
         }
         return Location.builder()
                 .nome(this.input.nome())
@@ -40,7 +40,7 @@ public final class LocationBuilder {
 
     public Location update() {
         if (this.location == null) {
-            throw new IllegalStateException("Location cannot be null when updating");
+            throw new IllegalStateException("Location não pode ser null ao atualizar");
         }
         this.location.setNome(this.input.nome());
         this.location.setEndereco(this.address);

@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import static org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS;
+
 /**
  * <p>The {@code RokaMokaController} uses {@link ServiceContext} to maintain execution metadata
  * and build meaningful HTTP response headers.
@@ -40,7 +42,14 @@ public abstract class RokaMokaController {
 
     private static HttpHeaders buildResponseHeaders(ServiceContext ctx) {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Custom-Headers", String.join(", ", EXECUTION_UUID, EXECUTION_START_TIME, EXECUTION_END_TIME, EXECUTION_ELAPSED_TIME));
+        headers.add(
+                ACCESS_CONTROL_EXPOSE_HEADERS,
+                String.join(
+                        ", ",
+                        EXECUTION_UUID,
+                        EXECUTION_START_TIME,
+                        EXECUTION_END_TIME,
+                        EXECUTION_ELAPSED_TIME));
         headers.add(EXECUTION_UUID, ctx.getExecutionUUID());
         headers.add(EXECUTION_START_TIME, DateUtils.formatDateTimeMillis(ctx.getStartTime()));
         headers.add(EXECUTION_END_TIME, DateUtils.formatDateTimeMillis(ctx.getEndTime()));
@@ -61,7 +70,8 @@ public abstract class RokaMokaController {
     }
 
     protected <T> ResponseEntity<ApiResponseWrapper<T>> success(T response) {
-        log.info("Sucesso ao executar APIResponse<{}>",
+        log.info(
+                "Sucesso ao executar APIResponse<{}>",
                 response == null ? "" : response.getClass().getSimpleName());
 
         ServiceContext ctx = ServiceContext.getContext();

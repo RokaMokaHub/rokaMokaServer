@@ -66,7 +66,7 @@ class LocationService implements ILocationService {
             throw new RokaMokaContentDuplicatedException("Localização já existe");
         }
 
-        Address address = this.getByAtributesIn(input.endereco())
+        Address address = this.getAddressFromInput(input.endereco())
                 .orElseGet(() -> new AddressBuilder(input.endereco()).build());
 
         Location location = new LocationBuilder(address, input).build();
@@ -110,7 +110,7 @@ class LocationService implements ILocationService {
                 .orElseThrow(() -> new RokaMokaContentNotFoundException("Localização não encontrada: ID=" + id));
     }
 
-    private Optional<Address> getByAtributesIn(AddressInputDTO input) {
+    private Optional<Address> getAddressFromInput(AddressInputDTO input) {
         return StringUtils.isBlank(input.complemento())
                 ? this.addressRepository.findByRuaAndNumeroAndCep(input.rua(), input.numero(), input.cep())
                 : this.addressRepository.findByRuaAndNumeroAndCepAndComplemento(input.rua(), input.numero(), input.cep(), input.complemento());

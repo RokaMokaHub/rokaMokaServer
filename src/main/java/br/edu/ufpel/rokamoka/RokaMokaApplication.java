@@ -1,7 +1,6 @@
 package br.edu.ufpel.rokamoka;
 
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -11,6 +10,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.core.env.Environment;
+import org.springframework.lang.NonNull;
 
 import java.util.TimeZone;
 
