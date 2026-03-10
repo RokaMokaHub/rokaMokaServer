@@ -1,6 +1,7 @@
 package br.edu.ufpel.rokamoka.dto.location.input;
 
-import br.edu.ufpel.rokamoka.dto.GroupValidators;
+import br.edu.ufpel.rokamoka.dto.GroupValidators.Create;
+import br.edu.ufpel.rokamoka.dto.GroupValidators.Update;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -18,10 +19,11 @@ import jakarta.validation.constraints.Null;
  * @see AddressInputDTO
  */
 public record LocationInputDTO(
-        @NotNull(groups = GroupValidators.Update.class,
-                message = "O ID da localização é obrigatório durante a atualização")
-        @Null(groups = GroupValidators.Create.class,
-                message = "O ID da localização não pode ser fornecido durante a criação") Long id,
-        @NotBlank(message = "O nome da localização é obrigatório") String nome,
-        @NotNull(groups = GroupValidators.Create.class,
-                message = "O endereço é obrigatório") @Valid AddressInputDTO endereco) {}
+        @NotNull(groups = Update.class, message = "O ID da localização é obrigatório durante a atualização")
+        @Null(groups = Create.class, message = "O ID da localização não pode ser fornecido durante a criação")
+        Long id,
+        @NotBlank(message = "O nome da localização é obrigatório")
+        String nome,
+        @NotNull(groups = Create.class, message = "O endereço é obrigatório")
+        @Valid
+        AddressInputDTO endereco) {}

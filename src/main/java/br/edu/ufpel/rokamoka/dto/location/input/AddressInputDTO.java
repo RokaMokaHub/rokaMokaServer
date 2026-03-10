@@ -14,7 +14,11 @@ import jakarta.validation.constraints.NotBlank;
  * @author MauricioMucci
  * @see CepConstraint
  */
-public record AddressInputDTO(@NotBlank(message = "A rua é obrigatória") String rua,
-                              @NotBlank(message = "O número é obrigatório") String numero,
-                              @CepConstraint String cep,
-                              String complemento) {}
+public record AddressInputDTO(
+        @NotBlank(message = "A rua é obrigatória")
+        String rua,
+        @NotBlank(message = "O número é obrigatório")
+        String numero,
+        @CepConstraint
+        String cep,
+        String complemento) {}

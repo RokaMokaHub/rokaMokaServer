@@ -12,30 +12,38 @@ import br.edu.ufpel.rokamoka.dto.location.input.AddressInputDTO;
  */
 public final class AddressBuilder {
 
-    private Long existingId;
     private final AddressInputDTO input;
+    private final Address address;
 
     public AddressBuilder(AddressInputDTO input) {
-        this.input = input;
+        this(null, input);
     }
 
-    public AddressBuilder(Long existingId, AddressInputDTO input) {
-        this.existingId = existingId;
+    public AddressBuilder(Address address, AddressInputDTO input) {
+        this.address = address;
         this.input = input;
     }
 
     public Address build() {
-        Address address = Address.builder()
+        if (this.address != null) {
+            throw new IllegalStateException("Address deve ser null ao criar");
+        }
+        return Address.builder()
                 .rua(this.input.rua())
                 .numero(this.input.numero())
                 .cep(this.input.cep())
                 .complemento(this.input.complemento())
                 .build();
+    }
 
-        if (this.existingId != null) {
-            address.setId(this.existingId);
+    public Address update() {
+        if (this.address == null) {
+            throw new IllegalStateException("Address não pode ser null ao atualizar");
         }
-
-        return address;
+        this.address.setRua(this.input.rua());
+        this.address.setNumero(this.input.numero());
+        this.address.setCep(this.input.cep());
+        this.address.setComplemento(this.input.complemento());
+        return this.address;
     }
 }
