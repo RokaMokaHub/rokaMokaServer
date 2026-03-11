@@ -14,31 +14,36 @@ import br.edu.ufpel.rokamoka.dto.location.input.LocationInputDTO;
  */
 public final class LocationBuilder {
 
-    private Long existingId;
     private final LocationInputDTO input;
     private final Address address;
+    private final Location location;
 
-    public LocationBuilder(Long existingId, LocationInputDTO input, Address address) {
-        this.existingId = existingId;
-        this.input = input;
-        this.address = address;
+    public LocationBuilder(Address address, LocationInputDTO input) {
+        this(null, address, input);
     }
 
-    public LocationBuilder(LocationInputDTO input, Address address) {
+    public LocationBuilder(Location location, Address address, LocationInputDTO input) {
+        this.location = location;
         this.input = input;
         this.address = address;
     }
 
     public Location build() {
-        Location location = Location.builder()
+        if (this.location != null) {
+            throw new IllegalStateException("Location deve ser null ao criar");
+        }
+        return Location.builder()
                 .nome(this.input.nome())
                 .endereco(this.address)
                 .build();
+    }
 
-        if (this.existingId != null) {
-            location.setId(this.existingId);
+    public Location update() {
+        if (this.location == null) {
+            throw new IllegalStateException("Location não pode ser null ao atualizar");
         }
-
-        return location;
+        this.location.setNome(this.input.nome());
+        this.location.setEndereco(this.address);
+        return this.location;
     }
 }

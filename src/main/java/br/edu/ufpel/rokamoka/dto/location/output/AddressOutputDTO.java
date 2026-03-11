@@ -5,15 +5,16 @@ import br.edu.ufpel.rokamoka.core.Address;
 /**
  * A Data Transfer Object (DTO) representing the input data of a location.
  *
- * @param id The unique identifier of the address.
  * @param rua The street name of the address.
  * @param cep The postal code in format XXXXXXXX.
+ * @param numero The number of the address.
+ * @param complemento The complement of the address.
  *
  * @author MauricioMucci
  */
-public record AddressOutputDTO(Long id, String rua, String cep) {
+public record AddressOutputDTO(String rua, String cep, String numero, String complemento) {
 
     public AddressOutputDTO(Address address) {
-        this(address.getId(), address.getRua(), address.getCep());
+        this(address.getRua(), address.getCep(), address.getNumero(), address.getComplemento());
     }
 }
