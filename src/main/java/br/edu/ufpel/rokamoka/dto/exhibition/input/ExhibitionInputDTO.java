@@ -18,8 +18,11 @@ import jakarta.validation.constraints.Null;
  * @see br.edu.ufpel.rokamoka.core.Exhibition
  */
 public record ExhibitionInputDTO(
-        @NotNull(groups = Update.class, message = "O ID da exposição é obrigatório durante a atualização") @Null(
-                groups = Create.class, message = "O ID da exposição não pode ser fornecido durante a criação") Long id,
-        @NotBlank(message = "O nome da exposição é obrigatório") String name,
+        @NotNull(groups = Update.class, message = "O ID da exposição é obrigatório durante a atualização")
+        @Null(groups = Create.class, message = "O ID da exposição não pode ser fornecido durante a criação")
+        Long id,
+        @NotBlank(message = "O nome da exposição é obrigatório")
+        String name,
         String description,
-        @NotNull(groups = Create.class, message = "O ID do local é obrigatório durante a criação") Long locationId) {}
+        @NotNull(groups = Create.class, message = "O ID do local é obrigatório durante a criação")
+        Long locationId) {}
