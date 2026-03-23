@@ -128,7 +128,8 @@ CREATE TABLE public.obra
     updated_by   VARCHAR(255)                                                                                                    NOT NULL,
     created_date TIMESTAMP                                                                                                       NOT NULL,
     updated_date TIMESTAMP                                                                                                       NOT NULL,
-    CONSTRAINT obra_pkey PRIMARY KEY (id)
+    CONSTRAINT obra_pkey PRIMARY KEY (id),
+    CONSTRAINT unq_qrcode_obra UNIQUE (qr_code)
 );
 
 ALTER TABLE public.obra
