@@ -6,6 +6,7 @@ import br.edu.ufpel.rokamoka.core.Mokadex;
 import br.edu.ufpel.rokamoka.core.User;
 import br.edu.ufpel.rokamoka.dto.mokadex.output.MokadexOutputDTO;
 import br.edu.ufpel.rokamoka.dto.mokadex.output.MokadexSummaryDTO;
+import br.edu.ufpel.rokamoka.exceptions.RokaMokaNoUserInContextException;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.validation.annotation.Validated;
@@ -33,5 +34,5 @@ public interface IMokadexService {
 
     Set<Artwork> getMissingStarsByExhibition(@NotNull Long exhibitionId);
 
-    MokadexSummaryDTO getSummary();
+    MokadexSummaryDTO getSummary() throws RokaMokaNoUserInContextException;
 }

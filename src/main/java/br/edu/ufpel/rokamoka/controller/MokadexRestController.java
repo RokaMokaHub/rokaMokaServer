@@ -5,6 +5,7 @@ import br.edu.ufpel.rokamoka.core.Mokadex;
 import br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO;
 import br.edu.ufpel.rokamoka.dto.mokadex.output.MokadexOutputDTO;
 import br.edu.ufpel.rokamoka.dto.mokadex.output.MokadexSummaryDTO;
+import br.edu.ufpel.rokamoka.exceptions.RokaMokaNoUserInContextException;
 import br.edu.ufpel.rokamoka.service.mokadex.IMokadexService;
 import br.edu.ufpel.rokamoka.wrapper.RokaMokaController;
 import io.swagger.v3.oas.annotations.Operation;
@@ -67,7 +68,7 @@ public class MokadexRestController extends RokaMokaController {
     @Operation(summary = "Endpoint para obter resumo do Mokadex",
             description = "Operação para obter contadores de estrelas e emblemas do Mokadex do usuário logado")
     @GetMapping("/summary")
-    public ResponseEntity<ApiResponseWrapper<MokadexSummaryDTO>> getSummary() {
+    public ResponseEntity<ApiResponseWrapper<MokadexSummaryDTO>> getSummary() throws RokaMokaNoUserInContextException {
         var output = this.mokadexService.getSummary();
         return this.success(output);
     }

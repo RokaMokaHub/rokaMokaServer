@@ -7,14 +7,12 @@ import br.edu.ufpel.rokamoka.core.Emblem;
 import br.edu.ufpel.rokamoka.core.Exhibition;
 import br.edu.ufpel.rokamoka.core.Mokadex;
 import br.edu.ufpel.rokamoka.core.User;
-import br.edu.ufpel.rokamoka.dto.emblem.output.EmblemOutputDTO;
-import br.edu.ufpel.rokamoka.dto.mokadex.output.CollectionDTO;
 import br.edu.ufpel.rokamoka.dto.mokadex.output.MokadexOutputDTO;
 import br.edu.ufpel.rokamoka.dto.mokadex.output.MokadexSummaryDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
+import br.edu.ufpel.rokamoka.exceptions.RokaMokaNoUserInContextException;
 import br.edu.ufpel.rokamoka.repository.MokadexRepository;
-import br.edu.ufpel.rokamoka.security.UserAuthenticated;
 import br.edu.ufpel.rokamoka.service.artwork.IArtworkService;
 import br.edu.ufpel.rokamoka.service.emblem.IEmblemService;
 import br.edu.ufpel.rokamoka.service.exhibition.IExhibitionService;
@@ -89,8 +87,8 @@ public class MokadexService implements IMokadexService {
     public MokadexOutputDTO getMokadexOutputDTOByMokadex(@NotNull Mokadex mokadex) {
         log.info("Construindo {} para o {} informado", MokadexOutputDTO.class.getSimpleName(), mokadex);
 
-        Set<CollectionDTO> collectionDTOSet = new MokadexCollectionsBuilder(mokadex).buildCollectionSet();
-        Set<EmblemOutputDTO> emblemDTOSet = new MokadexEmblemsBuilder(mokadex).buildEmblemSet();
+        var collectionDTOSet = new MokadexCollectionsBuilder(mokadex).buildCollectionSet();
+        var emblemDTOSet = new MokadexEmblemsBuilder(mokadex).buildEmblemSet();
 
         return new MokadexOutputDTO(collectionDTOSet, emblemDTOSet);
     }
@@ -109,8 +107,8 @@ public class MokadexService implements IMokadexService {
     @Override
     @Transactional(propagation = REQUIRED)
     public Mokadex collectStar(@NotBlank String qrCode) {
-        Mokadex mokadex = this.getMokadexByLoggedUser();
-        Artwork artwork = this.artworkService.getByQrCodeOrThrow(qrCode);
+        var mokadex = this.getMokadexByLoggedUser();
+        var artwork = this.artworkService.getByQrCodeOrThrow(qrCode);
 
         if (mokadex.containsArtwork(artwork)) {
             this.sendMessageToBrokerIfReady(mokadex, artwork.getExhibition());
@@ -141,7 +139,7 @@ public class MokadexService implements IMokadexService {
     @Override
     @Transactional(propagation = REQUIRED)
     public Mokadex collectEmblem(Long mokadexId, Emblem emblem) {
-        Mokadex mokadex = this.findById(mokadexId);
+        var mokadex = this.findById(mokadexId);
 
         if (mokadex.containsEmblem(emblem)) {
             throw new RokaMokaContentDuplicatedException("Emblema já foi coletado");
@@ -166,8 +164,8 @@ public class MokadexService implements IMokadexService {
      */
     @Override
     public Set<Artwork> getMissingStarsByExhibition(@NotNull Long exhibitionId) {
-        Mokadex mokadex = this.getMokadexByLoggedUser();
-        Exhibition exhibition = this.exhibitionService.getExhibitionOrElseThrow(exhibitionId);
+        var mokadex = this.getMokadexByLoggedUser();
+        var exhibition = this.exhibitionService.getExhibitionOrElseThrow(exhibitionId);
         return this.mokadexRepository.findAllMissingStars(mokadex.getId(), exhibition.getId());
     }
 
@@ -177,10 +175,10 @@ public class MokadexService implements IMokadexService {
      * @return A {@link MokadexSummaryDTO} containing the emblem and star counts.
      */
     @Override
-    public MokadexSummaryDTO getSummary() {
-        var user = ServiceContext.getContext().getUser();
-        var starCount = this.mokadexRepository.getStarCount(user.getUsername());
-        var emblemCount = this.mokadexRepository.getEmblemCount(user.getUsername());
+    public MokadexSummaryDTO getSummary() throws RokaMokaNoUserInContextException {
+        var username = ServiceContext.getContext().getUsernameOrThrow();
+        var starCount = this.mokadexRepository.getStarCount(username);
+        var emblemCount = this.mokadexRepository.getEmblemCount(username);
         return new MokadexSummaryDTO(starCount, emblemCount);
     }
 
@@ -196,7 +194,7 @@ public class MokadexService implements IMokadexService {
     private Optional<Mokadex> getMokadexByUser(User user) {
         log.info("Buscando pelo [{}] do [{}]", Mokadex.class.getSimpleName(), user);
 
-        Optional<Mokadex> maybeMokadex = this.mokadexRepository.findMokadexByUsername(user.getNome());
+        var maybeMokadex = this.mokadexRepository.findMokadexByUsername(user.getNome());
         maybeMokadex.ifPresentOrElse(
                 mokadex -> log.info("[{}] foi encontrado", mokadex),
                 () -> log.info(
@@ -225,8 +223,8 @@ public class MokadexService implements IMokadexService {
     }
 
     private Mokadex getMokadexByLoggedUser() {
-        UserAuthenticated loggedInUser = ServiceContext.getContext().getUser();
-        return this.mokadexRepository.findMokadexByUsername(loggedInUser.getUsername())
+        var user = ServiceContext.getContext().getUser();
+        return this.mokadexRepository.findMokadexByUsername(user.getUsername())
                 .orElseThrow(() -> new ServiceException("Mokadex não encontrado para usuário logado"));
     }
 
