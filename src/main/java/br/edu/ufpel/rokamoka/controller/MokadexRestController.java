@@ -45,8 +45,8 @@ public class MokadexRestController extends RokaMokaController {
     @PostMapping(value = "/collect/{qrcode}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseWrapper<MokadexOutputDTO>> collectStar(
             @PathVariable(value = "qrcode") String qrCode) {
-        Mokadex mokadex = this.mokadexService.collectStar(qrCode);
-        MokadexOutputDTO output = this.mokadexService.getMokadexOutputDTOByMokadex(mokadex);
+        var mokadex = this.mokadexService.collectStar(qrCode);
+        var output = this.mokadexService.getMokadexOutputDTOByMokadex(mokadex);
         return this.success(output);
     }
 
@@ -57,7 +57,7 @@ public class MokadexRestController extends RokaMokaController {
     @GetMapping("/missing/{exhibitionId}")
     public ResponseEntity<ApiResponseWrapper<Set<ArtworkOutputDTO>>> findMissingStarsByExhibition(
             @PathVariable Long exhibitionId) {
-        Set<ArtworkOutputDTO> output = this.mokadexService.getMissingStarsByExhibition(exhibitionId)
+        var output = this.mokadexService.getMissingStarsByExhibition(exhibitionId)
                 .stream()
                 .map(ArtworkOutputDTO::new)
                 .collect(Collectors.toUnmodifiableSet());

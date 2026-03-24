@@ -56,12 +56,30 @@ public interface MokadexRepository extends JpaRepository<Mokadex, Long> {
            NOT EXISTS (SELECT 1 FROM Mokadex m JOIN m.artworks a2 WHERE a1.id = a2.id and m.id = :mokadexId)""")
     Set<Artwork> findAllMissingStars(Long mokadexId, Long exhibitionId);
 
+    /**
+     * Retrieves the count of distinct artworks (stars) associated with a Mokadex entity
+     * for a specific user identified by their username.
+     *
+     * @param username The username of the {@link User} whose Mokadex is being queried.
+     *
+     * @return The total number of unique artworks (stars) associated with the specified user's Mokadex.
+     *         Returns {@code 0} if the user has no associated Mokadex or if no artworks exist for their Mokadex.
+     */
     @Query("""
            SELECT COUNT(DISTINCT a.id) FROM Mokadex m
            JOIN m.artworks a
            WHERE m.usuario.nome = :username""")
     Long getStarCount(String username);
 
+    /**
+     * Retrieves the count of distinct emblems associated with a Mokadex entity
+     * for a specific user identified by their username.
+     *
+     * @param username The username of the {@link User} whose Mokadex is being queried.
+     *
+     * @return The total number of unique emblems associated with the specified user's Mokadex.
+     *         Returns {@code 0} if the user has no associated Mokadex or if no emblems exist for their Mokadex.
+     */
     @Query("""
            SELECT COUNT(DISTINCT e.id) FROM Mokadex m
            JOIN m.emblems e

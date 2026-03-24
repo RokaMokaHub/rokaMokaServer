@@ -171,6 +171,11 @@ public class MokadexService implements IMokadexService {
         return this.mokadexRepository.findAllMissingStars(mokadex.getId(), exhibition.getId());
     }
 
+    /**
+     * Retrieves a summary of the user's Mokadex, including the count of emblems and stars.
+     *
+     * @return A {@link MokadexSummaryDTO} containing the emblem and star counts.
+     */
     @Override
     public MokadexSummaryDTO getSummary() {
         var user = ServiceContext.getContext().getUser();
