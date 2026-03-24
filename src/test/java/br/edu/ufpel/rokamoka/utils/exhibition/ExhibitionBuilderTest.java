@@ -6,6 +6,7 @@ import br.edu.ufpel.rokamoka.dto.exhibition.input.ExhibitionInputDTO;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -24,11 +25,11 @@ class ExhibitionBuilderTest {
     @Test
     void build_shouldThrowIllegalStateException_whenExhibitionIsNotNull() {
         // Arrange
-        Exhibition exhibition = mock(Exhibition.class);
-        Location location = mock(Location.class);
-        ExhibitionInputDTO input = mock(ExhibitionInputDTO.class);
+        var exhibition = mock(Exhibition.class);
+        var location = mock(Location.class);
+        var input = mock(ExhibitionInputDTO.class);
 
-        ExhibitionBuilder builder = new ExhibitionBuilder(exhibition, location, input);
+        var builder = new ExhibitionBuilder(exhibition, location, input);
 
         // Act & Assert
         assertThrows(IllegalStateException.class, builder::build);
@@ -37,19 +38,21 @@ class ExhibitionBuilderTest {
     @Test
     void build_shouldBuildExhibition_whenExhibitionIsNull() {
         // Arrange
-        Location location = Instancio.create(Location.class);
-        ExhibitionInputDTO input = Instancio.create(ExhibitionInputDTO.class);
+        var location = Instancio.create(Location.class);
+        var input = Instancio.create(ExhibitionInputDTO.class);
 
-        ExhibitionBuilder builder = new ExhibitionBuilder(location, input);
+        var builder = new ExhibitionBuilder(location, input);
 
         // Act
-        Exhibition result = builder.build();
+        var result = builder.build();
 
         // Assert
-        assertNotNull(result);
-        assertEquals(location, result.getLocation());
-        assertEquals(input.name(), result.getName());
-        assertEquals(input.description(), result.getDescription());
+        assertAll(
+                () -> assertNotNull(result),
+                () -> assertEquals(location, result.getLocation()),
+                () -> assertEquals(input.name(), result.getName()),
+                () -> assertEquals(input.description(), result.getDescription())
+        );
     }
     //endregion
 
@@ -57,10 +60,10 @@ class ExhibitionBuilderTest {
     @Test
     void update_shouldThrowIllegalStateException_whenExhibitionIsNull() {
         // Arrange
-        Location location = mock(Location.class);
-        ExhibitionInputDTO input = mock(ExhibitionInputDTO.class);
+        var location = mock(Location.class);
+        var input = mock(ExhibitionInputDTO.class);
 
-        ExhibitionBuilder builder = new ExhibitionBuilder(location, input);
+        var builder = new ExhibitionBuilder(location, input);
 
         // Act & Assert
         assertThrows(IllegalStateException.class, builder::update);
@@ -69,20 +72,27 @@ class ExhibitionBuilderTest {
     @Test
     void update_shouldPatchExhibition_whenExhibitionIsNotNull() {
         // Arrange
-        Exhibition exhibition = Instancio.create(Exhibition.class);
-        Location location = Instancio.create(Location.class);
-        ExhibitionInputDTO input = Instancio.create(ExhibitionInputDTO.class);
+        var location = Instancio.create(Location.class);
+        var input = Instancio.create(ExhibitionInputDTO.class);
 
-        ExhibitionBuilder builder = new ExhibitionBuilder(exhibition, location, input);
+        var exhibition = Instancio.create(Exhibition.class);
+        var createdBy = exhibition.getCreatedBy();
+        var createdDate = exhibition.getCreatedDate();
+
+        var builder = new ExhibitionBuilder(exhibition, location, input);
 
         // Act
-        Exhibition result = builder.update();
+        var result = builder.update();
 
         // Assert
-        assertNotNull(result);
-        assertEquals(location, result.getLocation());
-        assertEquals(input.name(), result.getName());
-        assertEquals(input.description(), result.getDescription());
+        assertAll(
+                () -> assertNotNull(result),
+                () -> assertEquals(location, result.getLocation()),
+                () -> assertEquals(input.name(), result.getName()),
+                () -> assertEquals(input.description(), result.getDescription()),
+                () -> assertEquals(createdBy, result.getCreatedBy()),
+                () -> assertEquals(createdDate, result.getCreatedDate())
+        );
     }
     //endregion
 }
