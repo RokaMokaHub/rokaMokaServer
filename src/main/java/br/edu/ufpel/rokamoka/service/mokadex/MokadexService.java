@@ -76,44 +76,6 @@ public class MokadexService implements IMokadexService {
     }
 
     /**
-     * Retrieves an {@link Optional} containing the {@link Mokadex} associated with the specified {@link User}.
-     *
-     * @param user The {@code User} whose associated {@link Mokadex} is to be retrieved.
-     *
-     * @return An {@code Optional} containing the {@code Mokadex} if found, or empty if no matching {@code Mokadex}
-     * exists.
-     * @see MokadexRepository#findMokadexByUsername(String)
-     */
-    private Optional<Mokadex> getMokadexByUser(User user) {
-        log.info("Buscando pelo [{}] do [{}]", Mokadex.class.getSimpleName(), user);
-
-        Optional<Mokadex> maybeMokadex = this.mokadexRepository.findMokadexByUsername(user.getNome());
-        maybeMokadex.ifPresentOrElse(mokadex -> log.info("[{}] foi encontrado", mokadex),
-                () -> log.info("Não foi encontrado nenhum [{}] para o [{}] informado", Mokadex.class.getSimpleName(),
-                        user));
-
-        return maybeMokadex;
-    }
-
-    /**
-     * Creates a new {@link Mokadex} instance for the specified {@link User} and persists it in the repository.
-     *
-     * @param user The {@code User} for whom the new {@code Mokadex} is to be created.
-     *
-     * @return The newly created and persisted {@code Mokadex} instance associated with the given {@code user}.
-     */
-    private Mokadex createMokadexByUser(User user) {
-        log.info("Criando [{}] para o [{}]", Mokadex.class.getSimpleName(), user);
-
-        var mokadex = new Mokadex();
-        mokadex.setUsuario(user);
-        mokadex = this.mokadexRepository.save(mokadex);
-
-        log.info("Novo [{}] criado com sucesso para o [{}] informado", mokadex, user);
-        return mokadex;
-    }
-
-    /**
      * Returns a {@link MokadexOutputDTO} based on the given {@link Mokadex}.
      *
      * @param mokadex The {@link Mokadex} object from which collections and emblems are derived.
@@ -164,21 +126,6 @@ public class MokadexService implements IMokadexService {
         return mokadex;
     }
 
-    private Mokadex getMokadexByLoggedUser() {
-        UserAuthenticated loggedInUser = ServiceContext.getContext().getUser();
-        return this.mokadexRepository.findMokadexByUsername(loggedInUser.getUsername())
-                .orElseThrow(() -> new ServiceException("Mokadex não encontrado para usuário logado"));
-    }
-
-    private void sendMessageToBrokerIfReady(Mokadex mokadex, Exhibition exhibition) {
-        if (!this.emblemService.existsEmblemByExhibitionId(exhibition.getId())) {
-            throw new ServiceException("Emblema não foi criado");
-        }
-        if (this.mokadexRepository.hasCollectedAllArtworksInExhibition(mokadex.getId(), exhibition.getId())) {
-            this.collectEmblemProducer.publishCollectEmblem(mokadex, exhibition);
-        }
-    }
-
     /**
      * Tries to collect an emblem and associates it with the specified Mokadex if not already collected.
      *
@@ -221,5 +168,60 @@ public class MokadexService implements IMokadexService {
         Mokadex mokadex = this.getMokadexByLoggedUser();
         Exhibition exhibition = this.exhibitionService.getExhibitionOrElseThrow(exhibitionId);
         return this.mokadexRepository.findAllMissingStars(mokadex.getId(), exhibition.getId());
+    }
+
+    /**
+     * Retrieves an {@link Optional} containing the {@link Mokadex} associated with the specified {@link User}.
+     *
+     * @param user The {@code User} whose associated {@link Mokadex} is to be retrieved.
+     *
+     * @return An {@code Optional} containing the {@code Mokadex} if found, or empty if no matching {@code Mokadex}
+     * exists.
+     * @see MokadexRepository#findMokadexByUsername(String)
+     */
+    private Optional<Mokadex> getMokadexByUser(User user) {
+        log.info("Buscando pelo [{}] do [{}]", Mokadex.class.getSimpleName(), user);
+
+        Optional<Mokadex> maybeMokadex = this.mokadexRepository.findMokadexByUsername(user.getNome());
+        maybeMokadex.ifPresentOrElse(
+                mokadex -> log.info("[{}] foi encontrado", mokadex),
+                () -> log.info(
+                        "Não foi encontrado nenhum [{}] para o [{}] informado", Mokadex.class.getSimpleName(),
+                        user));
+
+        return maybeMokadex;
+    }
+
+    /**
+     * Creates a new {@link Mokadex} instance for the specified {@link User} and persists it in the repository.
+     *
+     * @param user The {@code User} for whom the new {@code Mokadex} is to be created.
+     *
+     * @return The newly created and persisted {@code Mokadex} instance associated with the given {@code user}.
+     */
+    private Mokadex createMokadexByUser(User user) {
+        log.info("Criando [{}] para o [{}]", Mokadex.class.getSimpleName(), user);
+
+        var mokadex = new Mokadex();
+        mokadex.setUsuario(user);
+        mokadex = this.mokadexRepository.save(mokadex);
+
+        log.info("Novo [{}] criado com sucesso para o [{}] informado", mokadex, user);
+        return mokadex;
+    }
+
+    private Mokadex getMokadexByLoggedUser() {
+        UserAuthenticated loggedInUser = ServiceContext.getContext().getUser();
+        return this.mokadexRepository.findMokadexByUsername(loggedInUser.getUsername())
+                .orElseThrow(() -> new ServiceException("Mokadex não encontrado para usuário logado"));
+    }
+
+    private void sendMessageToBrokerIfReady(Mokadex mokadex, Exhibition exhibition) {
+        if (!this.emblemService.existsEmblemByExhibitionId(exhibition.getId())) {
+            throw new ServiceException("Emblema não foi criado");
+        }
+        if (this.mokadexRepository.hasCollectedAllArtworksInExhibition(mokadex.getId(), exhibition.getId())) {
+            this.collectEmblemProducer.publishCollectEmblem(mokadex, exhibition);
+        }
     }
 }
