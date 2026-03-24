@@ -55,4 +55,16 @@ public interface MokadexRepository extends JpaRepository<Mokadex, Long> {
            SELECT a1 FROM Artwork a1 WHERE a1.exhibition.id = :exhibitionId AND
            NOT EXISTS (SELECT 1 FROM Mokadex m JOIN m.artworks a2 WHERE a1.id = a2.id and m.id = :mokadexId)""")
     Set<Artwork> findAllMissingStars(Long mokadexId, Long exhibitionId);
+
+    @Query("""
+           SELECT COUNT(DISTINCT a.id) FROM Mokadex m
+           JOIN m.artworks a
+           WHERE m.usuario.nome = :username""")
+    Long getStarCount(String username);
+
+    @Query("""
+           SELECT COUNT(DISTINCT e.id) FROM Mokadex m
+           JOIN m.emblems e
+           WHERE m.usuario.nome = :username""")
+    Long getEmblemCount(String username);
 }

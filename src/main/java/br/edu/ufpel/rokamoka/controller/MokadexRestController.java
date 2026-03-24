@@ -4,6 +4,7 @@ import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
 import br.edu.ufpel.rokamoka.core.Mokadex;
 import br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO;
 import br.edu.ufpel.rokamoka.dto.mokadex.output.MokadexOutputDTO;
+import br.edu.ufpel.rokamoka.dto.mokadex.output.MokadexSummaryDTO;
 import br.edu.ufpel.rokamoka.service.mokadex.IMokadexService;
 import br.edu.ufpel.rokamoka.wrapper.RokaMokaController;
 import io.swagger.v3.oas.annotations.Operation;
@@ -60,6 +61,14 @@ public class MokadexRestController extends RokaMokaController {
                 .stream()
                 .map(ArtworkOutputDTO::new)
                 .collect(Collectors.toUnmodifiableSet());
+        return this.success(output);
+    }
+
+    @Operation(summary = "Endpoint para obter resumo do Mokadex",
+            description = "Operação para obter contadores de estrelas e emblemas do Mokadex do usuário logado")
+    @GetMapping("/summary")
+    public ResponseEntity<ApiResponseWrapper<MokadexSummaryDTO>> getSummary() {
+        var output = this.mokadexService.getSummary();
         return this.success(output);
     }
 }

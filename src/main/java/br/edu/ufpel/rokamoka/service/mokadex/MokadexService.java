@@ -10,6 +10,7 @@ import br.edu.ufpel.rokamoka.core.User;
 import br.edu.ufpel.rokamoka.dto.emblem.output.EmblemOutputDTO;
 import br.edu.ufpel.rokamoka.dto.mokadex.output.CollectionDTO;
 import br.edu.ufpel.rokamoka.dto.mokadex.output.MokadexOutputDTO;
+import br.edu.ufpel.rokamoka.dto.mokadex.output.MokadexSummaryDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.repository.MokadexRepository;
@@ -168,6 +169,14 @@ public class MokadexService implements IMokadexService {
         Mokadex mokadex = this.getMokadexByLoggedUser();
         Exhibition exhibition = this.exhibitionService.getExhibitionOrElseThrow(exhibitionId);
         return this.mokadexRepository.findAllMissingStars(mokadex.getId(), exhibition.getId());
+    }
+
+    @Override
+    public MokadexSummaryDTO getSummary() {
+        var user = ServiceContext.getContext().getUser();
+        var starCount = this.mokadexRepository.getStarCount(user.getUsername());
+        var emblemCount = this.mokadexRepository.getEmblemCount(user.getUsername());
+        return new MokadexSummaryDTO(starCount, emblemCount);
     }
 
     /**
