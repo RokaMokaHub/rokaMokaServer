@@ -37,7 +37,8 @@ public class ExhibitionRestController extends RokaMokaController {
 
     @Operation(summary = "Buscar exposição por ID",
             description = "Retorna os detalhes de uma exposição específica com base no seu ID.")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Exposição encontrada"),
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Exposição encontrada"),
             @ApiResponse(responseCode = "404", description = "Exposição não encontrada")})
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponseWrapper<ExhibitionOutputDTO>> getExhibition(@PathVariable Long id) {
@@ -56,7 +57,8 @@ public class ExhibitionRestController extends RokaMokaController {
 
     @Operation(summary = "Cadastrar uma nova exposição",
             description = "Cria o registro de uma nova exposição a partir dos dados fornecidos.")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Exposição cadastrada com sucesso"),
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Exposição cadastrada com sucesso"),
             @ApiResponse(responseCode = "400", description = "Erro de validação nos dados enviados"),
             @ApiResponse(responseCode = "500", description = "Erro inesperado ao cadastrar exposição")})
     @PostMapping
@@ -68,7 +70,8 @@ public class ExhibitionRestController extends RokaMokaController {
 
     @Operation(summary = "Atualizar uma exposição",
             description = "Atualiza o registro de uma exposição a partir dos dados fornecidos.")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Exposição atualizada com sucesso"),
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Exposição atualizada com sucesso"),
             @ApiResponse(responseCode = "400", description = "Erro de validação nos dados enviados"),
             @ApiResponse(responseCode = "500", description = "Erro inesperado ao atualizar exposição")})
     @PatchMapping
