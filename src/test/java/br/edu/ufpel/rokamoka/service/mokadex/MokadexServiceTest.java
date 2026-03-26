@@ -76,8 +76,8 @@ class MokadexServiceTest implements MockUserSession, MockRepository<Mokadex> {
     @Mock
     private CollectEmblemProducer collectEmblemProducer;
 
-    static Stream<Mokadex> provideMokadexInput() {
-        var sampleMokadex = Instancio.create(Mokadex.class);
+    static Stream<Mokadex> provideMokadex() {
+        var fullMokadex = Instancio.create(Mokadex.class);
         var emptyArtwork = Instancio.of(Mokadex.class)
                 .set(field(Mokadex::getArtworks), Collections.emptySet())
                 .create();
@@ -88,7 +88,7 @@ class MokadexServiceTest implements MockUserSession, MockRepository<Mokadex> {
                 .set(field(Mokadex::getArtworks), Collections.emptySet())
                 .set(field(Mokadex::getEmblems), Collections.emptySet())
                 .create();
-        return Stream.of(sampleMokadex, emptyArtwork, emptyEmblem, emptyMokadex);
+        return Stream.of(fullMokadex, emptyArtwork, emptyEmblem, emptyMokadex);
     }
 
     static Stream<Arguments> provideGetMissingStarsByExhibitionInput() {
@@ -171,6 +171,19 @@ class MokadexServiceTest implements MockUserSession, MockRepository<Mokadex> {
 
         assertNotNull(actual);
         assertEquals(user, actual.getUsuario());
+    }
+    //endregion
+
+    //region getMokadexOutputDTOByMokadex
+    @ParameterizedTest
+    @MethodSource("provideMokadex")
+    void getMokadexOutputDTOByMokadex_shouldReturnMokadexOutputDTO_whenCalled(Mokadex mokadex) {
+        var result = this.mokadexService.getMokadexOutputDTOByMokadex(mokadex);
+        assertNotNull(result);
+        assertAll(
+            () -> assertEquals(mokadex.getEmblems().size(), result.emblemSet().size()),
+            () -> assertEquals(mokadex.getArtworks().size(), result.collectionSet().size())
+        );
     }
     //endregion
 
