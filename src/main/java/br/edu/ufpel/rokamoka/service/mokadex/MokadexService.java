@@ -7,13 +7,12 @@ import br.edu.ufpel.rokamoka.core.Emblem;
 import br.edu.ufpel.rokamoka.core.Exhibition;
 import br.edu.ufpel.rokamoka.core.Mokadex;
 import br.edu.ufpel.rokamoka.core.User;
-import br.edu.ufpel.rokamoka.dto.emblem.output.EmblemOutputDTO;
-import br.edu.ufpel.rokamoka.dto.mokadex.output.CollectionDTO;
 import br.edu.ufpel.rokamoka.dto.mokadex.output.MokadexOutputDTO;
+import br.edu.ufpel.rokamoka.dto.mokadex.output.MokadexSummaryDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
+import br.edu.ufpel.rokamoka.exceptions.RokaMokaNoUserInContextException;
 import br.edu.ufpel.rokamoka.repository.MokadexRepository;
-import br.edu.ufpel.rokamoka.security.UserAuthenticated;
 import br.edu.ufpel.rokamoka.service.artwork.IArtworkService;
 import br.edu.ufpel.rokamoka.service.emblem.IEmblemService;
 import br.edu.ufpel.rokamoka.service.exhibition.IExhibitionService;
@@ -76,44 +75,6 @@ public class MokadexService implements IMokadexService {
     }
 
     /**
-     * Retrieves an {@link Optional} containing the {@link Mokadex} associated with the specified {@link User}.
-     *
-     * @param user The {@code User} whose associated {@link Mokadex} is to be retrieved.
-     *
-     * @return An {@code Optional} containing the {@code Mokadex} if found, or empty if no matching {@code Mokadex}
-     * exists.
-     * @see MokadexRepository#findMokadexByUsername(String)
-     */
-    private Optional<Mokadex> getMokadexByUser(User user) {
-        log.info("Buscando pelo [{}] do [{}]", Mokadex.class.getSimpleName(), user);
-
-        Optional<Mokadex> maybeMokadex = this.mokadexRepository.findMokadexByUsername(user.getNome());
-        maybeMokadex.ifPresentOrElse(mokadex -> log.info("[{}] foi encontrado", mokadex),
-                () -> log.info("Não foi encontrado nenhum [{}] para o [{}] informado", Mokadex.class.getSimpleName(),
-                        user));
-
-        return maybeMokadex;
-    }
-
-    /**
-     * Creates a new {@link Mokadex} instance for the specified {@link User} and persists it in the repository.
-     *
-     * @param user The {@code User} for whom the new {@code Mokadex} is to be created.
-     *
-     * @return The newly created and persisted {@code Mokadex} instance associated with the given {@code user}.
-     */
-    private Mokadex createMokadexByUser(User user) {
-        log.info("Criando [{}] para o [{}]", Mokadex.class.getSimpleName(), user);
-
-        var mokadex = new Mokadex();
-        mokadex.setUsuario(user);
-        mokadex = this.mokadexRepository.save(mokadex);
-
-        log.info("Novo [{}] criado com sucesso para o [{}] informado", mokadex, user);
-        return mokadex;
-    }
-
-    /**
      * Returns a {@link MokadexOutputDTO} based on the given {@link Mokadex}.
      *
      * @param mokadex The {@link Mokadex} object from which collections and emblems are derived.
@@ -126,8 +87,8 @@ public class MokadexService implements IMokadexService {
     public MokadexOutputDTO getMokadexOutputDTOByMokadex(@NotNull Mokadex mokadex) {
         log.info("Construindo {} para o {} informado", MokadexOutputDTO.class.getSimpleName(), mokadex);
 
-        Set<CollectionDTO> collectionDTOSet = new MokadexCollectionsBuilder(mokadex).buildCollectionSet();
-        Set<EmblemOutputDTO> emblemDTOSet = new MokadexEmblemsBuilder(mokadex).buildEmblemSet();
+        var collectionDTOSet = new MokadexCollectionsBuilder(mokadex).buildCollectionSet();
+        var emblemDTOSet = new MokadexEmblemsBuilder(mokadex).buildEmblemSet();
 
         return new MokadexOutputDTO(collectionDTOSet, emblemDTOSet);
     }
@@ -146,8 +107,8 @@ public class MokadexService implements IMokadexService {
     @Override
     @Transactional(propagation = REQUIRED)
     public Mokadex collectStar(@NotBlank String qrCode) {
-        Mokadex mokadex = this.getMokadexByLoggedUser();
-        Artwork artwork = this.artworkService.getByQrCodeOrThrow(qrCode);
+        var mokadex = this.getMokadexByLoggedUser();
+        var artwork = this.artworkService.getByQrCodeOrThrow(qrCode);
 
         if (mokadex.containsArtwork(artwork)) {
             this.sendMessageToBrokerIfReady(mokadex, artwork.getExhibition());
@@ -164,21 +125,6 @@ public class MokadexService implements IMokadexService {
         return mokadex;
     }
 
-    private Mokadex getMokadexByLoggedUser() {
-        UserAuthenticated loggedInUser = ServiceContext.getContext().getUser();
-        return this.mokadexRepository.findMokadexByUsername(loggedInUser.getUsername())
-                .orElseThrow(() -> new ServiceException("Mokadex não encontrado para usuário logado"));
-    }
-
-    private void sendMessageToBrokerIfReady(Mokadex mokadex, Exhibition exhibition) {
-        if (!this.emblemService.existsEmblemByExhibitionId(exhibition.getId())) {
-            throw new ServiceException("Emblema não foi criado");
-        }
-        if (this.mokadexRepository.hasCollectedAllArtworksInExhibition(mokadex.getId(), exhibition.getId())) {
-            this.collectEmblemProducer.publishCollectEmblem(mokadex, exhibition);
-        }
-    }
-
     /**
      * Tries to collect an emblem and associates it with the specified Mokadex if not already collected.
      *
@@ -193,7 +139,7 @@ public class MokadexService implements IMokadexService {
     @Override
     @Transactional(propagation = REQUIRED)
     public Mokadex collectEmblem(Long mokadexId, Emblem emblem) {
-        Mokadex mokadex = this.findById(mokadexId);
+        var mokadex = this.findById(mokadexId);
 
         if (mokadex.containsEmblem(emblem)) {
             throw new RokaMokaContentDuplicatedException("Emblema já foi coletado");
@@ -218,8 +164,76 @@ public class MokadexService implements IMokadexService {
      */
     @Override
     public Set<Artwork> getMissingStarsByExhibition(@NotNull Long exhibitionId) {
-        Mokadex mokadex = this.getMokadexByLoggedUser();
-        Exhibition exhibition = this.exhibitionService.getExhibitionOrElseThrow(exhibitionId);
+        var mokadex = this.getMokadexByLoggedUser();
+        var exhibition = this.exhibitionService.getExhibitionOrElseThrow(exhibitionId);
         return this.mokadexRepository.findAllMissingStars(mokadex.getId(), exhibition.getId());
+    }
+
+    /**
+     * Retrieves a summary of the user's Mokadex, including the count of emblems and stars.
+     *
+     * @return A {@link MokadexSummaryDTO} containing the emblem and star counts.
+     */
+    @Override
+    public MokadexSummaryDTO getSummary() throws RokaMokaNoUserInContextException {
+        var username = ServiceContext.getContext().getUsernameOrThrow();
+        var starCount = this.mokadexRepository.getStarCount(username);
+        var emblemCount = this.mokadexRepository.getEmblemCount(username);
+        return new MokadexSummaryDTO(starCount, emblemCount);
+    }
+
+    /**
+     * Retrieves an {@link Optional} containing the {@link Mokadex} associated with the specified {@link User}.
+     *
+     * @param user The {@code User} whose associated {@link Mokadex} is to be retrieved.
+     *
+     * @return An {@code Optional} containing the {@code Mokadex} if found, or empty if no matching {@code Mokadex}
+     * exists.
+     * @see MokadexRepository#findMokadexByUsername(String)
+     */
+    private Optional<Mokadex> getMokadexByUser(User user) {
+        log.info("Buscando pelo [{}] do [{}]", Mokadex.class.getSimpleName(), user);
+
+        var maybeMokadex = this.mokadexRepository.findMokadexByUsername(user.getNome());
+        maybeMokadex.ifPresentOrElse(
+                mokadex -> log.info("[{}] foi encontrado", mokadex),
+                () -> log.info(
+                        "Não foi encontrado nenhum [{}] para o [{}] informado", Mokadex.class.getSimpleName(),
+                        user));
+
+        return maybeMokadex;
+    }
+
+    /**
+     * Creates a new {@link Mokadex} instance for the specified {@link User} and persists it in the repository.
+     *
+     * @param user The {@code User} for whom the new {@code Mokadex} is to be created.
+     *
+     * @return The newly created and persisted {@code Mokadex} instance associated with the given {@code user}.
+     */
+    private Mokadex createMokadexByUser(User user) {
+        log.info("Criando [{}] para o [{}]", Mokadex.class.getSimpleName(), user);
+
+        var mokadex = new Mokadex();
+        mokadex.setUsuario(user);
+        mokadex = this.mokadexRepository.save(mokadex);
+
+        log.info("Novo [{}] criado com sucesso para o [{}] informado", mokadex, user);
+        return mokadex;
+    }
+
+    private Mokadex getMokadexByLoggedUser() {
+        var user = ServiceContext.getContext().getUser();
+        return this.mokadexRepository.findMokadexByUsername(user.getUsername())
+                .orElseThrow(() -> new ServiceException("Mokadex não encontrado para usuário logado"));
+    }
+
+    private void sendMessageToBrokerIfReady(Mokadex mokadex, Exhibition exhibition) {
+        if (!this.emblemService.existsEmblemByExhibitionId(exhibition.getId())) {
+            throw new ServiceException("Emblema não foi criado");
+        }
+        if (this.mokadexRepository.hasCollectedAllArtworksInExhibition(mokadex.getId(), exhibition.getId())) {
+            this.collectEmblemProducer.publishCollectEmblem(mokadex, exhibition);
+        }
     }
 }
