@@ -58,6 +58,9 @@ public class ArtworkRestController extends RokaMokaController {
             @PathVariable Long exhibitionId) {
         var artworks = this.artworkService.getAllArtworkByExhibitionId(exhibitionId);
         var ids = artworks.stream().map(Artwork::getId).collect(Collectors.toSet());
+        if (ids.isEmpty()) {
+            return this.success(List.of());
+        }
         var dtoList = this.artworkRepository.createFullArtworkInfo(ids);
         return this.success(dtoList);
     }
