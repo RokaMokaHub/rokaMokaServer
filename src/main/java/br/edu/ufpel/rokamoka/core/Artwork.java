@@ -2,6 +2,7 @@ package br.edu.ufpel.rokamoka.core;
 
 import br.edu.ufpel.rokamoka.core.audit.Auditable;
 import br.edu.ufpel.rokamoka.dto.artwork.input.ArtworkInputDTO;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -39,15 +40,22 @@ public class Artwork extends Auditable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false) private String nome;
+    @Column(nullable = false)
+    private String nome;
+
     private String nomeArtista;
+
     private String descricao;
+
     private String link;
+
     private String qrCode;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "exposicao_id")
     private Exhibition exhibition;
-    @OneToMany
+
+    @OneToMany(cascade = {CascadeType.REMOVE}, fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "obra_id")
     private Set<Image> images;
 
@@ -71,12 +79,10 @@ public class Artwork extends Auditable {
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
             return false;
         }
-        Artwork other = (Artwork) o;
+        var other = (Artwork) o;
         if (this.id != null && Objects.equals(this.id, other.getId())) {
             return true;
         }
-        boolean isSameName = this.nome != null && Objects.equals(this.nome, other.getNome());
-        boolean isSameArtist = this.nomeArtista != null && Objects.equals(this.nomeArtista, other.getNomeArtista());
-        return isSameArtist && isSameName;
+        return this.qrCode != null && Objects.equals(this.qrCode, other.getQrCode());
     }
 }
