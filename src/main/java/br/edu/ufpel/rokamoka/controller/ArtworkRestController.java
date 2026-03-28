@@ -14,7 +14,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.BadRequestException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -25,9 +24,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -71,19 +68,6 @@ public class ArtworkRestController extends RokaMokaController {
         Artwork artwork = this.artworkService.getByQrCodeOrThrow(qrcode);
         ArtworkOutputDTO dto = this.artworkRepository.createFullArtworkInfo(artwork.getId());
         return this.success(dto);
-    }
-
-    @Operation(summary = "Upload de uma image em uma obra",
-            description = "Faz upload de uma image, caso já exista estoura um erro")
-    @PostMapping(value = "/upload/{artworkId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ApiResponseWrapper<Void>> uploadImage(
-            @PathVariable Long artworkId,
-            @RequestParam("image") MultipartFile image) throws BadRequestException {
-        if (image == null || image.isEmpty()) {
-            throw new BadRequestException("É necessário enviar uma imagem");
-        }
-        this.artworkService.addImage(artworkId, image);
-        return this.success();
     }
 
     @Operation(summary = "Cadastrar uma nova obra",

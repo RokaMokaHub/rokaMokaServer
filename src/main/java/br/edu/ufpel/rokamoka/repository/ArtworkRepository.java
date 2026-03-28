@@ -11,18 +11,11 @@ import java.util.Optional;
 public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
 
     @Query("""
-            select new br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO(a, i)
-                from Artwork a left join fetch a.images i
-                where a.id = ?1
-            """)
+           SELECT NEW br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO(a, i)
+           FROM Artwork a LEFT JOIN FETCH a.images i
+           WHERE a.id = ?1
+           """)
     ArtworkOutputDTO createFullArtworkInfo(Long id);
-
-    @Query("""
-            select a
-                from Artwork a left join fetch a.images i
-                where a.id = ?1
-            """)
-    Optional<Artwork> findByIdWithinImage(Long id);
 
     Optional<Artwork> findByQrCode(String qrCode);
 
