@@ -179,7 +179,7 @@ public class MokadexService implements IMokadexService {
         var username = ServiceContext.getContext().getUsernameOrThrow();
         var starCount = this.mokadexRepository.getStarCount(username);
         var emblemCount = this.mokadexRepository.getEmblemCount(username);
-        return new MokadexSummaryDTO(starCount, emblemCount);
+        return new MokadexSummaryDTO(emblemCount, starCount);
     }
 
     /**
