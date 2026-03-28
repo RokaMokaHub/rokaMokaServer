@@ -23,6 +23,7 @@ import lombok.ToString;
 import org.hibernate.Hibernate;
 import org.hibernate.proxy.HibernateProxy;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -57,7 +58,7 @@ public class Artwork extends Auditable {
 
     @OneToMany(cascade = {CascadeType.REMOVE}, fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "obra_id")
-    private Set<Image> images;
+    private Set<Image> images = new HashSet<>();
 
     public Artwork(ArtworkInputDTO dto, Exhibition exhibition) {
         this.nome = dto.nome();
