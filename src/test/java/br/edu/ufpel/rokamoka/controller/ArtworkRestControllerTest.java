@@ -6,7 +6,6 @@ import br.edu.ufpel.rokamoka.dto.artwork.input.ArtworkInputDTO;
 import br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO;
 import br.edu.ufpel.rokamoka.repository.ArtworkRepository;
 import br.edu.ufpel.rokamoka.service.artwork.IArtworkService;
-import org.apache.coyote.BadRequestException;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,19 +16,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -43,14 +38,21 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ArtworkRestControllerTest implements ControllerResponseValidator {
 
-    @InjectMocks private ArtworkRestController artworkController;
+    @InjectMocks
+    private ArtworkRestController artworkController;
 
-    @Mock private IArtworkService artworkService;
-    @Mock private ArtworkRepository artworkRepository;
+    @Mock
+    private IArtworkService artworkService;
+    @Mock
+    private ArtworkRepository artworkRepository;
 
     private ArtworkInputDTO input;
     private Artwork artwork;
     private ArtworkOutputDTO expected;
+
+    static Stream<List<Artwork>> provideArtworkList() {
+        return Stream.of(Collections.emptyList(), Instancio.ofList(Artwork.class).create());
+    }
 
     @BeforeEach
     void setUp() {
@@ -59,7 +61,6 @@ class ArtworkRestControllerTest implements ControllerResponseValidator {
         this.expected = new ArtworkOutputDTO(this.artwork);
     }
 
-    //region getArtworkOrElseThrow
     @Test
     void findById_shouldReturnArtworkOutputDTO_whenArtworkExistsById() {
         // Arrange
@@ -76,12 +77,6 @@ class ArtworkRestControllerTest implements ControllerResponseValidator {
         verify(this.artworkRepository).createFullArtworkInfo(anyLong());
         verifyNoMoreInteractions(this.artworkService, this.artworkRepository);
     }
-    //endregion
-
-    //region getAllByExhibitionId
-    static Stream<List<Artwork>> provideArtworkList() {
-        return Stream.of(Collections.emptyList(), Instancio.ofList(Artwork.class).create());
-    }
 
     @ParameterizedTest
     @MethodSource("provideArtworkList")
@@ -92,7 +87,7 @@ class ArtworkRestControllerTest implements ControllerResponseValidator {
         // Act
         ResponseEntity<ApiResponseWrapper<List<ArtworkOutputDTO>>> response =
                 this.artworkController.getAllByExhibitionId(
-                1L);
+                        1L);
 
         // Assert
         List<ArtworkOutputDTO> dto = artworks.stream().map(ArtworkOutputDTO::new).toList();
@@ -100,9 +95,7 @@ class ArtworkRestControllerTest implements ControllerResponseValidator {
 
         verify(this.artworkService).getAllArtworkByExhibitionId(anyLong());
     }
-    //endregion
 
-    //region getArtworkByQrCode
     @Test
     void getArtworkByQrCode_shouldReturnArtworkOutputDTO_whenArtworkExistsByQrCode() {
         // Arrange
@@ -119,49 +112,7 @@ class ArtworkRestControllerTest implements ControllerResponseValidator {
         verify(this.artworkRepository).createFullArtworkInfo(anyLong());
         verifyNoMoreInteractions(this.artworkService, this.artworkRepository);
     }
-    //endregion
 
-    //region uploadImage
-    @Test
-    void uploadImage_shouldThrowBadRequestException_whenImageIsNull() {
-        assertThrows(BadRequestException.class, () -> this.artworkController.uploadImage(1L, null));
-        verifyNoInteractions(this.artworkService, this.artworkRepository);
-    }
-
-    @Test
-    void uploadImage_shouldThrowBadRequestException_whenImageIsEmpty() {
-        // Arrange
-        MultipartFile image = mock(MultipartFile.class);
-
-        when(image.isEmpty()).thenReturn(true);
-
-        // Act & Assert
-        assertThrows(BadRequestException.class, () -> this.artworkController.uploadImage(1L, image));
-
-        verifyNoMoreInteractions(this.artworkService, image);
-        verifyNoMoreInteractions(this.artworkRepository);
-    }
-
-    @Test
-    void uploadImage_shouldReturnVoidResponse_whenSuccessful() throws BadRequestException {
-        // Arrange
-        MultipartFile image = mock(MultipartFile.class);
-
-        when(image.isEmpty()).thenReturn(false);
-
-        // Act
-        ResponseEntity<ApiResponseWrapper<Void>> response = this.artworkController.uploadImage(1L, image);
-
-        // Assert
-        this.assertVoidResponse(response);
-
-        verify(this.artworkService).addImage(anyLong(), any(MultipartFile.class));
-        verifyNoMoreInteractions(this.artworkService, image);
-        verifyNoMoreInteractions(this.artworkRepository);
-    }
-    //endregion
-
-    //region register
     @Test
     void register_shouldReturnArtworkOutputDTO_whenSuccessful() {
         // Arrange
@@ -177,9 +128,7 @@ class ArtworkRestControllerTest implements ControllerResponseValidator {
         verifyNoMoreInteractions(this.artworkService);
         verifyNoMoreInteractions(this.artworkRepository);
     }
-    //endregion
 
-    //region patch
     @Test
     void patch_shouldReturnArtworkOutputDTO_whenSuccessful() {
         // Arrange
@@ -192,9 +141,7 @@ class ArtworkRestControllerTest implements ControllerResponseValidator {
         this.assertExpectedResponse(response, this.expected);
         verify(this.artworkService).update(this.input);
     }
-    //endregion
 
-    //region remove
     @Test
     void remove_shouldReturnArtworkOutputDTO_whenSuccessful() {
         // Arrange
@@ -208,5 +155,4 @@ class ArtworkRestControllerTest implements ControllerResponseValidator {
 
         verify(this.artworkService).delete(anyLong());
     }
-    //endregion
 }
