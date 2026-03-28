@@ -7,22 +7,23 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
 
     @Query("""
-            select new br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO(a, i)
-                from Artwork a left join fetch a.images i
-                where a.id = ?1
-            """)
+           SELECT NEW br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO(a, i)
+           FROM Artwork a LEFT JOIN FETCH a.images i
+           WHERE a.id = ?1
+           """)
     ArtworkOutputDTO createFullArtworkInfo(Long id);
 
     @Query("""
-            select a
-                from Artwork a left join fetch a.images i
-                where a.id = ?1
-            """)
-    Optional<Artwork> findByIdWithinImage(Long id);
+           SELECT NEW br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO(a, i)
+           FROM Artwork a LEFT JOIN FETCH a.images i
+           WHERE a.id IN ?1
+           """)
+    List<ArtworkOutputDTO> createFullArtworkInfo(Set<Long> ids);
 
     Optional<Artwork> findByQrCode(String qrCode);
 
