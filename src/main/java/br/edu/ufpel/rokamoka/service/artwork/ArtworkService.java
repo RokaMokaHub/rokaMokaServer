@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -101,9 +102,17 @@ public class ArtworkService implements IArtworkService {
         artwork.setNomeArtista(input.nomeArtista());
         artwork.setLink(input.link());
         artwork.setQrCode(input.qrCode());
-        artwork.setImages(this.imageService.upload(input.image()));
 
-        artwork = this.artworkRepository.save(artwork);
+        var images = this.imageService.upload(input.image());
+        if (CollectionUtils.isEmpty(images)) {
+            return new ArtworkOutputDTO(artwork);
+        }
+        if (CollectionUtils.isEmpty(artwork.getImages())) {
+            artwork.setImages(images);
+        } else {
+            artwork.getImages().addAll(images);
+        }
+
         return new ArtworkOutputDTO(artwork);
     }
 
