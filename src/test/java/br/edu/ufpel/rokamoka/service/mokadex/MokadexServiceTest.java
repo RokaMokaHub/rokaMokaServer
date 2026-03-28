@@ -23,6 +23,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -93,10 +94,18 @@ class MokadexServiceTest implements MockUserSession, MockRepository<Mokadex> {
 
     static Stream<Arguments> provideGetMissingStarsByExhibitionInput() {
         var exhibition = Instancio.create(Exhibition.class);
-        var mokadex = Instancio.of(Mokadex.class)
-                .set(field(Mokadex::getEmblems), new HashSet<>(Set.of(exhibition)))
+        var emblem = Instancio
+                .of(Emblem.class)
+                .set(field(Emblem::getExhibition), exhibition)
                 .create();
-        var artworks = Instancio.ofSet(Artwork.class).set(field(Artwork::getExhibition), exhibition).create();
+        var mokadex = Instancio
+                .of(Mokadex.class)
+                .set(field(Mokadex::getEmblems), new HashSet<>(Set.of(emblem)))
+                .create();
+        var artworks = Instancio
+                .ofSet(Artwork.class)
+                .set(field(Artwork::getExhibition), exhibition)
+                .create();
         return Stream.of(
                 Arguments.of(exhibition, mokadex, artworks),
                 Arguments.of(exhibition, mokadex, Collections.emptySet()));
@@ -482,17 +491,19 @@ class MokadexServiceTest implements MockUserSession, MockRepository<Mokadex> {
         }
     }
 
-    @Test
-    void getSummary_shouldReturnMokadexSummary_whenSuccessful() throws RokaMokaNoUserInContextException {
+    @ParameterizedTest
+    @ValueSource(longs = {1L, 2L, 3L})
+    void getSummary_shouldReturnMokadexSummary_whenSuccessful(long sampleCount) throws RokaMokaNoUserInContextException {
         try (var mockedServiceContext = mockStatic(ServiceContext.class)) {
             // Arrange
-            var sampleCount = 1L;
+            var starCount = sampleCount * 2;
+            var emblemCount = sampleCount * 5;
             var mockContext = mock(ServiceContext.class);
 
             mockedServiceContext.when(ServiceContext::getContext).thenReturn(mockContext);
             when(mockContext.getUsernameOrThrow()).thenReturn(LOGGED_USER_NAME);
-            when(this.mokadexRepository.getStarCount(anyString())).thenReturn(sampleCount);
-            when(this.mokadexRepository.getEmblemCount(anyString())).thenReturn(sampleCount);
+            when(this.mokadexRepository.getStarCount(anyString())).thenReturn(starCount);
+            when(this.mokadexRepository.getEmblemCount(anyString())).thenReturn(emblemCount);
 
             // Act
             var summary = this.mokadexService.getSummary();
@@ -503,8 +514,8 @@ class MokadexServiceTest implements MockUserSession, MockRepository<Mokadex> {
 
             assertNotNull(summary);
             assertAll(
-                    () -> assertEquals(sampleCount, summary.starCount()),
-                    () -> assertEquals(sampleCount, summary.emblemCount())
+                    () -> assertEquals(starCount, summary.starCount()),
+                    () -> assertEquals(emblemCount, summary.emblemCount())
             );
         }
     }
