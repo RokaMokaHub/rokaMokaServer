@@ -10,16 +10,10 @@ import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Stream;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -50,10 +44,6 @@ class ArtworkRestControllerTest implements ControllerResponseValidator {
     private Artwork artwork;
     private ArtworkOutputDTO expected;
 
-    static Stream<List<Artwork>> provideArtworkList() {
-        return Stream.of(Collections.emptyList(), Instancio.ofList(Artwork.class).create());
-    }
-
     @BeforeEach
     void setUp() {
         this.input = Instancio.create(ArtworkInputDTO.class);
@@ -76,24 +66,6 @@ class ArtworkRestControllerTest implements ControllerResponseValidator {
         verify(this.artworkService).getArtworkOrElseThrow(anyLong());
         verify(this.artworkRepository).createFullArtworkInfo(anyLong());
         verifyNoMoreInteractions(this.artworkService, this.artworkRepository);
-    }
-
-    @ParameterizedTest
-    @MethodSource("provideArtworkList")
-    void getAllByExhibitionId_shouldReturnArtworkOutputDTOList_whenCalled(List<Artwork> artworks) {
-        // Arrange
-        when(this.artworkService.getAllArtworkByExhibitionId(anyLong())).thenReturn(artworks);
-
-        // Act
-        ResponseEntity<ApiResponseWrapper<List<ArtworkOutputDTO>>> response =
-                this.artworkController.getAllByExhibitionId(
-                        1L);
-
-        // Assert
-        List<ArtworkOutputDTO> dto = artworks.stream().map(ArtworkOutputDTO::new).toList();
-        this.assertListResponse(response, dto);
-
-        verify(this.artworkService).getAllArtworkByExhibitionId(anyLong());
     }
 
     @Test

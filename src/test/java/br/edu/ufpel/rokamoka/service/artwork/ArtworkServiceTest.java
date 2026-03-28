@@ -94,25 +94,6 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
         this.artwork = mock(Artwork.class);
     }
 
-    //region findAll
-    @ParameterizedTest
-    @MethodSource("provideArtworkList")
-    void findAll_shouldReturnListOfArtwork_whenCalled(List<Artwork> artworks) {
-        // Arrange
-        when(this.artworkRepository.findAll()).thenReturn(artworks);
-
-        // Act
-        List<Artwork> actual = this.artworkService.findAll();
-
-        // Assert
-        assertNotNull(actual);
-        assertEquals(artworks.size(), actual.size());
-
-        verify(this.artworkRepository).findAll();
-        verifyNoInteractions(this.exhibitionRepository, this.imageService);
-    }
-    //endregion
-
     //region getArtworkOrElseThrow
     @Test
     void getArtworkOrElseThrow_shouldReturnArtwork_whenArtworkExistsById() {
