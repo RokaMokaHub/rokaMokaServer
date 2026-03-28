@@ -11,8 +11,6 @@ import java.util.Optional;
 
 public interface IArtworkService {
 
-    List<Artwork> findAll();
-
     Artwork getArtworkOrElseThrow(Long id);
 
     Optional<Artwork> findByQrCode(String qrCode);

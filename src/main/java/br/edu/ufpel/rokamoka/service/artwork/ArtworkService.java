@@ -29,12 +29,6 @@ public class ArtworkService implements IArtworkService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Artwork> findAll() {
-        return this.artworkRepository.findAll();
-    }
-
-    @Override
-    @Transactional(readOnly = true)
     public Artwork getArtworkOrElseThrow(Long id) {
         return this.artworkRepository.findById(id).orElseThrow(RokaMokaContentNotFoundException::new);
     }
@@ -104,10 +98,10 @@ public class ArtworkService implements IArtworkService {
         artwork.setQrCode(input.qrCode());
 
         var images = this.imageService.upload(input.image());
-        if (CollectionUtils.isEmpty(images)) {
-            return new ArtworkOutputDTO(artwork);
+        if (!CollectionUtils.isEmpty(images)) {
+            artwork.getImages().clear();
+            artwork.getImages().addAll(images);
         }
-        artwork.setImages(images);
 
         return new ArtworkOutputDTO(artwork);
     }

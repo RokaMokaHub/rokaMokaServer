@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Validated
 @RequiredArgsConstructor
@@ -55,8 +56,10 @@ public class ArtworkRestController extends RokaMokaController {
     @GetMapping("/exposicao/{exhibitionId}")
     public ResponseEntity<ApiResponseWrapper<List<ArtworkOutputDTO>>> getAllByExhibitionId(
             @PathVariable Long exhibitionId) {
-        List<Artwork> artworks = this.artworkService.getAllArtworkByExhibitionId(exhibitionId);
-        return this.success(artworks.stream().map(ArtworkOutputDTO::new).toList());
+        var artworks = this.artworkService.getAllArtworkByExhibitionId(exhibitionId);
+        var ids = artworks.stream().map(Artwork::getId).collect(Collectors.toSet());
+        var dtoList = this.artworkRepository.createFullArtworkInfo(ids);
+        return this.success(dtoList);
     }
 
     @Operation(summary = "Buscar obra por QR Code",
