@@ -15,6 +15,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -69,6 +73,28 @@ class ArtworkRestControllerTest implements ControllerResponseValidator {
     }
 
     @Test
+    void getAllByExhibitionId_shouldReturnArtworkOutputDTOList_whenCalled() {
+        // Arrange
+        List<Artwork> artworks = List.of(this.artwork);
+        List<ArtworkOutputDTO> dtoList = List.of(this.expected);
+        Set<Long> ids = artworks.stream().map(Artwork::getId).collect(Collectors.toSet());
+
+        when(this.artworkService.getAllArtworkByExhibitionId(anyLong())).thenReturn(artworks);
+        when(this.artworkRepository.createFullArtworkInfo(ids)).thenReturn(dtoList);
+
+        // Act
+        ResponseEntity<ApiResponseWrapper<List<ArtworkOutputDTO>>> response =
+                this.artworkController.getAllByExhibitionId(1L);
+
+        // Assert
+        verify(this.artworkService).getAllArtworkByExhibitionId(anyLong());
+        verify(this.artworkRepository).createFullArtworkInfo(ids);
+
+        this.assertListResponse(response, dtoList);
+
+    }
+
+    @Test
     void getArtworkByQrCode_shouldReturnArtworkOutputDTO_whenArtworkExistsByQrCode() {
         // Arrange
         when(this.artworkService.getByQrCodeOrThrow(anyString())).thenReturn(this.artwork);
@@ -105,13 +131,16 @@ class ArtworkRestControllerTest implements ControllerResponseValidator {
     void patch_shouldReturnArtworkOutputDTO_whenSuccessful() {
         // Arrange
         when(this.artworkService.update(this.input)).thenReturn(this.expected);
+        when(this.artworkRepository.createFullArtworkInfo(this.expected.id())).thenReturn(this.expected);
 
         // Act
         ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> response = this.artworkController.patch(this.input);
 
         // Assert
-        this.assertExpectedResponse(response, this.expected);
         verify(this.artworkService).update(this.input);
+        verify(this.artworkRepository).createFullArtworkInfo(this.expected.id());
+
+        this.assertExpectedResponse(response, this.expected);
     }
 
     @Test

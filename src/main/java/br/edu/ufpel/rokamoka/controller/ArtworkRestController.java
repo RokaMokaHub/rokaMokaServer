@@ -97,7 +97,8 @@ public class ArtworkRestController extends RokaMokaController {
     @PatchMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> patch(
             @ModelAttribute @Validated(value = Update.class) ArtworkInputDTO input) {
-        ArtworkOutputDTO artwork = this.artworkService.update(input);
+        var artwork = this.artworkService.update(input);
+        artwork = this.artworkRepository.createFullArtworkInfo(artwork.id());
         return this.success(artwork);
     }
 
