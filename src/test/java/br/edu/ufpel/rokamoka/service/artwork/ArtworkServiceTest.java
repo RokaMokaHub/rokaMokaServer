@@ -350,7 +350,7 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
     }
 
     @Test
-    void update_shouldUpdateArtworkInfoAndSetImages_whenImageIsProvidedAndNoPreviousImageWasSet() {
+    void update_shouldUpdateArtworkInfoAndSetImages_whenImageIsProvided() {
         // Arrange
         var input = Instancio.create(ArtworkInputDTO.class);
         var images = Instancio.createSet(Image.class);
@@ -371,36 +371,6 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
 
         assertArtworkOutputByArtwork(spyArtwork, actual);
         assertTrue(spyArtwork.getImages().containsAll(images));
-    }
-
-    @Test
-    void update_shouldUpdateArtworkInfoAndAddImages_whenImageIsProvidedAndPreviousImageWasSet() {
-        // Arrange
-        var input = Instancio.create(ArtworkInputDTO.class);
-        var inputImages = Instancio.createSet(Image.class);
-        var existingImages = Instancio.createSet(Image.class);
-
-        var artwork = Instancio
-                .of(Artwork.class)
-                .set(field(Artwork::getImages), existingImages)
-                .create();
-
-        var spyArtwork = spy(artwork);
-
-        when(this.artworkRepository.findById(anyLong())).thenReturn(Optional.of(spyArtwork));
-        when(this.imageService.upload(input.image())).thenReturn(inputImages);
-
-        // Act
-        var actual = this.artworkService.update(input);
-
-        // Assert
-        verify(this.artworkRepository).findById(anyLong());
-        verify(this.imageService).upload(input.image());
-        verifyNoMoreInteractions(this.artworkRepository, this.imageService);
-
-        assertArtworkOutputByArtwork(spyArtwork, actual);
-        assertTrue(spyArtwork.getImages().containsAll(existingImages));
-        assertTrue(spyArtwork.getImages().containsAll(inputImages));
     }
     //endregion
 

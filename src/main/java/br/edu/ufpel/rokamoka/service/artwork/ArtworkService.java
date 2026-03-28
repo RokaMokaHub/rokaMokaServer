@@ -107,11 +107,7 @@ public class ArtworkService implements IArtworkService {
         if (CollectionUtils.isEmpty(images)) {
             return new ArtworkOutputDTO(artwork);
         }
-        if (CollectionUtils.isEmpty(artwork.getImages())) {
-            artwork.setImages(images);
-        } else {
-            artwork.getImages().addAll(images);
-        }
+        artwork.setImages(images);
 
         return new ArtworkOutputDTO(artwork);
     }
