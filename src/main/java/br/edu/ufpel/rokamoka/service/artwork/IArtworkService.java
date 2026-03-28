@@ -5,14 +5,11 @@ import br.edu.ufpel.rokamoka.core.Exhibition;
 import br.edu.ufpel.rokamoka.dto.artwork.input.ArtworkInputDTO;
 import br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO;
 import jakarta.validation.Valid;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface IArtworkService {
-
-    List<Artwork> findAll();
 
     Artwork getArtworkOrElseThrow(Long id);
 
@@ -21,8 +18,6 @@ public interface IArtworkService {
     Artwork getByQrCodeOrThrow(String qrCode);
 
     Artwork create(Long exhibitionId, @Valid ArtworkInputDTO artworkInputDTO);
-
-    void addImage(Long artworkId, MultipartFile image);
 
     List<Artwork> getAllArtworkByExhibitionId(Long exhibitionId);
 

@@ -37,15 +37,6 @@ public class ExhibitionService implements IExhibitionService {
     public ExhibitionOutputDTO getExhibitionWithArtworks(Long id) {
         Exhibition exhibition = this.getExhibitionOrElseThrow(id);
         this.loadArtworks(exhibition);
-        return toOutput(exhibition);
-    }
-
-    private void loadArtworks(Exhibition exhibition) {
-        List<Artwork> artworks = this.artworkService.getAllArtworkByExhibitionId(exhibition.getId());
-        exhibition.setArtworks(artworks);
-    }
-
-    private static ExhibitionOutputDTO toOutput(Exhibition exhibition) {
         return new ExhibitionOutputDTO(exhibition);
     }
 
@@ -53,9 +44,9 @@ public class ExhibitionService implements IExhibitionService {
     @Transactional(propagation = REQUIRED)
     public ExhibitionOutputDTO create(ExhibitionInputDTO dto) {
         Location location = this.locationService.getLocationOrElseThrow(dto.locationId());
-        Exhibition exhibition = new ExhibitionBuilder(dto, location).build();
+        Exhibition exhibition = new ExhibitionBuilder(location, dto).build();
         exhibition = this.exhibitionRepository.save(exhibition);
-        return toOutput(exhibition);
+        return new ExhibitionOutputDTO(exhibition);
     }
 
     @Override
@@ -65,7 +56,7 @@ public class ExhibitionService implements IExhibitionService {
         this.artworkService.deleteByExhibitionId(exhibition.getId());
 
         this.exhibitionRepository.delete(exhibition);
-        return toOutput(exhibition);
+        return new ExhibitionOutputDTO(exhibition);
     }
 
     @Override
@@ -92,9 +83,13 @@ public class ExhibitionService implements IExhibitionService {
             location = this.locationService.getLocationOrElseThrow(input.locationId());
         }
 
-        exhibition = new ExhibitionBuilder(exhibition.getId(), input, location).build();
+        exhibition = new ExhibitionBuilder(exhibition, location, input).update();
         exhibition = this.exhibitionRepository.save(exhibition);
+        return new ExhibitionOutputDTO(exhibition);
+    }
 
-        return toOutput(exhibition);
+    private void loadArtworks(Exhibition exhibition) {
+        List<Artwork> artworks = this.artworkService.getAllArtworkByExhibitionId(exhibition.getId());
+        exhibition.setArtworks(artworks);
     }
 }

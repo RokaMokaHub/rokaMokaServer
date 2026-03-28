@@ -4,6 +4,8 @@ import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
 import br.edu.ufpel.rokamoka.core.Mokadex;
 import br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO;
 import br.edu.ufpel.rokamoka.dto.mokadex.output.MokadexOutputDTO;
+import br.edu.ufpel.rokamoka.dto.mokadex.output.MokadexSummaryDTO;
+import br.edu.ufpel.rokamoka.exceptions.RokaMokaNoUserInContextException;
 import br.edu.ufpel.rokamoka.service.mokadex.IMokadexService;
 import br.edu.ufpel.rokamoka.wrapper.RokaMokaController;
 import io.swagger.v3.oas.annotations.Operation;
@@ -44,8 +46,8 @@ public class MokadexRestController extends RokaMokaController {
     @PostMapping(value = "/collect/{qrcode}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponseWrapper<MokadexOutputDTO>> collectStar(
             @PathVariable(value = "qrcode") String qrCode) {
-        Mokadex mokadex = this.mokadexService.collectStar(qrCode);
-        MokadexOutputDTO output = this.mokadexService.getMokadexOutputDTOByMokadex(mokadex);
+        var mokadex = this.mokadexService.collectStar(qrCode);
+        var output = this.mokadexService.getMokadexOutputDTOByMokadex(mokadex);
         return this.success(output);
     }
 
@@ -56,10 +58,18 @@ public class MokadexRestController extends RokaMokaController {
     @GetMapping("/missing/{exhibitionId}")
     public ResponseEntity<ApiResponseWrapper<Set<ArtworkOutputDTO>>> findMissingStarsByExhibition(
             @PathVariable Long exhibitionId) {
-        Set<ArtworkOutputDTO> output = this.mokadexService.getMissingStarsByExhibition(exhibitionId)
+        var output = this.mokadexService.getMissingStarsByExhibition(exhibitionId)
                 .stream()
                 .map(ArtworkOutputDTO::new)
                 .collect(Collectors.toUnmodifiableSet());
+        return this.success(output);
+    }
+
+    @Operation(summary = "Endpoint para obter resumo do Mokadex",
+            description = "Operação para obter contadores de estrelas e emblemas do Mokadex do usuário logado")
+    @GetMapping("/summary")
+    public ResponseEntity<ApiResponseWrapper<MokadexSummaryDTO>> getSummary() throws RokaMokaNoUserInContextException {
+        var output = this.mokadexService.getSummary();
         return this.success(output);
     }
 }

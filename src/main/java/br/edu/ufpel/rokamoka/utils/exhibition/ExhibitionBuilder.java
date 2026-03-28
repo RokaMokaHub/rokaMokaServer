@@ -14,32 +14,38 @@ import br.edu.ufpel.rokamoka.dto.exhibition.input.ExhibitionInputDTO;
  */
 public final class ExhibitionBuilder {
 
-    private Long existingId;
     private final ExhibitionInputDTO input;
     private final Location location;
+    private final Exhibition exhibition;
 
-    public ExhibitionBuilder(Long existingId, ExhibitionInputDTO input, Location location) {
-        this.existingId = existingId;
-        this.input = input;
-        this.location = location;
+    public ExhibitionBuilder(Location location, ExhibitionInputDTO input) {
+        this(null, location, input);
     }
 
-    public ExhibitionBuilder(ExhibitionInputDTO input, Location location) {
-        this.input = input;
+    public ExhibitionBuilder(Exhibition exhibition, Location location, ExhibitionInputDTO input) {
+        this.exhibition = exhibition;
         this.location = location;
+        this.input = input;
     }
 
     public Exhibition build() {
-        Exhibition exhibition = Exhibition.builder()
+        if (this.exhibition != null) {
+            throw new IllegalStateException("Exhibition deve ser null ao criar");
+        }
+        return Exhibition.builder()
                 .name(this.input.name())
                 .description(this.input.description())
                 .location(this.location)
                 .build();
+    }
 
-        if (this.existingId != null) {
-            exhibition.setId(this.existingId);
+    public Exhibition update() {
+        if (this.exhibition == null) {
+            throw new IllegalStateException("Exhibition não pode ser null ao atualizar");
         }
-
-        return exhibition;
+        this.exhibition.setName(this.input.name());
+        this.exhibition.setDescription(this.input.description());
+        this.exhibition.setLocation(this.location);
+        return this.exhibition;
     }
 }
