@@ -1,6 +1,6 @@
 package br.edu.ufpel.rokamoka.core;
 
-vimport br.edu.ufpel.rokamoka.core.audit.Auditable;
+import br.edu.ufpel.rokamoka.core.audit.Auditable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
