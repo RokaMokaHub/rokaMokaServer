@@ -1,9 +1,5 @@
 name: Construção e Testes Java 17
 
-on:
-  pull_request:
-    branches: ["dev"]
-
 jobs:
   build:
     runs-on: ubuntu-latest
