@@ -37,13 +37,15 @@ jobs:
       if: success()
       uses: actions/github-script@v7
       with:
-        script: | github.rest.issues.createComment({ issue_number: context.issue.number, owner: context.repo.owner, repo: context.repo.repo, body: "🟢 Testes passaram com sucesso!" })
+        script: | 
+          github.rest.issues.createComment({ issue_number: context.issue.number, owner: context.repo.owner, repo: context.repo.repo, body: "🟢 Testes passaram com sucesso!" })
     
     - name: Comentário de falha de teste
       if: failure()
       uses: actions/github-script@v7
       with:
-        script: | github.rest.issues.createComment({ issue_number: context.issue.number, owner: context.repo.owner, repo: context.repo.repo, body: "🔴 Testes falharam. Corrige antes de fazer merge." })
+        script: | 
+          github.rest.issues.createComment({ issue_number: context.issue.number, owner: context.repo.owner, repo: context.repo.repo, body: "🔴 Testes falharam. Corrige antes de fazer merge." })
     
     - name: Build
       run: mvn clean compile
@@ -51,11 +53,13 @@ jobs:
       if: success()
       uses: actions/github-script@v7
       with:
-        script: | github.rest.issues.createComment({ issue_number: context.issue.number, owner: context.repo.owner, repo: context.repo.repo, body: "🟢 Build obteve sucesso!" })
+        script: | 
+          github.rest.issues.createComment({ issue_number: context.issue.number, owner: context.repo.owner, repo: context.repo.repo, body: "🟢 Build obteve sucesso!" })
     
     - name: Comentário de falha de teste
       if: failure()
       uses: actions/github-script@v7
       with:
-        script: | github.rest.issues.createComment({ issue_number: context.issue.number, owner: context.repo.owner, repo: context.repo.repo, body: "🔴 Build falharam. Corrige antes de fazer merge." })
+        script: | 
+          github.rest.issues.createComment({ issue_number: context.issue.number, owner: context.repo.owner, repo: context.repo.repo, body: "🔴 Build falharam. Corrige antes de fazer merge." })
           
