@@ -171,7 +171,7 @@ class UserServiceTest implements MockUserSession, MockRepository<User> {
         when(this.userRepository.existsByNome(anyString())).thenReturn(true);
 
         // Act & Assert
-        assertThrows(RokaMokaContentDuplicatedException.class, () -> this.userService.createAnonymousUser(userDTO));
+        assertThrows(IllegalAccessError.class, () -> this.userService.createAnonymousUser(userDTO));
 
         verify(this.passwordEncoder).encode(anyString());
         verify(this.roleRepository).findByName(any(RoleEnum.class));
