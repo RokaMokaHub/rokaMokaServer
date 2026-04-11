@@ -1,8 +1,6 @@
 name: Construção e Testes Java 17
 
 on:
-  push:
-    branches: ["**"]
   pull_request:
     branches: ["**"]
 
@@ -23,54 +21,6 @@ jobs:
 
     - name: Execução de Testes
       run: mvn clean verify
-
-    - name: Comentário de sucesso de teste
-      if: success() && github.event_name == 'pull_request'
-      uses: actions/github-script@v7
-      with:
-        script: |
-          github.rest.issues.createComment({
-            issue_number: context.payload.pull_request.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: "🟢 Testes passaram com sucesso!"
-          })
-
-    - name: Comentário de falha de teste
-      if: failure() && github.event_name == 'pull_request'
-      uses: actions/github-script@v7
-      with:
-        script: |
-          github.rest.issues.createComment({
-            issue_number: context.payload.pull_request.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: "🔴 Testes falharam. Corrige antes de fazer merge."
-          })
-
+      
     - name: Build
       run: mvn clean compile
-
-    - name: Comentário de sucesso de build
-      if: success() && github.event_name == 'pull_request'
-      uses: actions/github-script@v7
-      with:
-        script: |
-          github.rest.issues.createComment({
-            issue_number: context.payload.pull_request.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: "🟢 Build obteve sucesso!"
-          })
-
-    - name: Comentário de falha de build
-      if: failure() && github.event_name == 'pull_request'
-      uses: actions/github-script@v7
-      with:
-        script: |
-          github.rest.issues.createComment({
-            issue_number: context.payload.pull_request.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: "🔴 Build falhou. Corrige antes de fazer merge."
-          })
