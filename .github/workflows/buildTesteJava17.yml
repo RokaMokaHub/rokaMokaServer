@@ -2,7 +2,7 @@ name: Construção e Testes Java 17
 
 on:
   pull_request:
-    branches: ["**"]
+    branches: ["dev"]
 
 jobs:
   build:
