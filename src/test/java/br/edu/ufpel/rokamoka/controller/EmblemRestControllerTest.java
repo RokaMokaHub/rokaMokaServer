@@ -16,15 +16,20 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
-import java.util.List;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
+
 /**
- * Unit tests for the {@link EmblemRestController} class, which is responsible for handling emblem-related endpoints.
+ * Unit tests for the {@link EmblemRestController} class, which is responsible
+ * for handling emblem-related endpoints.
  *
  * @author MauricioMucci
  * @see EmblemService
@@ -32,9 +37,11 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class EmblemRestControllerTest implements ControllerResponseValidator {
 
-    @InjectMocks private EmblemRestController emblemController;
+    @InjectMocks
+    private EmblemRestController emblemController;
 
-    @Mock private IEmblemService emblemService;
+    @Mock
+    private EmblemService emblemService;
 
     private Emblem emblem;
     private EmblemInputDTO input;
@@ -48,7 +55,7 @@ class EmblemRestControllerTest implements ControllerResponseValidator {
         this.emblemWithArtworks = new EmblemOutputDTO(this.emblem, List.of(new ArtworkOutputDTO(artwork)));
     }
 
-    //region findById
+    // region findById
     @Test
     void findById_shouldReturnEmblemOutputDTO_whenEmblemExistsById() {
         // Arrange
@@ -62,10 +69,39 @@ class EmblemRestControllerTest implements ControllerResponseValidator {
 
         verify(this.emblemService).findByIdWithArtworks(anyLong());
     }
+    // endregion
 
-    //endregion
+    // region findByExhibitionId
+    @Test
+    void findByExhibitionId_shouldReturnEmblemOutputDTO_whenEmblemExistsByExhibitionId() {
+        // Arrange
+        when(this.emblemService.findByExhibitionId(anyLong())).thenReturn(Optional.of(this.emblem));
 
-    //region register
+        // Act
+        ResponseEntity<ApiResponseWrapper<EmblemOutputDTO>> response = this.emblemController.findByExhibitionId(1L);
+
+        // Assert
+        this.assertExpectedResponse(response, new EmblemOutputDTO(this.emblem));
+
+        verify(this.emblemService).findByExhibitionId(anyLong());
+    }
+
+    @Test
+    void findByExhibitionId_shouldReturnNullBody_whenEmblemDoesNotExist() {
+        // Arrange
+        when(this.emblemService.findByExhibitionId(anyLong()))
+                .thenReturn(Optional.empty());
+
+        // Act
+        ResponseEntity<ApiResponseWrapper<EmblemOutputDTO>> response = this.emblemController.findByExhibitionId(1L);
+
+        // Assert
+        assertNotNull(response);
+        assertNotNull(response.getBody());
+        assertNull(response.getBody().getBody());
+    }
+
+    // region register
     @Test
     void register_shouldReturnEmblemOutputDTO_whenSuccessful() {
         // Arrange
@@ -79,9 +115,9 @@ class EmblemRestControllerTest implements ControllerResponseValidator {
 
         verify(this.emblemService).create(this.input);
     }
-    //endregion
+    // endregion
 
-    //region remove
+    // region remove
     @Test
     void remove_shouldReturnEmblemOutputDTO_whenSuccessful() {
         // Arrange
@@ -95,5 +131,5 @@ class EmblemRestControllerTest implements ControllerResponseValidator {
 
         verify(this.emblemService).delete(anyLong());
     }
-    //endregion
+    // endregion
 }

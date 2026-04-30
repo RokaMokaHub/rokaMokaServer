@@ -39,11 +39,11 @@ public class EmblemRestController extends RokaMokaController {
 
     @Operation(summary = "Buscar emblema pela exibição", description = "Retorna um emblema que foi buscado a partir do ID de exibição")
     @GetMapping("/exhibition/{exhibitionId}")
-    public ResponseEntity<ApiResponseWrapper<EmblemOutputDTO>> findByExhibitionId(@PathVariable Long exhibitionid) {
-        Emblem emblem = this.emblemService.findByExhibitionId(exhibitionid).orElseThrow(() -> new RokaMokaContentNotFoundException("Emblema não encontrada para id: " + exhibitionid.toString()));
+    public ResponseEntity<ApiResponseWrapper<EmblemOutputDTO>> findByExhibitionId(@PathVariable Long exhibitionId) {
+        Emblem emblem = this.emblemService.findByExhibitionId(exhibitionId).get();
         return this.success(new EmblemOutputDTO(emblem));
     }
-    
+
 
     @Operation(summary = "Criar novo emblema", description = "Cria um novo emblema com os dados fornecidos")
     @PostMapping(path = "/create", consumes = MediaType.APPLICATION_JSON_VALUE,
