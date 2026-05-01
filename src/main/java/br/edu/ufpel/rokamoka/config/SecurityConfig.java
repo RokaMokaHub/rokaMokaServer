@@ -11,6 +11,7 @@ import com.nimbusds.jose.proc.SecurityContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -44,10 +45,30 @@ public class SecurityConfig {
                 .httpBasic(Customizer.withDefaults())
                 .authorizeHttpRequests(authorizeHttpRequests ->
                         authorizeHttpRequests
-                                .requestMatchers(this.endpointAccessRules.getPermissionsEndpoints())
+                                .requestMatchers("/auth/**")
+                                .permitAll()
+                                .requestMatchers(HttpMethod.GET,"/emblem/**")
+                                .authenticated()
+                                .requestMatchers("/emblem/**")
+                                .hasAnyAuthority(RoleEnum.ADMINISTRATOR.name(), RoleEnum.RESEARCHER.name())
+                                .requestMatchers(HttpMethod.GET, "/exhibition/**")
+                                .authenticated()
+                                .requestMatchers("/exhibition/**")
+                                .hasAnyAuthority(RoleEnum.ADMINISTRATOR.name(), RoleEnum.RESEARCHER.name())
+                                .requestMatchers(HttpMethod.GET,"/location/**")
+                                .authenticated()
+                                .requestMatchers("/location/**")
                                 .hasAnyAuthority(RoleEnum.CURATOR.name(), RoleEnum.ADMINISTRATOR.name())
-                                .requestMatchers(this.endpointAccessRules.getExhibitionEndpoints())
+                                .requestMatchers("/mokadex/**")
+                                .authenticated()
+                                .requestMatchers(HttpMethod.GET, "/artwork/**")
+                                .authenticated()
+                                .requestMatchers("/artwork/**")
                                 .hasAnyAuthority(RoleEnum.RESEARCHER.name(), RoleEnum.ADMINISTRATOR.name())
+                                .requestMatchers("/researcher/**")
+                                .hasAnyAuthority(RoleEnum.CURATOR.name(), RoleEnum.ADMINISTRATOR.name())
+                                .requestMatchers("/evaluation/permission/**")
+                                .hasAnyAuthority(RoleEnum.CURATOR.name(), RoleEnum.ADMINISTRATOR.name())
                                 .requestMatchers(this.endpointAccessRules.getEndpointWhiteList())
                                 .permitAll()
                                 .anyRequest()
