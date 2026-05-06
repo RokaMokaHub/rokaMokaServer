@@ -14,12 +14,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.server.ResponseStatusException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -87,18 +90,17 @@ class EmblemRestControllerTest implements ControllerResponseValidator {
     }
 
     @Test
-    void findByExhibitionId_shouldReturnNullBody_whenEmblemDoesNotExist() {
+    void findByExhibitionId_shouldThrowException_whenEmblemDoesNotExist() {
         // Arrange
         when(this.emblemService.findByExhibitionId(anyLong()))
                 .thenReturn(Optional.empty());
 
-        // Act
-        ResponseEntity<ApiResponseWrapper<EmblemOutputDTO>> response = this.emblemController.findByExhibitionId(1L);
+        // Act + Assert
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            this.emblemController.findByExhibitionId(1L);
+        });
 
-        // Assert
-        assertNotNull(response);
-        assertNotNull(response.getBody());
-        assertNull(response.getBody().getBody());
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
     }
 
     // region register
