@@ -69,6 +69,11 @@ spring:
             required: true
           quitwait: true
 
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: ${SPRING_MAX_FILE_SIZE:35MB}       # max size per file
+      max-request-size: ${SPRING_MAX_REQUEST_SIZE:50MB} # max total request size
 jwt:
   private:
     key: classpath:app.key
