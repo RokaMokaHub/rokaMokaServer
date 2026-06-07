@@ -16,7 +16,4 @@ public interface ExhibitionRepository extends JpaRepository<Exhibition, Long> {
            GROUP BY e
            """)
     List<ExhibitionOutputDTO> findAllExhibitionAndCountArtworks();
-
-    @Query("SELECT COUNT(e) > 0 FROM Emblem e WHERE e.exhibition.id = :exhibitionId")
-    boolean existsEmblemByExhibitionId(Long exhibitionId);
 }

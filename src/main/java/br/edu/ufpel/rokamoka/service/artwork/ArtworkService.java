@@ -6,6 +6,7 @@ import br.edu.ufpel.rokamoka.dto.artwork.input.ArtworkInputDTO;
 import br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.repository.ArtworkRepository;
+import br.edu.ufpel.rokamoka.repository.EmblemRepository;
 import br.edu.ufpel.rokamoka.repository.ExhibitionRepository;
 import br.edu.ufpel.rokamoka.service.image.IIMageService;
 import lombok.AllArgsConstructor;
@@ -24,6 +25,7 @@ public class ArtworkService implements IArtworkService {
 
     private final ArtworkRepository artworkRepository;
     private final ExhibitionRepository exhibitionRepository;
+    private final EmblemRepository emblemRepository;
 
     private final IIMageService imageService;
 
@@ -55,7 +57,7 @@ public class ArtworkService implements IArtworkService {
         artwork.setDescricao(input.descricao());
 
         var exhibition = artwork.getExhibition();
-        if (exhibition != null && this.exhibitionRepository.existsEmblemByExhibitionId(exhibition.getId())) {
+        if (exhibition != null && this.emblemRepository.existsEmblemByExhibitionId(exhibition.getId())) {
             return artwork;
         }
 
