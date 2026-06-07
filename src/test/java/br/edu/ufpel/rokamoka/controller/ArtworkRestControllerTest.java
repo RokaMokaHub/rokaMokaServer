@@ -1,6 +1,5 @@
 package br.edu.ufpel.rokamoka.controller;
 
-import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
 import br.edu.ufpel.rokamoka.core.Artwork;
 import br.edu.ufpel.rokamoka.dto.artwork.input.ArtworkInputDTO;
 import br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO;
@@ -13,10 +12,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.ResponseEntity;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -62,36 +59,34 @@ class ArtworkRestControllerTest implements ControllerResponseValidator {
         when(this.artworkRepository.createFullArtworkInfo(anyLong())).thenReturn(this.expected);
 
         // Act
-        ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> response = this.artworkController.findById(1L);
+        var response = this.artworkController.findById(1L);
 
         // Assert
-        this.assertExpectedResponse(response, this.expected);
-
         verify(this.artworkService).getArtworkOrElseThrow(anyLong());
         verify(this.artworkRepository).createFullArtworkInfo(anyLong());
         verifyNoMoreInteractions(this.artworkService, this.artworkRepository);
+
+        this.assertExpectedResponse(response, this.expected);
     }
 
     @Test
     void getAllByExhibitionId_shouldReturnArtworkOutputDTOList_whenCalled() {
         // Arrange
-        List<Artwork> artworks = List.of(this.artwork);
-        List<ArtworkOutputDTO> dtoList = List.of(this.expected);
-        Set<Long> ids = artworks.stream().map(Artwork::getId).collect(Collectors.toSet());
+        var artworks = List.of(this.artwork);
+        var dtoList = List.of(this.expected);
+        var ids = artworks.stream().map(Artwork::getId).collect(Collectors.toSet());
 
         when(this.artworkService.getAllArtworkByExhibitionId(anyLong())).thenReturn(artworks);
         when(this.artworkRepository.createFullArtworkInfo(ids)).thenReturn(dtoList);
 
         // Act
-        ResponseEntity<ApiResponseWrapper<List<ArtworkOutputDTO>>> response =
-                this.artworkController.getAllByExhibitionId(1L);
+        var response = this.artworkController.getAllByExhibitionId(1L);
 
         // Assert
         verify(this.artworkService).getAllArtworkByExhibitionId(anyLong());
         verify(this.artworkRepository).createFullArtworkInfo(ids);
 
         this.assertListResponse(response, dtoList);
-
     }
 
     @Test
@@ -101,40 +96,41 @@ class ArtworkRestControllerTest implements ControllerResponseValidator {
         when(this.artworkRepository.createFullArtworkInfo(anyLong())).thenReturn(this.expected);
 
         // Act
-        ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> response = this.artworkController.getArtworkByQrCode("");
+        var response = this.artworkController.getArtworkByQrCode("");
 
         // Assert
-        this.assertExpectedResponse(response, this.expected);
-
         verify(this.artworkService).getByQrCodeOrThrow(anyString());
         verify(this.artworkRepository).createFullArtworkInfo(anyLong());
         verifyNoMoreInteractions(this.artworkService, this.artworkRepository);
+
+        this.assertExpectedResponse(response, this.expected);
     }
 
     @Test
     void register_shouldReturnArtworkOutputDTO_whenSuccessful() {
         // Arrange
         when(this.artworkService.create(anyLong(), any(ArtworkInputDTO.class))).thenReturn(this.artwork);
+        when(this.artworkRepository.createFullArtworkInfo(this.artwork.getId())).thenReturn(this.expected);
 
         // Act
-        ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> response = this.artworkController.register(1L, this.input);
+        var response = this.artworkController.register(1L, this.input);
 
         // Assert
-        this.assertExpectedResponse(response, this.expected);
-
         verify(this.artworkService).create(anyLong(), any(ArtworkInputDTO.class));
         verifyNoMoreInteractions(this.artworkService);
         verifyNoMoreInteractions(this.artworkRepository);
+
+        this.assertExpectedResponse(response, this.expected);
     }
 
     @Test
     void patch_shouldReturnArtworkOutputDTO_whenSuccessful() {
         // Arrange
-        when(this.artworkService.update(this.input)).thenReturn(this.expected);
-        when(this.artworkRepository.createFullArtworkInfo(this.expected.id())).thenReturn(this.expected);
+        when(this.artworkService.update(this.input)).thenReturn(this.artwork);
+        when(this.artworkRepository.createFullArtworkInfo(this.artwork.getId())).thenReturn(this.expected);
 
         // Act
-        ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> response = this.artworkController.patch(this.input);
+        var response = this.artworkController.patch(this.input);
 
         // Assert
         verify(this.artworkService).update(this.input);
@@ -149,7 +145,7 @@ class ArtworkRestControllerTest implements ControllerResponseValidator {
         when(this.artworkService.delete(anyLong())).thenReturn(this.expected);
 
         // Act
-        ResponseEntity<ApiResponseWrapper<ArtworkOutputDTO>> response = this.artworkController.remove(1L);
+        var response = this.artworkController.remove(1L);
 
         // Assert
         this.assertExpectedResponse(response, this.expected);
