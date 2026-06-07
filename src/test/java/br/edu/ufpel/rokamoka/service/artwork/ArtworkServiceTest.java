@@ -7,6 +7,7 @@ import br.edu.ufpel.rokamoka.dto.artwork.input.ArtworkInputDTO;
 import br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.repository.ArtworkRepository;
+import br.edu.ufpel.rokamoka.repository.EmblemRepository;
 import br.edu.ufpel.rokamoka.repository.ExhibitionRepository;
 import br.edu.ufpel.rokamoka.service.MockRepository;
 import br.edu.ufpel.rokamoka.service.MockUserSession;
@@ -50,6 +51,7 @@ import static org.mockito.Mockito.when;
  * @author MauricioMucci
  * @see ArtworkRepository
  * @see ExhibitionRepository
+ * @see EmblemRepository
  * @see IIMageService
  */
 @ExtendWith(MockitoExtension.class)
@@ -62,6 +64,8 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
     private ArtworkRepository artworkRepository;
     @Mock
     private ExhibitionRepository exhibitionRepository;
+    @Mock
+    private EmblemRepository emblemRepository;
 
     @Mock
     private IIMageService imageService;
@@ -292,14 +296,14 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
         var spyArtwork = spy(artwork);
 
         when(this.artworkRepository.findById(anyLong())).thenReturn(Optional.of(spyArtwork));
-        when(this.exhibitionRepository.existsEmblemByExhibitionId(anyLong())).thenReturn(true);
+        when(this.emblemRepository.existsEmblemByExhibitionId(anyLong())).thenReturn(true);
 
         // Act
         var result = this.artworkService.update(input);
 
         // Assert
         verify(this.artworkRepository).findById(anyLong());
-        verify(this.exhibitionRepository).existsEmblemByExhibitionId(anyLong());
+        verify(this.emblemRepository).existsEmblemByExhibitionId(anyLong());
         verifyNoMoreInteractions(this.artworkRepository, this.exhibitionRepository);
         verifyNoInteractions(this.imageService);
 
@@ -350,7 +354,7 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
 
         when(this.artworkRepository.findById(anyLong())).thenReturn(Optional.of(spyArtwork));
         when(exhibition.getId()).thenReturn(1L);
-        when(this.exhibitionRepository.existsEmblemByExhibitionId(anyLong())).thenReturn(false);
+        when(this.emblemRepository.existsEmblemByExhibitionId(anyLong())).thenReturn(false);
         when(this.imageService.upload(input.image())).thenReturn(images);
 
         // Act
@@ -359,6 +363,7 @@ class ArtworkServiceTest implements MockUserSession, MockRepository<Artwork> {
         // Assert
         verify(this.artworkRepository).findById(anyLong());
         verify(this.imageService).upload(input.image());
+        verify(this.emblemRepository).existsEmblemByExhibitionId(anyLong());
         verifyNoMoreInteractions(this.artworkRepository, this.imageService);
 
         assertArtworkDetailsMatch(spyArtwork, result);

@@ -117,6 +117,7 @@ class ArtworkRestControllerTest implements ControllerResponseValidator {
 
         // Assert
         verify(this.artworkService).create(anyLong(), any(ArtworkInputDTO.class));
+        verify(this.artworkRepository).createFullArtworkInfo(this.artwork.getId());
         verifyNoMoreInteractions(this.artworkService);
         verifyNoMoreInteractions(this.artworkRepository);
 
@@ -134,7 +135,7 @@ class ArtworkRestControllerTest implements ControllerResponseValidator {
 
         // Assert
         verify(this.artworkService).update(this.input);
-        verify(this.artworkRepository).createFullArtworkInfo(this.expected.id());
+        verify(this.artworkRepository).createFullArtworkInfo(this.artwork.getId());
 
         this.assertExpectedResponse(response, this.expected);
     }
