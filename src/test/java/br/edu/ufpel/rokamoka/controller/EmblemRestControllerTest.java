@@ -1,10 +1,12 @@
 package br.edu.ufpel.rokamoka.controller;
 
 import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
+import br.edu.ufpel.rokamoka.core.Artwork;
 import br.edu.ufpel.rokamoka.core.Emblem;
 import br.edu.ufpel.rokamoka.dto.emblem.input.EmblemInputDTO;
 import br.edu.ufpel.rokamoka.dto.emblem.output.EmblemOutputDTO;
-import br.edu.ufpel.rokamoka.service.emblem.EmblemService;
+import br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO;
+import br.edu.ufpel.rokamoka.service.emblem.IEmblemService;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +15,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
+
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
@@ -30,31 +34,35 @@ class EmblemRestControllerTest implements ControllerResponseValidator {
 
     @InjectMocks private EmblemRestController emblemController;
 
-    @Mock private EmblemService emblemService;
+    @Mock private IEmblemService emblemService;
 
     private Emblem emblem;
     private EmblemInputDTO input;
+    private EmblemOutputDTO emblemWithArtworks;
 
     @BeforeEach
     void setUp() {
         this.emblem = Instancio.create(Emblem.class);
         this.input = mock(EmblemInputDTO.class);
+        var artwork = Instancio.create(Artwork.class);
+        this.emblemWithArtworks = new EmblemOutputDTO(this.emblem, List.of(new ArtworkOutputDTO(artwork)));
     }
 
     //region findById
     @Test
     void findById_shouldReturnEmblemOutputDTO_whenEmblemExistsById() {
         // Arrange
-        when(this.emblemService.findById(anyLong())).thenReturn(this.emblem);
+        when(this.emblemService.findByIdWithArtworks(anyLong())).thenReturn(this.emblemWithArtworks);
 
         // Act
         ResponseEntity<ApiResponseWrapper<EmblemOutputDTO>> response = this.emblemController.findById(1L);
 
         // Assert
-        this.assertExpectedResponse(response, new EmblemOutputDTO(this.emblem));
+        this.assertExpectedResponse(response, this.emblemWithArtworks);
 
-        verify(this.emblemService).findById(anyLong());
+        verify(this.emblemService).findByIdWithArtworks(anyLong());
     }
+
     //endregion
 
     //region register

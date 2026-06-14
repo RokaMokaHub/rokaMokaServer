@@ -1,9 +1,18 @@
 package br.edu.ufpel.rokamoka.service.emblem;
 
 import br.edu.ufpel.rokamoka.core.Emblem;
+import br.edu.ufpel.rokamoka.core.Artwork;
+import br.edu.ufpel.rokamoka.core.Mokadex;
+import br.edu.ufpel.rokamoka.context.ServiceContext;
 import br.edu.ufpel.rokamoka.dto.emblem.input.EmblemInputDTO;
+import br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO;
+import br.edu.ufpel.rokamoka.dto.emblem.output.EmblemOutputDTO;
+import br.edu.ufpel.rokamoka.exceptions.RokaMokaForbiddenException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
+import br.edu.ufpel.rokamoka.repository.ArtworkRepository;
 import br.edu.ufpel.rokamoka.repository.EmblemRepository;
+import br.edu.ufpel.rokamoka.repository.MokadexRepository;
+import br.edu.ufpel.rokamoka.service.artwork.IArtworkService;
 import br.edu.ufpel.rokamoka.service.exhibition.IExhibitionService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.Optional;
+import java.util.Set;
+import java.util.Comparator;
+import java.util.stream.Collectors;
 
 import static org.springframework.transaction.annotation.Propagation.REQUIRED;
 
@@ -31,11 +43,36 @@ import static org.springframework.transaction.annotation.Propagation.REQUIRED;
 public class EmblemService implements IEmblemService {
 
     private final EmblemRepository emblemRepository;
+    private final MokadexRepository mokadexRepository;
+    private final IArtworkService artworkService;
+    private final ArtworkRepository artworkRepository;
     private final IExhibitionService exhibitionService;
 
     @Override
     public Emblem findById(Long exhibitionId) {
         return this.emblemRepository.findById(exhibitionId).orElseThrow(RokaMokaContentNotFoundException::new);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public EmblemOutputDTO findByIdWithArtworks(Long emblemId) {
+        Emblem emblem = this.findById(emblemId);
+        this.assertLoggedUserHasEmblem(emblem);
+
+        Set<Long> artworkIds = this.artworkService.getAllArtworkByExhibitionId(emblem.getExhibition().getId())
+                .stream()
+                .map(Artwork::getId)
+                .collect(Collectors.toSet());
+
+        if (artworkIds.isEmpty()) {
+            return new EmblemOutputDTO(emblem);
+        }
+
+        var artworks = this.artworkRepository.createFullArtworkInfo(artworkIds).stream()
+                .sorted(Comparator.comparing(ArtworkOutputDTO::id, Comparator.nullsLast(Long::compareTo)))
+                .toList();
+
+        return new EmblemOutputDTO(emblem, artworks);
     }
 
     @Override
@@ -71,4 +108,20 @@ public class EmblemService implements IEmblemService {
     public boolean existsEmblemByExhibitionId(Long exhibitionId) {
         return this.emblemRepository.existsEmblemByExhibitionId(exhibitionId);
     }
+
+    private void assertLoggedUserHasEmblem(Emblem emblem) {
+        var context = ServiceContext.getContext();
+        var user = context.getUser();
+        if (user == null) {
+            throw new RokaMokaForbiddenException("Usuário não autenticado");
+        }
+
+        Mokadex mokadex = this.mokadexRepository.findMokadexByUsername(user.getUsername())
+                .orElseThrow(() -> new RokaMokaForbiddenException("Usuário não possui mokadex"));
+
+        if (!mokadex.containsEmblem(emblem)) {
+            throw new RokaMokaForbiddenException("Usuário não possui o emblema solicitado");
+        }
+    }
+
 }

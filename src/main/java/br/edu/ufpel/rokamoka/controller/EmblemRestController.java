@@ -32,8 +32,8 @@ public class EmblemRestController extends RokaMokaController {
     @Operation(summary = "Buscar emblema por ID", description = "Retorna um emblema com base no ID informado")
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponseWrapper<EmblemOutputDTO>> findById(@PathVariable Long id) {
-        Emblem emblem = this.emblemService.findById(id);
-        return this.success(new EmblemOutputDTO(emblem));
+        EmblemOutputDTO emblem = this.emblemService.findByIdWithArtworks(id);
+        return this.success(emblem);
     }
 
     @Operation(summary = "Criar novo emblema", description = "Cria um novo emblema com os dados fornecidos")
