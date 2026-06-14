@@ -4,6 +4,7 @@ import br.edu.ufpel.rokamoka.context.ServiceContext;
 import br.edu.ufpel.rokamoka.core.Artwork;
 import br.edu.ufpel.rokamoka.core.Emblem;
 import br.edu.ufpel.rokamoka.core.Exhibition;
+import br.edu.ufpel.rokamoka.core.Location;
 import br.edu.ufpel.rokamoka.core.Mokadex;
 import br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO;
 import br.edu.ufpel.rokamoka.dto.emblem.input.EmblemInputDTO;
@@ -41,6 +42,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -66,6 +68,7 @@ class EmblemServiceTest implements MockRepository<Emblem>, MockUserSession {
     private Emblem expected;
     private EmblemInputDTO input;
     private Exhibition exhibition;
+    private Location location;
     private Mokadex mokadex;
 
     @BeforeEach
@@ -73,7 +76,11 @@ class EmblemServiceTest implements MockRepository<Emblem>, MockUserSession {
         this.expected = mock(Emblem.class);
         this.input = Instancio.create(EmblemInputDTO.class);
         this.exhibition = mock(Exhibition.class);
+        this.location = mock(Location.class);
         this.mokadex = mock(Mokadex.class);
+
+        lenient().when(this.exhibition.getLocation()).thenReturn(this.location);
+        lenient().when(this.location.getNome()).thenReturn("local");
     }
 
     //region findById
@@ -230,7 +237,7 @@ class EmblemServiceTest implements MockRepository<Emblem>, MockUserSession {
     @Test
     void findByIdWithArtworks_shouldThrowForbidden_whenUserIsNotAuthenticated() {
         // Arrange
-        var mockContext = this.mockServiceContext();
+        var mockContext = mock(ServiceContext.class);
         var emblem = Instancio.of(Emblem.class)
                 .set(field(Emblem::getExhibition), this.exhibition)
                 .create();
