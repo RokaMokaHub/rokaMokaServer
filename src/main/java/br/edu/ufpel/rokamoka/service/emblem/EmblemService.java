@@ -1,14 +1,25 @@
 package br.edu.ufpel.rokamoka.service.emblem;
 
-import br.edu.ufpel.rokamoka.core.Emblem;
-import br.edu.ufpel.rokamoka.core.Artwork;
-import br.edu.ufpel.rokamoka.core.Mokadex;
+import static org.springframework.transaction.annotation.Propagation.REQUIRED;
+
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
+
 import br.edu.ufpel.rokamoka.context.ServiceContext;
+import br.edu.ufpel.rokamoka.core.Artwork;
+import br.edu.ufpel.rokamoka.core.Emblem;
+import br.edu.ufpel.rokamoka.core.Mokadex;
 import br.edu.ufpel.rokamoka.dto.emblem.input.EmblemInputDTO;
-import br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO;
 import br.edu.ufpel.rokamoka.dto.emblem.output.EmblemOutputDTO;
-import br.edu.ufpel.rokamoka.exceptions.RokaMokaForbiddenException;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
+import br.edu.ufpel.rokamoka.exceptions.RokaMokaForbiddenException;
+import br.edu.ufpel.rokamoka.exceptions.RokaMokaNoUserInContextException;
 import br.edu.ufpel.rokamoka.repository.ArtworkRepository;
 import br.edu.ufpel.rokamoka.repository.EmblemRepository;
 import br.edu.ufpel.rokamoka.repository.MokadexRepository;
@@ -17,17 +28,6 @@ import br.edu.ufpel.rokamoka.service.exhibition.IExhibitionService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
-
-import java.util.Optional;
-import java.util.Set;
-import java.util.Comparator;
-import java.util.stream.Collectors;
-
-import static org.springframework.transaction.annotation.Propagation.REQUIRED;
 
 /**
  * Service implementation of the {@link IEmblemService} interface for managing operations on the {@link Emblem}
@@ -49,8 +49,8 @@ public class EmblemService implements IEmblemService {
     private final IExhibitionService exhibitionService;
 
     @Override
-    public Emblem findById(Long exhibitionId) {
-        return this.emblemRepository.findById(exhibitionId).orElseThrow(RokaMokaContentNotFoundException::new);
+    public Emblem findById(Long emblemId) {
+        return this.emblemRepository.findById(emblemId).orElseThrow(RokaMokaContentNotFoundException::new);
     }
 
     @Override
@@ -68,9 +68,7 @@ public class EmblemService implements IEmblemService {
             return new EmblemOutputDTO(emblem);
         }
 
-        var artworks = this.artworkRepository.createFullArtworkInfo(artworkIds).stream()
-                .sorted(Comparator.comparing(ArtworkOutputDTO::id, Comparator.nullsLast(Long::compareTo)))
-                .toList();
+        var artworks = this.artworkRepository.createFullArtworkInfo(artworkIds).stream().toList();
 
         return new EmblemOutputDTO(emblem, artworks);
     }
@@ -110,13 +108,14 @@ public class EmblemService implements IEmblemService {
     }
 
     private void assertLoggedUserHasEmblem(Emblem emblem) {
-        var context = ServiceContext.getContext();
-        var user = context.getUser();
-        if (user == null) {
-            throw new RokaMokaForbiddenException("Usuário não autenticado");
+        String userName;
+        try {
+            userName = ServiceContext.getContext().getUsernameOrThrow();
+        } catch (RokaMokaNoUserInContextException e) {
+            log.error(e.getMessage());
+            throw new RokaMokaForbiddenException("Usuário não possui mokadex");
         }
-
-        Mokadex mokadex = this.mokadexRepository.findMokadexByUsername(user.getUsername())
+        Mokadex mokadex = this.mokadexRepository.findMokadexByUsername(userName)
                 .orElseThrow(() -> new RokaMokaForbiddenException("Usuário não possui mokadex"));
 
         if (!mokadex.containsEmblem(emblem)) {
