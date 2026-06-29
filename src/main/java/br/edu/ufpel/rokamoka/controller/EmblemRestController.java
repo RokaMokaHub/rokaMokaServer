@@ -4,6 +4,7 @@ import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
 import br.edu.ufpel.rokamoka.core.Emblem;
 import br.edu.ufpel.rokamoka.dto.emblem.input.EmblemInputDTO;
 import br.edu.ufpel.rokamoka.dto.emblem.output.EmblemOutputDTO;
+import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.service.emblem.IEmblemService;
 import br.edu.ufpel.rokamoka.wrapper.RokaMokaController;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,6 +37,14 @@ public class EmblemRestController extends RokaMokaController {
         return this.success(emblem);
     }
 
+    @Operation(summary = "Buscar emblema pela exibição", description = "Retorna um emblema que foi buscado a partir do ID de exibição")
+    @GetMapping("/exhibition/{exhibitionId}")
+    public ResponseEntity<ApiResponseWrapper<EmblemOutputDTO>> findByExhibitionId(@PathVariable Long exhibitionid) {
+        Emblem emblem = this.emblemService.findByExhibitionId(exhibitionid).orElseThrow(() -> new RokaMokaContentNotFoundException("Emblema não encontrada para id: " + exhibitionid.toString()));
+        return this.success(new EmblemOutputDTO(emblem));
+    }
+    
+
     @Operation(summary = "Criar novo emblema", description = "Cria um novo emblema com os dados fornecidos")
     @PostMapping(path = "/create", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -50,4 +59,6 @@ public class EmblemRestController extends RokaMokaController {
         Emblem emblem = this.emblemService.delete(id);
         return this.success(new EmblemOutputDTO(emblem));
     }
+
+   
 }

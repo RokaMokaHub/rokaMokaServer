@@ -67,7 +67,7 @@ public class UserService implements IUserService {
      * @return A random password consisting of 10 lowercase letters.
      */
     private static String generateRandomPassword() {
-        RandomStringGenerator pwdGenerator = new Builder().withinRange('a', 'z').build();
+        RandomStringGenerator pwdGenerator = new Builder().withinRange('a', 'z').get();
         return pwdGenerator.generate(10);
     }
 

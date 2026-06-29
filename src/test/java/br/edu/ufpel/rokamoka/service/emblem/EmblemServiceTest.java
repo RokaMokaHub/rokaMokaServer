@@ -1,37 +1,5 @@
 package br.edu.ufpel.rokamoka.service.emblem;
 
-import br.edu.ufpel.rokamoka.context.ServiceContext;
-import br.edu.ufpel.rokamoka.core.Artwork;
-import br.edu.ufpel.rokamoka.core.Emblem;
-import br.edu.ufpel.rokamoka.core.Exhibition;
-import br.edu.ufpel.rokamoka.core.Location;
-import br.edu.ufpel.rokamoka.core.Mokadex;
-import br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO;
-import br.edu.ufpel.rokamoka.dto.emblem.input.EmblemInputDTO;
-import br.edu.ufpel.rokamoka.dto.emblem.output.EmblemOutputDTO;
-import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
-import br.edu.ufpel.rokamoka.exceptions.RokaMokaForbiddenException;
-import br.edu.ufpel.rokamoka.repository.ArtworkRepository;
-import br.edu.ufpel.rokamoka.repository.EmblemRepository;
-import br.edu.ufpel.rokamoka.repository.MokadexRepository;
-import br.edu.ufpel.rokamoka.service.MockRepository;
-import br.edu.ufpel.rokamoka.service.MockUserSession;
-import br.edu.ufpel.rokamoka.service.artwork.IArtworkService;
-import br.edu.ufpel.rokamoka.service.exhibition.IExhibitionService;
-import org.instancio.Instancio;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
-import static org.instancio.Select.field;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -39,13 +7,34 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+
+import java.util.Optional;
+
+import org.instancio.Instancio;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import br.edu.ufpel.rokamoka.core.Emblem;
+import br.edu.ufpel.rokamoka.core.Exhibition;
+import br.edu.ufpel.rokamoka.core.Location;
+import br.edu.ufpel.rokamoka.dto.emblem.input.EmblemInputDTO;
+import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
+import br.edu.ufpel.rokamoka.repository.ArtworkRepository;
+import br.edu.ufpel.rokamoka.repository.EmblemRepository;
+import br.edu.ufpel.rokamoka.repository.MokadexRepository;
+import br.edu.ufpel.rokamoka.service.MockRepository;
+import br.edu.ufpel.rokamoka.service.MockUserSession;
+import br.edu.ufpel.rokamoka.service.artwork.IArtworkService;
+import br.edu.ufpel.rokamoka.service.exhibition.IExhibitionService;
 
 /**
  * Unit tests for the {@link EmblemService} class, which is responsible for handling emblem-related API operations.
@@ -69,15 +58,12 @@ class EmblemServiceTest implements MockRepository<Emblem>, MockUserSession {
     private EmblemInputDTO input;
     private Exhibition exhibition;
     private Location location;
-    private Mokadex mokadex;
-
     @BeforeEach
     void setUp() {
         this.expected = mock(Emblem.class);
         this.input = Instancio.create(EmblemInputDTO.class);
         this.exhibition = mock(Exhibition.class);
         this.location = mock(Location.class);
-        this.mokadex = mock(Mokadex.class);
 
         lenient().when(this.exhibition.getLocation()).thenReturn(this.location);
         lenient().when(this.location.getNome()).thenReturn("local");
