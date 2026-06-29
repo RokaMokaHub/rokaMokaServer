@@ -1,12 +1,15 @@
 package br.edu.ufpel.rokamoka.controller;
 
-import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
-import br.edu.ufpel.rokamoka.core.Artwork;
-import br.edu.ufpel.rokamoka.core.Emblem;
-import br.edu.ufpel.rokamoka.dto.emblem.input.EmblemInputDTO;
-import br.edu.ufpel.rokamoka.dto.emblem.output.EmblemOutputDTO;
-import br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO;
-import br.edu.ufpel.rokamoka.service.emblem.IEmblemService;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.Optional;
+
 import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,17 +21,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Optional;
+import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
+import br.edu.ufpel.rokamoka.core.Artwork;
+import br.edu.ufpel.rokamoka.core.Emblem;
+import br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO;
+import br.edu.ufpel.rokamoka.dto.emblem.input.EmblemInputDTO;
+import br.edu.ufpel.rokamoka.dto.emblem.output.EmblemOutputDTO;
+import br.edu.ufpel.rokamoka.service.emblem.EmblemService;
 
 /**
  * Unit tests for the {@link EmblemRestController} class, which is responsible

@@ -8,8 +8,6 @@ import br.edu.ufpel.rokamoka.dto.emblem.output.EmblemOutputDTO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
-import java.util.Optional;
-
 /**
  * Service interface for managing and retrieving information related to {@link Emblem}.
  *

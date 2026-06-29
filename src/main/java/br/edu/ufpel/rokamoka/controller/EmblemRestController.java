@@ -1,16 +1,5 @@
 package br.edu.ufpel.rokamoka.controller;
 
-import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
-import br.edu.ufpel.rokamoka.core.Emblem;
-import br.edu.ufpel.rokamoka.dto.emblem.input.EmblemInputDTO;
-import br.edu.ufpel.rokamoka.dto.emblem.output.EmblemOutputDTO;
-import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
-import br.edu.ufpel.rokamoka.service.emblem.IEmblemService;
-import br.edu.ufpel.rokamoka.wrapper.RokaMokaController;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +12,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.bind.annotation.RequestParam;
+
+import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
+import br.edu.ufpel.rokamoka.core.Emblem;
+import br.edu.ufpel.rokamoka.dto.emblem.input.EmblemInputDTO;
+import br.edu.ufpel.rokamoka.dto.emblem.output.EmblemOutputDTO;
+import br.edu.ufpel.rokamoka.service.emblem.IEmblemService;
+import br.edu.ufpel.rokamoka.wrapper.RokaMokaController;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 
 @Validated
 @RequiredArgsConstructor

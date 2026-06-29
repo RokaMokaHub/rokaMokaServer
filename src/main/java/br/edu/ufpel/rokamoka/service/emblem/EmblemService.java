@@ -74,7 +74,7 @@ public class EmblemService implements IEmblemService {
     }
 
     @Override
-    public Optional<Optional<Emblem>> findByExhibitionId(Long exhibitionId) {
+    public Optional<Emblem> findByExhibitionId(Long exhibitionId) {
         Optional<Emblem> maybeEmblem = this.emblemRepository.findEmblemByExhibitionId(exhibitionId);
         maybeEmblem.ifPresentOrElse(emblem -> log.info("[{}] encontrado com sucesso", emblem),
                 () -> log.info("[{}] não foi encontrado", Emblem.class.getSimpleName()));
