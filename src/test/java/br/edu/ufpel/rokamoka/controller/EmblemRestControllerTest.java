@@ -80,10 +80,11 @@ class EmblemRestControllerTest implements ControllerResponseValidator {
         when(this.emblemService.findByExhibitionId(anyLong())).thenReturn(Optional.of(this.emblem));
 
         // Act
-        ResponseEntity<ApiResponseWrapper<EmblemOutputDTO>> response = this.emblemController.findByExhibitionId(1L);
+        ResponseEntity<ApiResponseWrapper<List<EmblemOutputDTO>>> response = this.emblemController
+                .findByExhibitionId(1L);
 
         // Assert
-        this.assertExpectedResponse(response, new EmblemOutputDTO(this.emblem));
+        this.assertExpectedResponse(response, List.of(new EmblemOutputDTO(this.emblem)));
 
         verify(this.emblemService).findByExhibitionId(anyLong());
     }
