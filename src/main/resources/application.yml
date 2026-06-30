@@ -56,7 +56,7 @@ spring:
   mail:
     port: 587
     default-encoding: UTF-8
-    host: ${SPRING_EMAIL_HOST}
+    host: 'smtp.gmail.com'
     password: ${SPRING_EMAIL_PASSWORD}
     username: ${SPRING_EMAIL_USERNAME}
     protocol: smtp

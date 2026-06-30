@@ -6,7 +6,6 @@ import br.edu.ufpel.rokamoka.core.RoleEnum;
 import br.edu.ufpel.rokamoka.core.User;
 import br.edu.ufpel.rokamoka.dto.permission.output.PermissionRequestStatusDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentDuplicatedException;
-import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.repository.PermissionReqRepository;
 import br.edu.ufpel.rokamoka.repository.RoleRepository;
 import br.edu.ufpel.rokamoka.service.IRequestPermissionService;

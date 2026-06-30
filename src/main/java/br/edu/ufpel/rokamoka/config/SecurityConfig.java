@@ -47,9 +47,9 @@ public class SecurityConfig {
                         authorizeHttpRequests
                                 .requestMatchers("/auth/**")
                                 .permitAll()
-                                .requestMatchers(HttpMethod.GET, "/emblem/**")
+                                .requestMatchers(HttpMethod.GET, "/emblems/**")
                                 .authenticated()
-                                .requestMatchers("/emblem/**")
+                                .requestMatchers("/emblems/**")
                                 .hasAnyAuthority(RoleEnum.ADMINISTRATOR.name(), RoleEnum.RESEARCHER.name())
                                 .requestMatchers(HttpMethod.GET, "/exhibition/**")
                                 .authenticated()

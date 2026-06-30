@@ -81,6 +81,7 @@ public class EmblemService implements IEmblemService {
         return maybeEmblem;
     }
 
+
     @Override
     public Emblem create(EmblemInputDTO emblemInputDTO) {
         log.info("Criando [{}] para o [{}]", Emblem.class.getSimpleName(), emblemInputDTO);

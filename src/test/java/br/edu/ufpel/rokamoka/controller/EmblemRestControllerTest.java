@@ -1,12 +1,15 @@
 package br.edu.ufpel.rokamoka.controller;
 
-import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
-import br.edu.ufpel.rokamoka.core.Artwork;
-import br.edu.ufpel.rokamoka.core.Emblem;
-import br.edu.ufpel.rokamoka.dto.emblem.input.EmblemInputDTO;
-import br.edu.ufpel.rokamoka.dto.emblem.output.EmblemOutputDTO;
-import br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO;
-import br.edu.ufpel.rokamoka.service.emblem.IEmblemService;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.Optional;
+
 import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,17 +17,21 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import br.edu.ufpel.rokamoka.context.ApiResponseWrapper;
+import br.edu.ufpel.rokamoka.core.Artwork;
+import br.edu.ufpel.rokamoka.core.Emblem;
+import br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO;
+import br.edu.ufpel.rokamoka.dto.emblem.input.EmblemInputDTO;
+import br.edu.ufpel.rokamoka.dto.emblem.output.EmblemOutputDTO;
+import br.edu.ufpel.rokamoka.service.emblem.EmblemService;
 
 /**
- * Unit tests for the {@link EmblemRestController} class, which is responsible for handling emblem-related endpoints.
+ * Unit tests for the {@link EmblemRestController} class, which is responsible
+ * for handling emblem-related endpoints.
  *
  * @author MauricioMucci
  * @see EmblemService
@@ -32,9 +39,11 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class EmblemRestControllerTest implements ControllerResponseValidator {
 
-    @InjectMocks private EmblemRestController emblemController;
+    @InjectMocks
+    private EmblemRestController emblemController;
 
-    @Mock private IEmblemService emblemService;
+    @Mock
+    private EmblemService emblemService;
 
     private Emblem emblem;
     private EmblemInputDTO input;
@@ -48,7 +57,7 @@ class EmblemRestControllerTest implements ControllerResponseValidator {
         this.emblemWithArtworks = new EmblemOutputDTO(this.emblem, List.of(new ArtworkOutputDTO(artwork)));
     }
 
-    //region findById
+    // region findById
     @Test
     void findById_shouldReturnEmblemOutputDTO_whenEmblemExistsById() {
         // Arrange
@@ -62,10 +71,39 @@ class EmblemRestControllerTest implements ControllerResponseValidator {
 
         verify(this.emblemService).findByIdWithArtworks(anyLong());
     }
+    // endregion
 
-    //endregion
+    // region findByExhibitionId
+    @Test
+    void findByExhibitionId_shouldReturnEmblemOutputDTO_whenEmblemExistsByExhibitionId() {
+        // Arrange
+        when(this.emblemService.findByExhibitionId(anyLong())).thenReturn(Optional.of(this.emblem));
 
-    //region register
+        // Act
+        ResponseEntity<ApiResponseWrapper<List<EmblemOutputDTO>>> response = this.emblemController
+                .findByExhibitionId(1L);
+
+        // Assert
+        this.assertExpectedResponse(response, List.of(new EmblemOutputDTO(this.emblem)));
+
+        verify(this.emblemService).findByExhibitionId(anyLong());
+    }
+
+    @Test
+    void findByExhibitionId_shouldThrowException_whenEmblemDoesNotExist() {
+        // Arrange
+        when(this.emblemService.findByExhibitionId(anyLong()))
+                .thenReturn(Optional.empty());
+
+        // Act + Assert
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            this.emblemController.findByExhibitionId(1L);
+        });
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+    }
+
+    // region register
     @Test
     void register_shouldReturnEmblemOutputDTO_whenSuccessful() {
         // Arrange
@@ -79,9 +117,9 @@ class EmblemRestControllerTest implements ControllerResponseValidator {
 
         verify(this.emblemService).create(this.input);
     }
-    //endregion
+    // endregion
 
-    //region remove
+    // region remove
     @Test
     void remove_shouldReturnEmblemOutputDTO_whenSuccessful() {
         // Arrange
@@ -95,5 +133,5 @@ class EmblemRestControllerTest implements ControllerResponseValidator {
 
         verify(this.emblemService).delete(anyLong());
     }
-    //endregion
+    // endregion
 }
