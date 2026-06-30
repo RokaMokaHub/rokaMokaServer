@@ -43,17 +43,12 @@ Before you begin, ensure you have the following installed:
 
 ## Running the Application
 
-1. Start the database (if not already running):
+1. Start the application:
    ```
-   docker compose up -d
-   ```
-
-2. Run the Spring Boot application:
-   ```
-   ./mvnw spring-boot:run
+   docker compose up -d --build
    ```
 
-3. Access the application at:
+2. Access the application at:
    ```
    http://localhost:8080
    ```

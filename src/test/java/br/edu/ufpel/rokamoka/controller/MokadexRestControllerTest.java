@@ -111,7 +111,7 @@ class MokadexRestControllerTest implements ControllerResponseValidator {
     @Test
     void getSummary_shouldThrowRokaMokaNoUserInContextException_whenUserNotInContext() throws RokaMokaNoUserInContextException {
         // Arrange
-        var summary = mock(MokadexSummaryDTO.class);
+        mock(MokadexSummaryDTO.class);
 
         when(this.mokadexService.getSummary()).thenThrow(RokaMokaNoUserInContextException.class);
 

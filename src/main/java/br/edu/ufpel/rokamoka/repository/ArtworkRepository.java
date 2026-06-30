@@ -22,6 +22,7 @@ public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
            SELECT NEW br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO(a, i)
            FROM Artwork a LEFT JOIN FETCH a.images i
            WHERE a.id IN ?1
+           ORDER BY a.id
            """)
     List<ArtworkOutputDTO> createFullArtworkInfo(Set<Long> ids);
 

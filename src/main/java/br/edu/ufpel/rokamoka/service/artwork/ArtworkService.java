@@ -6,9 +6,9 @@ import br.edu.ufpel.rokamoka.dto.artwork.input.ArtworkInputDTO;
 import br.edu.ufpel.rokamoka.dto.artwork.output.ArtworkOutputDTO;
 import br.edu.ufpel.rokamoka.exceptions.RokaMokaContentNotFoundException;
 import br.edu.ufpel.rokamoka.repository.ArtworkRepository;
+import br.edu.ufpel.rokamoka.repository.EmblemRepository;
 import br.edu.ufpel.rokamoka.repository.ExhibitionRepository;
 import br.edu.ufpel.rokamoka.service.image.IIMageService;
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,30 +24,14 @@ import static org.springframework.transaction.annotation.Propagation.REQUIRED;
 public class ArtworkService implements IArtworkService {
 
     private final ArtworkRepository artworkRepository;
-    private final IIMageService imageService;
     private final ExhibitionRepository exhibitionRepository;
+    private final EmblemRepository emblemRepository;
 
-    @Override
-    @Transactional(readOnly = true)
-    public Artwork getArtworkOrElseThrow(Long id) {
-        return this.artworkRepository.findById(id).orElseThrow(RokaMokaContentNotFoundException::new);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Optional<Artwork> findByQrCode(String qrCode) {
-        return this.artworkRepository.findByQrCode(qrCode);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Artwork getByQrCodeOrThrow(String qrCode) {
-        return this.findByQrCode(qrCode).orElseThrow(RokaMokaContentNotFoundException::new);
-    }
+    private final IIMageService imageService;
 
     @Override
     @Transactional(propagation = REQUIRED)
-    public Artwork create(Long exhibitionId, @Valid ArtworkInputDTO artworkInputDTO) {
+    public Artwork create(Long exhibitionId, ArtworkInputDTO artworkInputDTO) {
         var exhibition = this.exhibitionRepository.findById(exhibitionId)
                 .orElseThrow(RokaMokaContentNotFoundException::new);
         var images = this.imageService.upload(artworkInputDTO.image());
@@ -62,6 +46,52 @@ public class ArtworkService implements IArtworkService {
                 .exhibition(exhibition)
                 .build();
         return this.artworkRepository.save(artwork);
+    }
+
+    @Override
+    @Transactional(propagation = REQUIRED)
+    public Artwork update(ArtworkInputDTO input) {
+        var artwork = this.getArtworkOrElseThrow(input.id());
+
+        artwork.setLink(input.link());
+        artwork.setDescricao(input.descricao());
+
+        var exhibition = artwork.getExhibition();
+        if (exhibition != null && this.emblemRepository.existsEmblemByExhibitionId(exhibition.getId())) {
+            return artwork;
+        }
+
+        artwork.setNome(input.nome());
+        artwork.setNomeArtista(input.nomeArtista());
+        artwork.setQrCode(input.qrCode());
+
+        var images = this.imageService.upload(input.image());
+        if (!CollectionUtils.isEmpty(images)) {
+            artwork.getImages().clear();
+            artwork.getImages().addAll(images);
+        }
+
+        return artwork;
+    }
+
+    @Override
+    @Transactional(propagation = REQUIRED)
+    public ArtworkOutputDTO delete(Long id) {
+        var artwork = this.getArtworkOrElseThrow(id);
+        this.artworkRepository.delete(artwork);
+        return new ArtworkOutputDTO(artwork);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Artwork getArtworkOrElseThrow(Long id) {
+        return this.artworkRepository.findById(id).orElseThrow(RokaMokaContentNotFoundException::new);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Artwork getByQrCodeOrThrow(String qrCode) {
+        return this.findByQrCode(qrCode).orElseThrow(RokaMokaContentNotFoundException::new);
     }
 
     @Override
@@ -86,31 +116,7 @@ public class ArtworkService implements IArtworkService {
         return artworks.stream().map(ArtworkOutputDTO::new).toList();
     }
 
-    @Override
-    @Transactional(propagation = REQUIRED)
-    public ArtworkOutputDTO update(ArtworkInputDTO input) {
-        var artwork = this.getArtworkOrElseThrow(input.id());
-
-        artwork.setNome(input.nome());
-        artwork.setDescricao(input.descricao());
-        artwork.setNomeArtista(input.nomeArtista());
-        artwork.setLink(input.link());
-        artwork.setQrCode(input.qrCode());
-
-        var images = this.imageService.upload(input.image());
-        if (!CollectionUtils.isEmpty(images)) {
-            artwork.getImages().clear();
-            artwork.getImages().addAll(images);
-        }
-
-        return new ArtworkOutputDTO(artwork);
-    }
-
-    @Override
-    @Transactional(propagation = REQUIRED)
-    public ArtworkOutputDTO delete(Long id) {
-        var artwork = this.getArtworkOrElseThrow(id);
-        this.artworkRepository.delete(artwork);
-        return new ArtworkOutputDTO(artwork);
+    private Optional<Artwork> findByQrCode(String qrCode) {
+        return this.artworkRepository.findByQrCode(qrCode);
     }
 }
